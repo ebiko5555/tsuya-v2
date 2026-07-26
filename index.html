@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#f4efe9">
 <title>艶 II — 手と光のアトリエ</title>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
+        onerror="window.__mpFailed=true"></script>
 <style>
   :root{
     --bg:#f4efe9; --ink:#2a2522; --sub:#8f8378; --faint:#b5a99d;
@@ -17,176 +18,267 @@
   html,body{height:100%; overscroll-behavior:none}
   body{
     font-family:"Hiragino Sans","Yu Gothic",sans-serif;
-    background:radial-gradient(120% 80% at 50% -10%, #fbf8f4 0%, var(--bg) 60%), var(--bg);
+    background:
+      radial-gradient(120% 80% at 50% -10%, #fbf8f4 0%, var(--bg) 60%),
+      var(--bg);
     color:var(--ink);
     display:flex; flex-direction:column;
     max-width:520px; margin:0 auto;
   }
-  header{flex:none; text-align:center; padding:calc(12px + env(safe-area-inset-top)) 0 10px}
-  .overline{font-size:8.5px; letter-spacing:.55em; color:var(--faint); text-transform:uppercase; margin-bottom:5px; text-indent:.55em}
+  /* ---------- ヘッダ ---------- */
+  header{
+    flex:none; text-align:center;
+    padding:calc(14px + env(safe-area-inset-top)) 0 14px;
+  }
+  .overline{
+    font-size:8.5px; letter-spacing:.55em; color:var(--faint);
+    text-transform:uppercase; margin-bottom:6px; text-indent:.55em;
+  }
   header h1{
     font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
-    font-size:clamp(48px, 16vw, 64px); font-weight:400; line-height:1; letter-spacing:.04em;
+    font-size:clamp(58px, 20vw, 76px); font-weight:400; line-height:1;
+    letter-spacing:.04em;
     background:linear-gradient(135deg, #8a5a45 0%, #d4a887 45%, #8a5a45 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  header .rule{width:28px; height:1px; background:var(--ink); opacity:.35; margin:10px auto 0}
-
+  header .rule{
+    width:28px; height:1px; background:var(--ink); opacity:.35;
+    margin:12px auto 0;
+  }
+  /* ---------- ステージ ---------- */
   .stage{
     position:relative; flex:1; min-height:0; margin:0 18px;
-    background:#e9e1d8; border-radius:20px; overflow:hidden; box-shadow:var(--shadow);
+    background:#e9e1d8; border-radius:20px; overflow:hidden;
+    box-shadow:var(--shadow);
   }
-  #gl,#snap{position:absolute; inset:0; width:100%; height:100%; display:block}
-  #snap{display:none; z-index:3}
+  #canvas{width:100%; height:100%; object-fit:cover; display:block}
   #startOverlay{
-    position:absolute; inset:0; z-index:8;
+    position:absolute; inset:0; z-index:5;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:32px;
     background:radial-gradient(90% 70% at 50% 20%, #f9f4ee 0%, #efe6dc 100%);
   }
   #startOverlay .invite{
     font-family:"Hiragino Mincho ProN",serif; font-size:15px;
-    letter-spacing:.6em; text-indent:.6em; color:#7a6c60; margin-bottom:30px;
+    letter-spacing:.6em; text-indent:.6em; color:#7a6c60; margin-bottom:34px;
   }
   .bigbtn{
     border:none; border-radius:999px; padding:16px 50px;
     background:linear-gradient(135deg, #c3906f, #a4735c);
     color:#fffdfa; font-size:13px; letter-spacing:.3em; text-indent:.3em;
-    font-family:inherit; cursor:pointer; box-shadow:0 10px 28px rgba(164,115,92,.38);
-    transition:transform .15s ease, box-shadow .15s ease, opacity .2s;
+    font-family:inherit; cursor:pointer;
+    box-shadow:0 10px 28px rgba(164,115,92,.38);
+    transition:transform .15s ease, box-shadow .15s ease;
   }
   .bigbtn:active{transform:scale(.97); box-shadow:0 4px 12px rgba(164,115,92,.38)}
-  .bigbtn[disabled]{opacity:.45}
-  #status{margin-top:22px; font-size:10px; letter-spacing:.2em; color:var(--faint); min-height:14px; line-height:1.9; padding:0 10px}
-  #loadbar{width:132px; height:1px; background:var(--line); margin-top:16px; overflow:hidden}
-  #loadbar i{display:block; height:100%; width:0%; background:var(--accent); transition:width .4s ease}
-  #guide{
-    position:absolute; top:14px; left:0; right:0; text-align:center; z-index:4;
-    font-size:11px; letter-spacing:.25em; text-indent:.25em; color:#fff;
-    text-shadow:0 1px 8px rgba(0,0,0,.55); pointer-events:none; transition:opacity .45s;
+  #status{
+    margin-top:26px; font-size:10px; letter-spacing:.2em; color:var(--faint);
+    min-height:14px; transition:opacity .3s;
   }
-  #perf{
-    position:absolute; top:12px; right:12px; z-index:4; display:none;
-    font-size:9px; letter-spacing:.08em; color:#fff; opacity:.75;
-    text-shadow:0 1px 6px rgba(0,0,0,.6); pointer-events:none; font-variant-numeric:tabular-nums;
+  #guide{
+    position:absolute; top:16px; left:0; right:0; text-align:center; z-index:4;
+    font-size:11px; letter-spacing:.25em; text-indent:.25em; color:#fff;
+    text-shadow:0 1px 8px rgba(0,0,0,.5); pointer-events:none;
+    transition:opacity .5s;
   }
   #countdown{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
     font-family:"Hiragino Mincho ProN",serif; font-size:96px; font-weight:300; color:#fff;
     text-shadow:0 2px 24px rgba(0,0,0,.4); z-index:6; pointer-events:none;
   }
-  .stagebtns{position:absolute; bottom:16px; left:0; right:0; z-index:5; display:flex; align-items:center; justify-content:center; gap:28px}
+  .stagebtns{
+    position:absolute; bottom:16px; left:0; right:0; z-index:5;
+    display:flex; align-items:center; justify-content:center; gap:28px;
+  }
   .shutter{
     width:60px; height:60px; border-radius:50%; cursor:pointer;
-    border:3px solid rgba(255,255,255,.95); background:rgba(255,255,255,.18);
-    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:background .15s;
+    border:3px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.18); backdrop-filter:blur(6px);
+    transition:background .15s;
   }
   .shutter:active{background:#fff}
   .roundbtn{
     width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
-    background:rgba(20,15,12,.32); color:#fff; font-size:14px;
-    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-    display:flex; align-items:center; justify-content:center; font-family:inherit;
+    background:rgba(20,15,12,.32); color:#fff; font-size:15px; backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
   }
-  #snapBar{position:absolute; bottom:16px; left:0; right:0; z-index:7; display:none; justify-content:center; gap:10px}
+  #snapBar{
+    position:absolute; bottom:16px; left:0; right:0; z-index:7;
+    display:none; justify-content:center; gap:10px;
+  }
   #snapBar .pill{
     border:none; border-radius:999px; padding:13px 26px; font-size:12px;
     font-family:inherit; letter-spacing:.18em; text-indent:.18em; cursor:pointer;
-    background:rgba(20,15,12,.5); color:#fff; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    background:rgba(20,15,12,.5); color:#fff; backdrop-filter:blur(8px);
   }
   #snapBar .pill.primary{background:#fdfaf7; color:var(--ink)}
-
-  .panel{flex:none; padding:12px 20px calc(10px + env(safe-area-inset-bottom))}
-  .tabs{display:flex; gap:16px; margin-bottom:10px; justify-content:center; flex-wrap:wrap}
-  .tab{
-    position:relative; font-size:10.5px; letter-spacing:.3em; text-indent:.3em;
-    color:var(--faint); padding:4px 0 7px; cursor:pointer; transition:color .25s;
+  /* ---------- 下部パネル ---------- */
+  .panel{
+    flex:none;
+    padding:14px 20px calc(12px + env(safe-area-inset-bottom));
   }
-  .tab::after{content:""; position:absolute; left:50%; bottom:0; height:1px; width:0; background:var(--ink); transform:translateX(-50%); transition:width .25s ease}
+  .tabs{display:flex; gap:20px; margin-bottom:12px; justify-content:center; flex-wrap:wrap}
+  .tab{
+    position:relative;
+    font-size:10.5px; letter-spacing:.3em; text-indent:.3em;
+    color:var(--faint); padding:4px 0 7px; cursor:pointer;
+    transition:color .25s;
+  }
+  .tab::after{
+    content:""; position:absolute; left:50%; bottom:0; height:1px; width:0;
+    background:var(--ink); transform:translateX(-50%);
+    transition:width .25s ease;
+  }
   .tab.active{color:var(--ink)}
   .tab.active::after{width:100%}
   .tray{display:none}
   .tray.active{display:block; animation:rise .3s ease}
   @keyframes rise{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
-  .scroller{display:flex; gap:12px; overflow-x:auto; padding:6px 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+  .scroller{
+    display:flex; gap:13px; overflow-x:auto; padding:6px 2px 6px;
+    scrollbar-width:none;
+  }
   .scroller::-webkit-scrollbar{display:none}
+  /* デザインサムネ：爪型 */
   .look{flex:none; text-align:center; cursor:pointer}
   .look canvas{
-    width:50px; height:64px; display:block; margin:0 auto;
-    border-radius:24px 24px 20px 20px; background:var(--card);
-    box-shadow:0 3px 10px rgba(90,66,50,.14); border:1.5px solid transparent;
+    width:52px; height:66px; display:block; margin:0 auto;
+    border-radius:24px 24px 20px 20px;
+    background:var(--card);
+    box-shadow:0 3px 10px rgba(90,66,50,.14);
+    border:1.5px solid transparent;
     transition:transform .2s ease, border-color .2s;
   }
   .look.active canvas{border-color:var(--ink); transform:translateY(-3px)}
-  .look span{font-size:9px; letter-spacing:.04em; color:var(--sub); display:block; margin-top:5px; white-space:nowrap}
+  .look span{
+    font-size:9px; letter-spacing:.06em; color:var(--sub);
+    display:block; margin-top:6px;
+  }
   .look.active span{color:var(--ink)}
+  /* 色チップ */
   .chip{
-    flex:none; width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent;
+    flex:none; width:36px; height:36px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent;
     box-shadow:inset 0 -7px 10px rgba(0,0,0,.14), inset 0 4px 6px rgba(255,255,255,.35), 0 2px 8px rgba(90,66,50,.16);
-    transition:transform .2s ease; padding:0; -webkit-appearance:none; appearance:none;
+    transition:transform .2s ease;
   }
   .chip.active{border-color:var(--ink); transform:scale(1.12)}
-  input.chip[type=color]{background:none}
-  input.chip[type=color]::-webkit-color-swatch-wrapper{padding:0}
-  input.chip[type=color]::-webkit-color-swatch{border:none; border-radius:50%}
-  .minirow{display:flex; align-items:center; gap:12px; margin-top:9px; font-size:10px; letter-spacing:.15em; color:var(--sub)}
-  input[type=range]{flex:1; -webkit-appearance:none; appearance:none; height:22px; background:transparent}
-  input[type=range]::-webkit-slider-runnable-track{height:1.5px; background:var(--line); border-radius:2px}
+  input.chip{padding:0; -webkit-appearance:none; appearance:none; background:none}
+  input.chip::-webkit-color-swatch-wrapper{padding:0}
+  input.chip::-webkit-color-swatch{border:none; border-radius:50%}
+  .minirow{
+    display:flex; align-items:center; gap:12px; margin-top:10px;
+    font-size:10px; letter-spacing:.15em; color:var(--sub);
+  }
+  input[type=range]{
+    flex:1; -webkit-appearance:none; appearance:none; height:22px; background:transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:1.5px; background:var(--line); border-radius:2px;
+  }
   input[type=range]::-webkit-slider-thumb{
     -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
-    background:var(--card); border:1.5px solid var(--ink); margin-top:-7.5px; box-shadow:0 2px 6px rgba(0,0,0,.15);
+    background:var(--card); border:1.5px solid var(--ink);
+    margin-top:-7.5px; box-shadow:0 2px 6px rgba(0,0,0,.15);
   }
   .ghostlink{
-    font-size:10.5px; color:var(--accent); letter-spacing:.12em; text-decoration:underline;
-    text-underline-offset:4px; text-decoration-thickness:.5px; cursor:pointer; white-space:nowrap;
+    font-size:10.5px; color:var(--accent); letter-spacing:.12em;
+    text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:.5px;
+    cursor:pointer; white-space:nowrap;
   }
-  #note{font-size:10.5px; color:var(--sub); margin-top:7px; min-height:15px; line-height:1.8; letter-spacing:.05em}
-  .presetgroup{margin-bottom:13px}
+  #note{
+    font-size:10.5px; color:var(--sub); margin-top:8px; min-height:15px;
+    line-height:1.8; letter-spacing:.05em;
+  }
+  .presetgroup{margin-bottom:16px}
   .presetgroup:last-child{margin-bottom:0}
-  .presetlabel{font-size:10px; letter-spacing:.25em; text-indent:.1em; color:var(--sub); margin-bottom:7px}
-  .presetrow{display:flex; gap:7px}
+  .presetlabel{
+    font-size:10px; letter-spacing:.25em; text-indent:.1em; color:var(--sub);
+    margin-bottom:8px;
+  }
+  .presetrow{display:flex; gap:8px}
   .presetbtn{
-    flex:1; border:1px solid var(--line); border-radius:999px; padding:9px 2px;
-    background:transparent; color:var(--sub); font-family:inherit; font-size:10px;
-    letter-spacing:.02em; cursor:pointer; white-space:nowrap;
+    flex:1; border:1px solid var(--line); border-radius:999px; padding:10px 4px;
+    background:transparent; color:var(--sub); font-family:inherit;
+    font-size:10.5px; letter-spacing:.04em; cursor:pointer;
     transition:background .2s ease, color .2s ease, border-color .2s ease;
   }
   .presetbtn.active{background:var(--accent); border-color:var(--accent); color:#fffdfa}
   input[type=file]{display:none}
+  /* 追加タイル */
   .addtile .addbox{
-    width:50px; height:64px; margin:0 auto; border-radius:24px 24px 20px 20px;
+    width:52px; height:66px; margin:0 auto;
+    border-radius:24px 24px 20px 20px;
     border:1.2px dashed var(--faint); color:var(--sub);
     display:flex; align-items:center; justify-content:center;
-    font-size:9.5px; letter-spacing:.05em; line-height:1.5; background:rgba(255,253,250,.6);
+    font-size:9.5px; letter-spacing:.05em; line-height:1.5;
+    background:rgba(255,253,250,.6);
   }
-  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:7px 2px; font-size:11.5px; letter-spacing:.1em; color:var(--ink)}
-  .switch{position:relative; width:42px; height:24px; border-radius:999px; background:var(--line); cursor:pointer; transition:background .25s; flex:none}
+  /* 光の軌跡タブ */
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 2px; font-size:11.5px; letter-spacing:.1em; color:var(--ink);
+  }
+  .switch{
+    position:relative; width:42px; height:24px; border-radius:999px;
+    background:var(--line); cursor:pointer; transition:background .25s;
+    flex:none;
+  }
   .switch.on{background:var(--accent)}
   .switch::after{
-    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%;
-    background:#fffdfa; box-shadow:0 1px 4px rgba(0,0,0,.2); transition:transform .25s ease;
+    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px;
+    border-radius:50%; background:#fffdfa; box-shadow:0 1px 4px rgba(0,0,0,.2);
+    transition:transform .25s ease;
   }
   .switch.on::after{transform:translateX(18px)}
-  .hikari-desc{font-size:10.5px; color:var(--sub); line-height:1.9; letter-spacing:.05em; margin-top:6px}
-  .swatchrow{display:flex; gap:10px; margin-top:9px}
-  .swatch{flex:none; width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid transparent}
-  .swatch.active{border-color:var(--ink)}
-
-  #editor{
-    position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
-    background:rgba(42,37,34,.45); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding:20px;
+  .hikari-desc{
+    font-size:10.5px; color:var(--sub); line-height:1.9; letter-spacing:.05em;
+    margin-top:6px;
   }
-  .edcard{width:100%; max-width:360px; background:var(--card); border-radius:20px; padding:18px 18px 16px; box-shadow:var(--shadow)}
-  .edtitle{font-family:"Hiragino Mincho ProN",serif; text-align:center; font-size:13px; letter-spacing:.3em; text-indent:.3em; margin-bottom:12px}
-  .edstage{display:flex; justify-content:center; background:conic-gradient(#f1eae2 25%, #faf6f1 0 50%, #f1eae2 0 75%, #faf6f1 0) 0 0/16px 16px; border-radius:14px; padding:10px}
+  .swatchrow{display:flex; gap:10px; margin-top:10px}
+  .swatch{
+    flex:none; width:30px; height:30px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent;
+  }
+  .swatch.active{border-color:var(--ink)}
+  /* ---------- お絵かきエディタ ---------- */
+  #editor{
+    position:fixed; inset:0; z-index:50; display:none;
+    align-items:center; justify-content:center;
+    background:rgba(42,37,34,.45); backdrop-filter:blur(8px);
+    padding:20px;
+  }
+  .edcard{
+    width:100%; max-width:360px; background:var(--card);
+    border-radius:20px; padding:18px 18px 16px;
+    box-shadow:var(--shadow);
+  }
+  .edtitle{
+    font-family:"Hiragino Mincho ProN",serif; text-align:center;
+    font-size:13px; letter-spacing:.3em; text-indent:.3em; margin-bottom:12px;
+  }
+  .edstage{
+    display:flex; justify-content:center;
+    background:
+      conic-gradient(#f1eae2 25%, #faf6f1 0 50%, #f1eae2 0 75%, #faf6f1 0) 0 0/16px 16px;
+    border-radius:14px; padding:10px;
+  }
   #edCanvas{
-    width:200px; height:266px; touch-action:none; cursor:crosshair;
-    background:linear-gradient(#f4e2d7,#eccfc0); border-radius:66px 66px 52px 52px;
+    width:210px; height:280px; touch-action:none; cursor:crosshair;
+    background:linear-gradient(#f4e2d7,#eccfc0);
+    border-radius:70px 70px 54px 54px;
     box-shadow:0 4px 14px rgba(90,66,50,.18);
   }
   .edrow{display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap}
-  .edsw{width:26px; height:26px; border-radius:50%; cursor:pointer; box-shadow:inset 0 -4px 6px rgba(0,0,0,.14), 0 1px 4px rgba(0,0,0,.12)}
-  .edbtn{border:1px solid var(--line); border-radius:999px; padding:8px 14px; background:transparent; color:var(--sub); font-family:inherit; font-size:11px; letter-spacing:.1em; cursor:pointer}
+  .edsw{
+    width:26px; height:26px; border-radius:50%; cursor:pointer;
+    box-shadow:inset 0 -4px 6px rgba(0,0,0,.14), 0 1px 4px rgba(0,0,0,.12);
+  }
+  .edbtn{
+    border:1px solid var(--line); border-radius:999px; padding:8px 14px;
+    background:transparent; color:var(--sub); font-family:inherit;
+    font-size:11px; letter-spacing:.1em; cursor:pointer;
+  }
   .edbtn.on{border-color:var(--ink); color:var(--ink)}
   .edbtn.primary{background:var(--ink); color:#fdfaf7; border-color:var(--ink)}
   .edrow.acts{justify-content:flex-end; margin-top:14px}
@@ -200,16 +292,13 @@
 </header>
 
 <div class="stage">
-  <canvas id="gl"></canvas>
-  <canvas id="snap"></canvas>
+  <canvas id="canvas"></canvas>
   <div id="guide" style="opacity:0">手をかざしてください</div>
-  <div id="perf"></div>
   <div id="countdown"></div>
 
   <div id="startOverlay">
     <p class="invite">手をかざす</p>
     <button class="bigbtn" id="startBtn">はじめる</button>
-    <div id="loadbar"><i></i></div>
     <div id="status"></div>
   </div>
 
@@ -229,8 +318,8 @@
   <div class="tabs">
     <div class="tab active" data-t="looks">デザイン</div>
     <div class="tab" data-t="colors">カラー</div>
-    <div class="tab" data-t="shape">形</div>
     <div class="tab" data-t="tune">質感</div>
+    <div class="tab" data-t="sculpt">スカルプ</div>
     <div class="tab" data-t="hikari">光</div>
   </div>
 
@@ -241,64 +330,51 @@
   <div class="tray" id="tray-colors">
     <div class="scroller" id="chips"></div>
     <div class="minirow">
-      <span class="ghostlink" id="inspoLink">写真から配色</span>
-      <span class="ghostlink" id="resetPalLink">もどす</span>
+      <span class="ghostlink" onclick="document.getElementById('inspoInput').click()">写真</span>
     </div>
     <div id="note"></div>
-  </div>
-
-  <div class="tray" id="tray-shape">
-    <div class="presetgroup">
-      <div class="presetlabel">形</div>
-      <div class="presetrow" data-key="shape">
-        <button class="presetbtn active" data-val="natural">ナチュラル</button>
-        <button class="presetbtn" data-val="round">ラウンド</button>
-        <button class="presetbtn" data-val="almond">アーモンド</button>
-      </div>
-      <div class="presetrow" data-key="shape" style="margin-top:7px">
-        <button class="presetbtn" data-val="square">スクエア</button>
-        <button class="presetbtn" data-val="coffin">バレリーナ</button>
-        <button class="presetbtn" data-val="stiletto">スティレット</button>
-      </div>
-    </div>
-    <div class="minirow">長さ <input type="range" id="lenSlider" min="55" max="230" value="100"></div>
-    <div class="minirow">幅 <input type="range" id="widSlider" min="70" max="135" value="100"></div>
-    <p class="hikari-desc">長さを伸ばすと、根元は爪の付け根に留まったまま先端だけが伸びます（スカルプと同じ伸び方）。</p>
   </div>
 
   <div class="tray" id="tray-tune">
     <div class="presetgroup">
       <div class="presetlabel">ツヤ</div>
       <div class="presetrow" data-key="gloss">
-        <button class="presetbtn" data-val="8">マット</button>
-        <button class="presetbtn active" data-val="62">セミグロス</button>
+        <button class="presetbtn" data-val="10">マット</button>
+        <button class="presetbtn active" data-val="65">セミグロス</button>
         <button class="presetbtn" data-val="100">ツヤツヤ</button>
       </div>
     </div>
     <div class="presetgroup">
       <div class="presetlabel">濃さ</div>
       <div class="presetrow" data-key="opacity">
-        <button class="presetbtn" data-val="55">すけ感</button>
-        <button class="presetbtn active" data-val="92">ふつう</button>
+        <button class="presetbtn" data-val="65">うすづき</button>
+        <button class="presetbtn active" data-val="96">ふつう</button>
         <button class="presetbtn" data-val="100">しっかり</button>
       </div>
     </div>
     <div class="presetgroup">
-      <div class="presetlabel">追従</div>
-      <div class="presetrow" data-key="follow">
-        <button class="presetbtn" data-val="calm">ゆったり</button>
-        <button class="presetbtn active" data-val="std">標準</button>
-        <button class="presetbtn" data-val="quick">きびきび</button>
+      <div class="presetlabel">大きさ</div>
+      <div class="presetrow" data-key="nailSize">
+        <button class="presetbtn" data-val="85">ナチュラル</button>
+        <button class="presetbtn active" data-val="100">ふつう</button>
+        <button class="presetbtn" data-val="120">長め</button>
       </div>
     </div>
+  </div>
+
+  <div class="tray" id="tray-sculpt">
+    <div class="minirow">長さ <input type="range" id="sculptLen" min="100" max="220" value="140"></div>
     <div class="presetgroup">
-      <div class="presetlabel">画質</div>
-      <div class="presetrow" data-key="quality">
-        <button class="presetbtn" data-val="eco">省エネ</button>
-        <button class="presetbtn active" data-val="std">標準</button>
-        <button class="presetbtn" data-val="high">きれい</button>
+      <div class="presetlabel">形</div>
+      <div class="presetrow" data-key="sculptShape">
+        <button class="presetbtn active" data-val="natural">ナチュラル</button>
+        <button class="presetbtn" data-val="round2">ラウンド</button>
+        <button class="presetbtn" data-val="almond">ポイント(アーモンド)</button>
+        <button class="presetbtn" data-val="square">スクエア</button>
+        <button class="presetbtn" data-val="coffin">バレリーナ(コフィン)</button>
       </div>
     </div>
+    <p class="hikari-desc">長さのスライダーでスカルプのように爪先を伸ばし、下の形から先端のシルエットを選べます。</p>
   </div>
 
   <div class="tray" id="tray-hikari">
@@ -309,20 +385,15 @@
     <div class="minirow">軌跡の強さ <input type="range" id="trailIntensity" min="0" max="100" value="55"></div>
     <div class="minirow">色</div>
     <div class="swatchrow" id="trailSwatches"></div>
-    <div class="toggle-row" style="margin-top:6px">
-      <span>速度メーターを表示</span>
-      <div class="switch" id="perfSwitch"></div>
-    </div>
     <p class="hikari-desc">手を動かすたび、爪の色に呼応した光がやわらかく尾を引きます。手を止めると静かに消えていきます。</p>
   </div>
 </div>
 
 <input type="file" id="inspoInput" accept="image/*">
 <input type="file" id="designInput" accept="image/*">
-<!-- display:none にすると requestVideoFrameCallback が発火しない端末があるため、極小で置く -->
-<video id="video" playsinline muted
-       style="position:fixed;top:0;left:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1"></video>
+<video id="video" playsinline style="display:none"></video>
 
+<!-- お絵かきエディタ -->
 <div id="editor">
   <div class="edcard">
     <div class="edtitle">マイデザインを描く</div>
@@ -342,1274 +413,799 @@
 </div>
 
 <script>
-/* =====================================================================
-   艶 II — WebGL2 + MediaPipe Tasks Vision
-   ===================================================================== */
-const $ = id => document.getElementById(id);
-const clamp = (v,a,b) => v<a?a:v>b?b:v;
-
-/* ---------------- 色ユーティリティ ---------------- */
-function rgb2hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('')}
-function shade(hex,amt){const n=parseInt(hex.slice(1),16);return rgb2hex((n>>16)+amt,(n>>8&255)+amt,(n&255)+amt)}
-function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`}
-function hex2rgb(hex){const n=parseInt(hex.slice(1),16);return [(n>>16)/255,(n>>8&255)/255,(n&255)/255]}
-
-/* =====================================================================
-   1. デザイン（柄）— アトラスに2Dで描き、光はGPUが後乗せする
-   mat = [metallic, roughness, iridescence, glitter, magnet, translucency, sheen]
-   ===================================================================== */
-function seeded(seed){let s=seed*9301+49297;return()=>{s=(s*9301+49297)%233280;return s/233280}}
-function bandFill(c,w,h,c1,c2){
-  const g=c.createLinearGradient(0,-h/2,0,h/2); g.addColorStop(0,c1); g.addColorStop(1,c2);
-  c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-}
-function nudeBase(c,w,h,a){
-  const k=c.globalAlpha; c.globalAlpha=k*a; bandFill(c,w,h,'#f0dcd1','#e5c7b8'); c.globalAlpha=k;
-}
-function heart(c,x,y,s){
-  c.save(); c.translate(x,y); c.scale(s,s); c.beginPath();
-  c.moveTo(0,.35); c.bezierCurveTo(-1.1,-.5,-.45,-1.2,0,-.5); c.bezierCurveTo(.45,-1.2,1.1,-.5,0,.35);
-  c.closePath(); c.fill(); c.restore();
-}
-function flower(c,x,y,r,col){
-  c.fillStyle=col;
-  for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;
-    c.beginPath(); c.ellipse(x+Math.cos(a)*r*.72,y+Math.sin(a)*r*.72,r*.5,r*.36,a,0,Math.PI*2); c.fill();}
-  c.fillStyle='#f3d98b'; c.beginPath(); c.arc(x,y,r*.3,0,Math.PI*2); c.fill();
-}
-function veins(c,w,h,col,seed,n,wid){
-  const rnd=seeded(seed); c.strokeStyle=col; c.lineCap='round';
-  for(let i=0;i<n;i++){
-    c.lineWidth=wid*(.4+rnd());
-    let x=(rnd()-.5)*w*1.1, y=-h/2;
-    c.beginPath(); c.moveTo(x,y);
-    for(let k=0;k<5;k++){ x+=(rnd()-.5)*w*.45; y+=h/5; c.lineTo(x,y); }
-    c.stroke();
-  }
-}
-
-const LOOKS = {
-  onecolor:{name:'ワンカラー', mat:[0,.10,0,0,0,0,0], paint(c,w,h,col){ bandFill(c,w,h,shade(col,20),shade(col,-16)); }},
-  churun:{name:'ちゅるん', mat:[0,.05,.05,0,0,.42,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.5); const k=c.globalAlpha; c.globalAlpha=k*.75;
-    bandFill(c,w,h,shade(col,34),shade(col,-2)); c.globalAlpha=k*.5;
-    const g=c.createRadialGradient(0,h*.05,0,0,h*.05,w*.75);
-    g.addColorStop(0,shade(col,-10)); g.addColorStop(1,'rgba(255,255,255,0)');
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h); c.globalAlpha=k;
-  }},
-  milk:{name:'ミルキー', mat:[0,.16,0,0,0,.12,.06], paint(c,w,h,col){
-    bandFill(c,w,h,'#fdf8f3','#f4e6dc'); const k=c.globalAlpha; c.globalAlpha=k*.48;
-    bandFill(c,w,h,shade(col,52),shade(col,24)); c.globalAlpha=k;
-  }},
-  sheer:{name:'すけ感', mat:[0,.07,.03,0,0,.68,0], paint(c,w,h,col){
-    const k=c.globalAlpha; c.globalAlpha=k*.55; bandFill(c,w,h,shade(col,40),shade(col,10)); c.globalAlpha=k;
-  }},
-  grad:{name:'グラデ', mat:[0,.10,0,0,0,.20,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.42);
-    const g=c.createLinearGradient(0,h/2,0,-h/2);
-    g.addColorStop(0,'rgba(240,220,209,.22)'); g.addColorStop(.42,hexA(col,.72)); g.addColorStop(1,shade(col,-10));
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-  }},
-  french:{name:'フレンチ', mat:[0,.09,0,0,0,.22,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.45); c.fillStyle=shade(col,6);
-    c.beginPath(); c.moveTo(-w/2,-h*.14); c.quadraticCurveTo(0,-h*.36,w/2,-h*.14);
-    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
-  }},
-  frenchmirror:{name:'ミラーフレンチ', mat:[.55,.06,.12,0,0,.18,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.5);
-    const g=c.createLinearGradient(-w/2,0,w/2,0);
-    g.addColorStop(0,shade(col,-28)); g.addColorStop(.3,shade(col,80)); g.addColorStop(.6,shade(col,-6)); g.addColorStop(1,shade(col,60));
-    c.fillStyle=g; c.save();
-    c.beginPath(); c.moveTo(-w/2,-h*.13); c.quadraticCurveTo(0,-h*.35,w/2,-h*.13);
-    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill(); c.restore();
-  }},
-  wanghong:{name:'ワンホン', mat:[.08,.09,.05,.12,0,.10,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.85); c.fillStyle=shade(col,10);
-    c.beginPath(); c.moveTo(-w/2,-h*.10); c.quadraticCurveTo(0,-h*.34,w/2,-h*.10);
-    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
-    c.fillStyle='rgba(255,255,255,.95)'; c.beginPath(); c.arc(-w*.12,h*.10,w*.055,0,Math.PI*2); c.fill();
-    c.fillStyle='#e8c987'; c.beginPath(); c.arc(w*.02,h*.16,w*.042,0,Math.PI*2); c.fill();
-    c.fillStyle=hexA(col,.9); heart(c,w*.14,h*.02,w*.09);
-  }},
-  mizuhikari:{name:'水光マグネット', mat:[.34,.10,.10,.05,1,0,0], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,-16),shade(col,-40));
-    const g=c.createLinearGradient(-w*.45,h*.35,w*.45,-h*.45);
-    g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.48,hexA(shade(col,80),.55));
-    g.addColorStop(.56,hexA(shade(col,110),.4)); g.addColorStop(1,'rgba(255,255,255,0)');
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-  }},
-  chrome:{name:'クロム', mat:[1,.04,.10,0,0,0,0], paint(c,w,h,col){
-    const g=c.createLinearGradient(-w/2,0,w/2,0);
-    g.addColorStop(0,shade(col,-26)); g.addColorStop(.22,shade(col,74)); g.addColorStop(.45,shade(col,-8));
-    g.addColorStop(.62,shade(col,105)); g.addColorStop(.82,shade(col,-20)); g.addColorStop(1,shade(col,38));
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-  }},
-  pearl:{name:'パール', mat:[.30,.11,.30,.18,0,.08,.10], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,46),shade(col,8));
-    const g=c.createRadialGradient(-w*.2,-h*.22,0,-w*.2,-h*.22,w*.9);
-    g.addColorStop(0,'rgba(255,255,255,.65)'); g.addColorStop(1,'rgba(255,255,255,0)');
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-  }},
-  aurora:{name:'オーロラ', mat:[.26,.08,.92,.14,0,.14,0], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,4),shade(col,-26)); const k=c.globalAlpha;
-    [['#ffb8d6',-w*.2,-h*.2],['#a9d0ff',w*.18,h*.05],['#bdf0c6',-w*.05,h*.3],[shade(col,55),w*.1,-h*.3]]
-      .forEach(([vc,x,y])=>{ c.globalAlpha=k*.55;
-        const g=c.createRadialGradient(x,y,0,x,y,w*.7); g.addColorStop(0,vc); g.addColorStop(1,'rgba(255,255,255,0)');
-        c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h); });
-    c.globalAlpha=k;
-  }},
-  flash:{name:'フラッシュ', mat:[.15,.22,.20,1,0,0,0], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,-4),shade(col,-26));
-    const rnd=seeded(29);
-    for(let i=0;i<70;i++){
-      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=rnd()*w*.028+w*.007, t=rnd();
-      c.fillStyle = t>.66 ? 'rgba(255,255,255,.9)' : t>.33 ? hexA(shade(col,90),.8) : 'rgba(230,225,255,.65)';
-      c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
-    }
-  }},
-  stardust:{name:'スターダスト', mat:[.10,.20,.16,.85,0,.10,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.5);
-    const g=c.createLinearGradient(0,h/2,0,-h/2);
-    g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.55,hexA(shade(col,20),.55)); g.addColorStop(1,shade(col,-6));
-    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-    const rnd=seeded(53);
-    for(let i=0;i<80;i++){
-      const y=(rnd()-.5)*h;
-      if(rnd() > (y+h/2)/h*0.9+0.1) continue;
-      c.fillStyle = rnd()>.5 ? 'rgba(255,255,255,.85)' : hexA(shade(col,70),.75);
-      c.beginPath(); c.arc((rnd()-.5)*w, y, rnd()*w*.018+w*.005, 0, Math.PI*2); c.fill();
-    }
-  }},
-  matte:{name:'マット', mat:[0,.92,0,0,0,0,.30], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,6),shade(col,-12));
-    const k=c.globalAlpha; c.globalAlpha=k*.18; c.fillStyle='#efe6de'; c.fillRect(-w/2,-h/2,w,h); c.globalAlpha=k;
-  }},
-  velvet:{name:'ベルベット', mat:[0,.78,.06,0,0,0,.65], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,-14),shade(col,-46));
-  }},
-  marble:{name:'大理石', mat:[.05,.12,.04,0,0,.08,0], paint(c,w,h,col){
-    bandFill(c,w,h,'#fdfaf7','#f2ece5');
-    veins(c,w,h,hexA(shade(col,-30),.5),7,5,w*.020);
-    veins(c,w,h,hexA(shade(col,20),.35),23,4,w*.032);
-    c.strokeStyle=hexA('#d9c39a',.65); c.lineWidth=w*.012; veins(c,w,h,hexA('#c8a86a',.6),41,2,w*.012);
-  }},
-  nuance:{name:'ニュアンス', mat:[.20,.16,.14,.08,0,.14,.08], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,44),shade(col,14));
-    const rnd=seeded(13);
-    for(let i=0;i<3;i++){
-      const x=(rnd()-.5)*w*.7, y=(rnd()-.5)*h*.7, r=w*(.28+rnd()*.32);
-      const g=c.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,hexA(shade(col,-26),.5)); g.addColorStop(1,'rgba(255,255,255,0)');
-      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-    }
-    c.fillStyle='rgba(226,196,132,.85)';
-    c.beginPath(); c.moveTo(-w*.3,h*.05); c.quadraticCurveTo(0,-h*.1,w*.28,h*.18);
-    c.lineWidth=w*.02; c.strokeStyle='rgba(226,196,132,.9)'; c.stroke();
-  }},
-  bekko:{name:'べっ甲', mat:[.10,.08,.05,0,0,.30,0], paint(c,w,h,col){
-    bandFill(c,w,h,'#e9b96a','#b8752f');
-    const rnd=seeded(7);
-    for(let i=0;i<9;i++){
-      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.12+rnd()*.26);
-      const g=c.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,'rgba(74,38,12,.85)'); g.addColorStop(.6,'rgba(120,64,20,.35)'); g.addColorStop(1,'rgba(120,64,20,0)');
-      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
-    }
-    const k=c.globalAlpha; c.globalAlpha=k*.28; bandFill(c,w,h,shade(col,30),shade(col,-10)); c.globalAlpha=k;
-  }},
-  flower:{name:'フラワー', mat:[0,.11,0,0,0,.10,0], paint(c,w,h,col){
-    bandFill(c,w,h,'#fdf7f1','#f2e4d9'); const rnd=seeded(17);
-    flower(c,-w*.16,-h*.05,w*.22,shade(col,10));
-    flower(c,w*.2,h*.24,w*.15,shade(col,35));
-    c.fillStyle=hexA(shade(col,-15),.8);
-    for(let i=0;i<4;i++){c.beginPath(); c.arc((rnd()-.5)*w*.9,(rnd()-.5)*h*.9,w*.02,0,Math.PI*2); c.fill();}
-  }},
-  dot:{name:'レトロドット', mat:[0,.12,0,0,0,.08,0], paint(c,w,h,col){
-    bandFill(c,w,h,'#fbf3ea','#f1e2d5'); c.fillStyle=col; const r=w*.085;
-    for(let row=0;row<4;row++) for(let k=0;k<3;k++){
-      const x=(k-1)*w*.32+(row%2?w*.16:0), y=(row-1.5)*h*.26;
-      c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
-    }
-  }},
-  check:{name:'チェック', mat:[0,.13,0,0,0,.08,0], paint(c,w,h,col){
-    bandFill(c,w,h,'#fdf7f0','#f4e8dc');
-    const k=c.globalAlpha;
-    c.globalAlpha=k*.55; c.fillStyle=shade(col,18);
-    for(let i=-3;i<=3;i++){ c.fillRect(i*w*.22-w*.05,-h/2,w*.10,h); c.fillRect(-w/2,i*h*.20-h*.03,w,h*.075); }
-    c.globalAlpha=k*.85; c.fillStyle=shade(col,-14);
-    for(let i=-3;i<=3;i++){ c.fillRect(i*w*.22-w*.012,-h/2,w*.022,h); c.fillRect(-w/2,i*h*.20-h*.008,w,h*.016); }
-    c.globalAlpha=k;
-  }},
-  line:{name:'ワイヤー', mat:[.28,.10,.08,.06,0,.20,0], paint(c,w,h,col){
-    nudeBase(c,w,h,.75);
-    const k=c.globalAlpha; c.globalAlpha=k*.5; bandFill(c,w,h,shade(col,50),shade(col,26)); c.globalAlpha=k;
-    c.strokeStyle='#d8b46a'; c.lineWidth=w*.022; c.lineCap='round';
-    c.beginPath(); c.moveTo(-w*.34,-h*.24); c.bezierCurveTo(w*.1,-h*.05,-w*.2,h*.16,w*.32,h*.30); c.stroke();
-    c.beginPath(); c.moveTo(-w*.30,h*.06); c.quadraticCurveTo(0,h*.30,w*.30,-h*.02); c.stroke();
-    c.fillStyle='#fff'; c.beginPath(); c.arc(w*.10,-h*.02,w*.045,0,Math.PI*2); c.fill();
-  }},
-  shell:{name:'シェル', mat:[.35,.09,.55,.30,0,.14,.06], paint(c,w,h,col){
-    bandFill(c,w,h,shade(col,52),shade(col,20));
-    const rnd=seeded(31);
-    for(let i=0;i<14;i++){
-      const x=(rnd()-.5)*w*.95, y=(rnd()-.5)*h*.95, r=w*(.06+rnd()*.13), a=rnd()*Math.PI;
-      c.save(); c.translate(x,y); c.rotate(a);
-      const g=c.createLinearGradient(-r,0,r,0);
-      const pal=['#ffd9ea','#d7ecff','#e5ffe9','#fff2cf'][Math.floor(rnd()*4)];
-      g.addColorStop(0,'rgba(255,255,255,.9)'); g.addColorStop(.5,pal); g.addColorStop(1,'rgba(255,255,255,.25)');
-      c.fillStyle=g; c.beginPath(); c.ellipse(0,0,r,r*.62,0,0,Math.PI*2); c.fill();
-      c.restore();
-    }
-  }},
-};
-const LOOK_KEYS = Object.keys(LOOKS);
-
-/* =====================================================================
-   2. アトラス（柄テクスチャ）
-   ===================================================================== */
-const ATLAS_COLS = 8, ATLAS_ROWS = 4, CELL_W = 176, CELL_H = 232;
-const MAX_CUSTOM = ATLAS_COLS*ATLAS_ROWS - LOOK_KEYS.length;
-const atlasCanvas = document.createElement('canvas');
-atlasCanvas.width = ATLAS_COLS*CELL_W; atlasCanvas.height = ATLAS_ROWS*CELL_H;
-const actx = atlasCanvas.getContext('2d', {willReadFrequently:false});
-let atlasDirty = true;
-
-const customLooks = [];   // {name, img}
-function slotOf(key){
-  if(key.startsWith('custom:')) return LOOK_KEYS.length + (+key.slice(7));
-  return LOOK_KEYS.indexOf(key);
-}
-function cellRect(slot){
-  return [ (slot%ATLAS_COLS)*CELL_W, Math.floor(slot/ATLAS_COLS)*CELL_H, CELL_W, CELL_H ];
-}
-function drawCover(c,img,w,h){
-  const sc = Math.max(w/img.width, h/img.height);
-  c.drawImage(img, -img.width*sc/2, -img.height*sc/2, img.width*sc, img.height*sc);
-}
-function paintSlot(slot, key){
-  const [x,y,w,h] = cellRect(slot);
-  actx.save();
-  actx.beginPath(); actx.rect(x,y,w,h); actx.clip();
-  actx.clearRect(x,y,w,h);
-  actx.translate(x+w/2, y+h/2);
-  actx.globalAlpha = 1;
-  if(key.startsWith('custom:')){
-    const cl = customLooks[+key.slice(7)];
-    if(cl) drawCover(actx, cl.img, w, h); else { actx.fillStyle='#e8d6c8'; actx.fillRect(-w/2,-h/2,w,h); }
-  }else{
-    LOOKS[key].paint(actx, w, h, currentColor);
-  }
-  actx.restore();
-}
-function rebuildAtlas(){
-  LOOK_KEYS.forEach((k,i)=>paintSlot(i,k));
-  customLooks.forEach((_,i)=>paintSlot(LOOK_KEYS.length+i, 'custom:'+i));
-  atlasDirty = true;
-}
-function matOf(key){
-  if(key.startsWith('custom:')) return [0,.12,0,0,0,.10,0];
-  return LOOKS[key].mat;
-}
-
-/* =====================================================================
-   3. WebGL2 レンダラ
-   ===================================================================== */
-const glc = $('gl');
-const gl = glc.getContext('webgl2', {alpha:false, antialias:false, depth:false, stencil:false,
-                                     desynchronized:true, powerPreference:'high-performance',
-                                     preserveDrawingBuffer:false});
-if(!gl){ $('status').textContent = 'このブラウザはWebGL2に対応していません。Safari／Chromeの最新版でお試しください。'; }
-
-function compile(type, src){
-  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)+'\n'+src);
-  return s;
-}
-function program(vs, fs){
-  const p = gl.createProgram();
-  gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
-  gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
-  gl.linkProgram(p);
-  if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-  const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-  for(let i=0;i<n;i++){ const info = gl.getActiveUniform(p,i); u[info.name.replace('[0]','')] = gl.getUniformLocation(p, info.name); }
-  return {p, u};
-}
-
-/* ---- 映像パス ---- */
-const VIDEO_VS = `#version 300 es
-in vec2 a_pos;
-uniform vec4 u_uv;         // u0, v0, du, dv
-out vec2 v_uv;
-void main(){
-  v_uv = u_uv.xy + (a_pos*0.5+0.5) * u_uv.zw;
-  gl_Position = vec4(a_pos.x, -a_pos.y, 0.0, 1.0);
-}`;
-const VIDEO_FS = `#version 300 es
-precision mediump float;
-in vec2 v_uv;
-uniform sampler2D u_tex;
-out vec4 o;
-void main(){ o = vec4(texture(u_tex, v_uv).rgb, 1.0); }`;
-
-/* ---- 爪パス ---- */
-const NAIL_VS = `#version 300 es
-in vec2 a_corner;
-in vec2 i_center;
-in vec2 i_axisU;
-in vec2 i_axisV;
-in vec3 i_tanU;
-in vec3 i_tanV;
-in vec3 i_nrm;
-in vec4 i_p0;        // slot, alpha, gloss, seed
-in vec4 i_p1;        // nx, ny, taper, expand
-uniform vec2 u_res;
-out vec2 v_local;
-out vec2 v_screen;
-out vec3 v_tanU;
-out vec3 v_tanV;
-out vec3 v_nrm;
-out vec4 v_p0;
-out vec4 v_p1;
-void main(){
-  float ex = i_p1.w;
-  vec2 pos = i_center + a_corner.x*ex*i_axisU + a_corner.y*ex*i_axisV;
-  v_local=a_corner; v_screen=pos; v_tanU=i_tanU; v_tanV=i_tanV; v_nrm=i_nrm; v_p0=i_p0; v_p1=i_p1;
-  gl_Position = vec4(pos.x/u_res.x*2.0-1.0, 1.0-pos.y/u_res.y*2.0, 0.0, 1.0);
-}`;
-
-const NAIL_FS = `#version 300 es
-precision highp float;
-in vec2 v_local;
-in vec2 v_screen;
-in vec3 v_tanU;
-in vec3 v_tanV;
-in vec3 v_nrm;
-in vec4 v_p0;
-in vec4 v_p1;
-uniform sampler2D u_atlas;
-uniform sampler2D u_video;
-uniform vec2 u_res;
-uniform vec2 u_grid;
-uniform vec4 u_videoUV;
-uniform vec4 u_mat0;      // metallic, roughness, iridescence, glitter
-uniform vec4 u_mat1;      // magnet, translucency, sheen, curve
-uniform float u_time;
-out vec4 o;
-
-vec3 hash33(vec3 p){
-  p = fract(p*vec3(0.1031,0.1030,0.0973));
-  p += dot(p, p.yxz+33.33);
-  return fract((p.xxy+p.yxx)*p.zyx);
-}
-vec3 envColor(vec3 r){
-  float up = clamp(-r.y*0.5+0.5, 0.0, 1.0);
-  /* 床・壁・天井の3層。境目がはっきりしているほど「鏡」に見える */
-  vec3 c = mix(vec3(0.30,0.26,0.25), vec3(0.64,0.62,0.63), smoothstep(0.32,0.52,up));
-  c = mix(c, vec3(0.97,0.96,0.97), smoothstep(0.60,0.84,up));
-  c += vec3(1.0,0.99,0.96) * exp(-pow((up-0.78)*8.0, 2.0)) * 1.45;
-  c += vec3(1.0,0.93,0.84) * exp(-pow((r.x-0.62)*3.2,2.0)) * exp(-pow((up-0.55)*3.4,2.0)) * 0.60;
-  c += vec3(0.86,0.92,1.0) * exp(-pow((r.x+0.70)*3.6,2.0)) * exp(-pow((up-0.62)*3.0,2.0)) * 0.40;
-  return c;
-}
-void main(){
-  float ex = v_p1.w;
-  vec2 p = v_local * ex;
-  float nx = v_p1.x, nyTip = v_p1.y, taper = v_p1.z;
-  float slot = v_p0.x, alpha = v_p0.y, gloss = v_p0.z, seed = v_p0.w;
-
-  float t = clamp(p.y*0.5+0.5, 0.0, 1.0);
-  float halfW = 1.0 - taper*t*t;
-  float xw = p.x / max(halfW, 0.05);
-  float ny = p.y > 0.0 ? nyTip : 2.7;
-  float d = pow(abs(xw), nx) + pow(abs(p.y), ny);
-
-  float aa = fwidth(d)*1.1 + 0.004;      // discard より前に微分を取る
-  float mask = 1.0 - smoothstep(1.0-aa, 1.0+aa, d);
-  float ring = (1.0 - smoothstep(1.0, 1.30, d)) * (1.0 - mask);   // 接地影。強いとシール感が出る
-  if(d > 1.75) discard;
-
-  /* --- 立体的な法線 --- */
-  float curve = u_mat1.w;
-  vec3 nt = vec3(p.x*0.86*curve, p.y*0.30*curve, 1.0);
-  vec2 grad = vec2(nx*pow(abs(xw), nx-1.0)*sign(xw)/max(halfW,0.05),
-                   ny*pow(abs(p.y), ny-1.0)*sign(p.y));
-  float bev = smoothstep(0.42, 1.02, d);
-  nt.xy += normalize(grad + vec2(1e-5)) * bev * 1.55;
-  nt = normalize(nt);
-  vec3 N = normalize(nt.x*v_tanU + nt.y*v_tanV + nt.z*v_nrm);
-  vec3 V = vec3(0.0, 0.0, -1.0);
-  float NoV = clamp(dot(N,V), 0.0, 1.0);
-
-  /* --- 柄 --- */
-  vec2 lp = clamp(p, vec2(-0.999), vec2(0.999));
-  vec2 cell = vec2(mod(slot, u_grid.x), floor(slot/u_grid.x));
-  /* 柄は上端が爪先（フレンチの色が乗る側）。幾何は +y が爪先なので上下を入れ替える */
-  vec2 auv = (cell + vec2(lp.x*0.5+0.5, 0.5-lp.y*0.5)) / u_grid;
-  vec4 tex = texture(u_atlas, auv);
-  vec3 albedo = mix(vec3(0.90,0.78,0.72), tex.rgb, tex.a);
-
-  /* --- 光 --- */
-  vec3 L  = normalize(vec3(-0.42,-0.74,-0.53));
-  vec3 L2 = normalize(vec3( 0.62, 0.22,-0.72));
-  vec3 H  = normalize(L+V);
-  float NoL = max(dot(N,L),0.0);
-  float NoH = max(dot(N,H),0.0);
-
-  float rough = clamp(u_mat0.y + (1.0-gloss)*0.60, 0.035, 1.0);
-  float shin = exp2(mix(11.0, 2.2, rough));
-  float spec = pow(NoH, shin) * min((shin+8.0)/28.0, 26.0);
-
-  vec3 R = reflect(-V, N);
-  vec3 E = envColor(R);
-
-  vec3 diff = albedo*(0.44 + 0.56*NoL) + albedo*0.20*max(dot(N,L2),0.0);
-
-  /* --- すけ感：後ろの指を実際に透かす --- */
-  float tr = clamp(u_mat1.y, 0.0, 0.92);
-  if(tr > 0.001){
-    vec2 vuv = u_videoUV.xy + (v_screen/u_res) * u_videoUV.zw;
-    vec3 skin = texture(u_video, vuv).rgb;
-    diff = mix(diff, skin * mix(vec3(1.0), albedo, 0.78) * 1.12, tr);
-  }
-
-  float metal = u_mat0.x;
-  vec3 col = mix(diff, E * mix(vec3(1.0), albedo, 0.58) * 1.75, metal);
-
-  float F = 0.045 + 0.955*pow(1.0-NoV, 5.0);
-  col += E * F * (0.30+0.70*gloss) * (1.0 - rough*0.65);
-  col += vec3(1.0,0.995,0.985) * spec * (0.45+0.95*gloss) * (1.0 - 0.55*metal);
-
-  /* --- 薄膜干渉（オーロラ／シェル） --- */
-  float irid = u_mat0.z;
-  if(irid > 0.001){
-    /* 縞は爪1枚に1〜2周期。細かすぎると画面上で混ざって灰色になる */
-    float film = 1.15 + 2.30*(1.0-NoV) + 1.05*nt.x + 0.62*nt.y;
-    vec3 ir = 0.5 + 0.5*cos(6.28318*film*vec3(1.0,0.82,0.64) + vec3(0.0,2.2,4.3));
-    ir = pow(ir, vec3(0.75));
-    vec3 iridCol = col*(0.28 + 1.55*ir) + ir*(0.08 + 0.50*F);
-    col = mix(col, iridCol, irid);
-  }
-
-  /* --- ラメ（角度で光る） --- */
-  float glit = u_mat0.w;
-  if(glit > 0.001){
-    vec2 gp = floor(p*vec2(24.0,30.0) + seed*7.0);
-    vec3 h3 = hash33(vec3(gp, seed));
-    vec3 gn = normalize(N + (h3-0.5)*1.30);
-    float sp = pow(max(dot(gn,H),0.0), 300.0) + pow(max(dot(gn,normalize(L2+V)),0.0), 420.0)*0.6;
-    col += mix(vec3(1.0,0.97,0.92), albedo+0.45, 0.35) * sp * step(0.52, h3.z) * glit * 7.0;
-  }
-
-  /* --- マグネット（光の帯が手の向きで動く） --- */
-  float mag = u_mat1.x;
-  if(mag > 0.001){
-    /* 帯は必ず爪の上に残しつつ、手の向きで位置が動く */
-    float band = p.y*1.30 + clamp(N.x*1.70 + N.y*0.95, -1.0, 1.0);
-    float b = exp(-band*band*2.7);
-    col *= 1.0 - 0.30*mag*(1.0-b);
-    col += mix(vec3(1.0), albedo+0.40, 0.45) * b * mag * 1.05;
-  }
-
-  /* --- ベルベット／マットの立ち上がり --- */
-  col += albedo * pow(1.0-NoV, 3.4) * u_mat1.z;
-
-  /* 根元をわずかに落とす */
-  col *= 0.90 + 0.10*smoothstep(-1.0, -0.42, p.y);
-
-  /* 表裏のフェードはJS側で計算済み。ここは真横のときの縁だけ落とす */
-  float face = smoothstep(0.0, 0.10, NoV);
-  float a = mask * alpha * face;
-  float sa = ring * 0.11 * alpha * face;
-
-  vec3 outc = mix(vec3(0.10,0.062,0.050), col, a/max(a+sa, 1e-4));
-  o = vec4(outc, clamp(a+sa, 0.0, 1.0));
-}`;
-
-/* ---- 軌跡パス ---- */
-const TRAIL_VS = `#version 300 es
-in vec2 a_corner;
-in vec2 i_pos;
-in vec2 i_rl;      // radius, life
-in vec3 i_col;
-uniform vec2 u_res;
-out vec2 v_uv; out vec3 v_col; out float v_life;
-void main(){
-  vec2 pos = i_pos + a_corner*i_rl.x;
-  v_uv=a_corner; v_col=i_col; v_life=i_rl.y;
-  gl_Position = vec4(pos.x/u_res.x*2.0-1.0, 1.0-pos.y/u_res.y*2.0, 0.0, 1.0);
-}`;
-const TRAIL_FS = `#version 300 es
-precision mediump float;
-in vec2 v_uv; in vec3 v_col; in float v_life;
-out vec4 o;
-void main(){
-  float r = length(v_uv);
-  if(r >= 1.0) discard;
-  float f = 1.0-r;
-  float core = pow(f, 2.4);
-  o = vec4((v_col*0.74 + vec3(0.28))*core*v_life, 1.0);
-}`;
-
-let progVideo, progNail, progTrail;
-let quadVBO, nailVAO, nailIBO, trailVAO, trailIBO, videoVAO;
-let texVideo, texAtlas;
-const MAX_NAILS = 10, NAIL_STRIDE = 24;
-const MAX_TRAILS = 260, TRAIL_STRIDE = 8;
-const nailData = new Float32Array(MAX_NAILS*NAIL_STRIDE);
-const trailData = new Float32Array(MAX_TRAILS*TRAIL_STRIDE);
-
-function initGL(){
-  progVideo = program(VIDEO_VS, VIDEO_FS);
-  progNail  = program(NAIL_VS,  NAIL_FS);
-  progTrail = program(TRAIL_VS, TRAIL_FS);
-
-  quadVBO = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-
-  const bindCorner = (prog) => {
-    const loc = gl.getAttribLocation(prog.p, 'a_corner') >= 0
-      ? gl.getAttribLocation(prog.p, 'a_corner') : gl.getAttribLocation(prog.p, 'a_pos');
-    gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  };
-
-  videoVAO = gl.createVertexArray(); gl.bindVertexArray(videoVAO); bindCorner(progVideo);
-
-  // 爪
-  nailVAO = gl.createVertexArray(); gl.bindVertexArray(nailVAO); bindCorner(progNail);
-  nailIBO = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, nailIBO);
-  gl.bufferData(gl.ARRAY_BUFFER, nailData.byteLength, gl.DYNAMIC_DRAW);
-  const S = NAIL_STRIDE*4;
-  [['i_center',2,0],['i_axisU',2,2],['i_axisV',2,4],['i_tanU',3,6],['i_tanV',3,9],
-   ['i_nrm',3,12],['i_p0',4,15],['i_p1',4,19]].forEach(([n,sz,off])=>{
-    const l = gl.getAttribLocation(progNail.p, n);
-    if(l < 0) return;
-    gl.enableVertexAttribArray(l);
-    gl.vertexAttribPointer(l, sz, gl.FLOAT, false, S, off*4);
-    gl.vertexAttribDivisor(l, 1);
-  });
-
-  // 軌跡
-  trailVAO = gl.createVertexArray(); gl.bindVertexArray(trailVAO); bindCorner(progTrail);
-  trailIBO = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, trailIBO);
-  gl.bufferData(gl.ARRAY_BUFFER, trailData.byteLength, gl.DYNAMIC_DRAW);
-  const TS = TRAIL_STRIDE*4;
-  [['i_pos',2,0],['i_rl',2,2],['i_col',3,4]].forEach(([n,sz,off])=>{
-    const l = gl.getAttribLocation(progTrail.p, n);
-    if(l < 0) return;
-    gl.enableVertexAttribArray(l);
-    gl.vertexAttribPointer(l, sz, gl.FLOAT, false, TS, off*4);
-    gl.vertexAttribDivisor(l, 1);
-  });
-  gl.bindVertexArray(null);
-
-  texVideo = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texVideo);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-  texAtlas = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texAtlas);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-  gl.disable(gl.DEPTH_TEST);
-  gl.enable(gl.BLEND);
-}
-
-/* ---- キャンバスの解像度 ---- */
-const QUALITY = { eco:1.0, std:1.5, high:2.0 };
-let qualityKey = 'std';
-let viewW = 0, viewH = 0;
-function resizeGL(){
-  const r = glc.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio||1, QUALITY[qualityKey]);
-  const w = Math.max(2, Math.round(r.width*dpr)), h = Math.max(2, Math.round(r.height*dpr));
-  if(w===viewW && h===viewH) return;
-  viewW=w; viewH=h; glc.width=w; glc.height=h;
-  gl.viewport(0,0,w,h);
-}
-
-/* =====================================================================
-   4. 手の検出（MediaPipe Tasks Vision）
-   ===================================================================== */
-const video = $('video');
-const TASKS_VERSION = '0.10.14';
-const CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${TASKS_VERSION}`;
-const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
-let landmarker = null, modelReady = null, visionMod = null;
-
-function setProgress(pct){ $('loadbar').firstElementChild.style.width = pct+'%'; }
-function setStatus(t){ $('status').textContent = t||''; }
-function setGuide(t){ const g=$('guide'); g.textContent=t||''; g.style.opacity = t?1:0; }
-
-async function loadModel(){
-  if(modelReady) return modelReady;
-  modelReady = (async ()=>{
-    setStatus('AIモデルを読み込んでいます…'); setProgress(12);
-    visionMod = await import(`${CDN}/vision_bundle.mjs`);
-    setProgress(35);
-    const fileset = await visionMod.FilesetResolver.forVisionTasks(`${CDN}/wasm`);
-    setProgress(58);
-    const opts = {
-      baseOptions:{ modelAssetPath: MODEL_URL, delegate:'GPU' },
-      runningMode:'VIDEO', numHands:2,
-      minHandDetectionConfidence:0.5, minHandPresenceConfidence:0.5, minTrackingConfidence:0.5
-    };
-    try{
-      landmarker = await visionMod.HandLandmarker.createFromOptions(fileset, opts);
-    }catch(e){
-      opts.baseOptions.delegate = 'CPU';
-      landmarker = await visionMod.HandLandmarker.createFromOptions(fileset, opts);
-    }
-    setProgress(100); setStatus('');
-    return landmarker;
-  })();
-  modelReady.catch(()=>{
-    modelReady = null; setProgress(0);
-    setStatus('AIモデルを読み込めませんでした。通信環境を確認して、ページを再読み込みしてください。');
-  });
-  return modelReady;
-}
-
-/* ---- One Euro フィルタ + 遅延補正 ---- */
-const FOLLOW = {
-  calm : {mc:0.9,  beta:14, pred:0,    dead:0.00030},
-  std  : {mc:1.3,  beta:25, pred:0.010, dead:0.00040},   /* 旧版の設定にほぼ揃えた */
-  quick: {mc:2.9,  beta:44, pred:0.042, dead:0.00060},
-};
-let followKey = 'std';
-const alphaFor = (cutoff, dt) => { const r = 2*Math.PI*cutoff*dt; return r/(r+1); };
-
-/* 手の追跡（フレーム間で同じ手を同じスロットに保つ） */
-const tracks = [];    // {lm:[{x,y,vx,vy}], w:[{x,y,z}], handed, seen}
-function matchTracks(hands){
-  const used = new Array(tracks.length).fill(false);
-  const out = [];
-  hands.forEach(h=>{
-    const wx = h.lm[0].x, wy = h.lm[0].y;
-    let best=-1, bd=0.22;
-    tracks.forEach((t,i)=>{
-      if(used[i]) return;
-      const d = Math.hypot(t.lm[0].x-wx, t.lm[0].y-wy);
-      if(d<bd){ bd=d; best=i; }
-    });
-    if(best>=0){ used[best]=true; out.push(best); }
-    else out.push(-1);
-  });
-  return out;
-}
-let lastDetectT = 0, detectLatency = 0.030;
-
-function ingest(result, tNow){
-  const hands = [];
-  const L = result.landmarks || [], W = result.worldLandmarks || [], HD = result.handedness || result.handednesses || [];
-  for(let i=0;i<L.length;i++){
-    hands.push({ lm:L[i], w:W[i]||null, handed:(HD[i]&&HD[i][0]&&HD[i][0].categoryName)||'Right' });
-  }
-  const map = matchTracks(hands);
-  const keep = [];
-  const cfg = FOLLOW[followKey];
-  hands.forEach((h,i)=>{
-    let t = map[i]>=0 ? tracks[map[i]] : null;
-    if(!t){
-      t = { lm:h.lm.map(p=>({x:p.x,y:p.y,vx:0,vy:0})), w:h.w?h.w.map(p=>({x:p.x,y:p.y,z:p.z})):null,
-            handed:h.handed, seen:tNow, t:tNow };
-      tracks.push(t);
-    }else{
-      const dt = clamp((tNow - t.t)/1000, 0.004, 0.12); t.t = tNow;
-      h.lm.forEach((p,k)=>{
-        const s = t.lm[k];
-        for(const [ax,vx] of [['x','vx'],['y','vy']]){
-          const d = p[ax]-s[ax];
-          if(Math.abs(d) < cfg.dead){ s[vx]*=0.55; continue; }
-          const dv = d/dt;
-          s[vx] += alphaFor(1.0, dt)*(dv - s[vx]);
-          s[ax] += alphaFor(cfg.mc + cfg.beta*Math.abs(s[vx]), dt)*d;
-        }
-      });
-      if(h.w){
-        if(!t.w) t.w = h.w.map(p=>({x:p.x,y:p.y,z:p.z}));
-        else h.w.forEach((p,k)=>{
-          const s=t.w[k], a=alphaFor(cfg.mc*1.4, dt);
-          s.x+=a*(p.x-s.x); s.y+=a*(p.y-s.y); s.z+=a*(p.z-s.z);
-        });
-      }
-      t.handed = h.handed; t.seen = tNow;
-    }
-    keep.push(t);
-  });
-  for(let i=tracks.length-1;i>=0;i--) if(tNow - tracks[i].seen > 400) tracks.splice(i,1);
-  /* 1〜2フレーム見失っただけで爪が消えないよう、少しだけ猶予を持たせる */
-  if(keep.length){ liveTracks = keep; lastHandT = tNow; }
-  else if(tNow - lastHandT > 220){ liveTracks = []; }
-}
-let liveTracks = [], lastHandT = 0;
-
-/* =====================================================================
-   5. 幾何：指ごとの3D基底から爪の四角形を作る
-   ===================================================================== */
-const FINGERS = [
-  /* [tip, dip, pip, mcp, 幅の微調整, 長さの微調整]
-     基準は旧版と同じ（幅 0.54 / 長さ 1.00 × 画面上の指節長）。ここは指ごとの微差だけ。 */
-  [4, 3, 2, 1, 1.08, 0.94],
-  [8, 7, 6, 5, 1.00, 1.00],
-  [12,11,10, 9, 1.00, 1.00],
-  [16,15,14,13, 0.98, 0.98],
-  [20,19,18,17, 0.94, 0.94],
-];
-const PALM_BONES = [[0,5],[0,17],[5,17],[5,9],[9,13],[13,17],[0,9]];
-const SHAPES = {
-  natural :{nx:2.8, ny:2.9, taper:0.06, curve:1.00},
-  round   :{nx:2.4, ny:2.2, taper:0.02, curve:1.05},
-  almond  :{nx:2.8, ny:3.4, taper:0.40, curve:1.10},
-  square  :{nx:6.0, ny:6.0, taper:0.00, curve:0.85},
-  coffin  :{nx:5.0, ny:8.0, taper:0.36, curve:0.90},
-  stiletto:{nx:3.0, ny:4.0, taper:0.62, curve:1.18},
-};
-const V = {
-  sub:(a,b)=>[a.x-b.x, a.y-b.y, a.z-b.z],
-  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
-  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
-  len:a=>Math.hypot(a[0],a[1],a[2]),
-  norm:a=>{const l=Math.hypot(a[0],a[1],a[2])||1e-6; return [a[0]/l,a[1]/l,a[2]/l];},
-  scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
-  addm:(a,b,s)=>[a[0]+b[0]*s, a[1]+b[1]*s, a[2]+b[2]*s],
-};
-
-const tuneVals = {gloss:62, opacity:92, shape:'natural', lenScale:1.0, widScale:1.0};
-let currentLook = 'onecolor';
-let currentColor = '#b76e79';
+/* ================= 状態 ================= */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const video = document.getElementById('video');
+let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
-const mirrored = () => facing === 'user';
+let stream = null;
+let currentColor = '#b76e79';
+let currentLook = 'onecolor';
+let smoothed = [];
+let rafOn = false;
+const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
+const $ = id => document.getElementById(id);
 
-/* 映像→キャンバス（cover）変換 */
-let cover = {sx:1, ox:0, oy:0};
-function updateCover(){
-  const vw = video.videoWidth||1, vh = video.videoHeight||1;
-  const s = Math.max(viewW/vw, viewH/vh);
-  cover.sx = s;
-  cover.ox = (viewW - vw*s)/2;
-  cover.oy = (viewH - vh*s)/2;
-}
-function toCanvas(px, py){
-  let x = px*cover.sx + cover.ox;
-  const y = py*cover.sx + cover.oy;
-  if(mirrored()) x = viewW - x;
-  return [x, y];
+function setStatus(t){ $('status').textContent = t || ''; }
+function setGuide(t){
+  const g = $('guide');
+  g.textContent = t || '';
+  g.style.opacity = t ? 1 : 0;
 }
 
-let nailCount = 0;
-const fingerTipsPx = [];   // 軌跡用
+/* ================= MediaPipe（初期化を待ってから使う） ================= */
+const MP_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/';
+let liveHands = null, liveReady = null;
 
-function buildNails(predMs){
-  nailCount = 0; fingerTipsPx.length = 0;
-  if(!liveTracks.length) return;
-  const vw = video.videoWidth||1, vh = video.videoHeight||1;
-  const sh = SHAPES[tuneVals.shape];
-  const alphaBase = clamp(tuneVals.opacity/100, 0, 1);
-  const gloss = tuneVals.gloss/100;
-  const predS = predMs/1000;
-  const GATE_LO = 0.15, GATE_HI = 0.45;   // 正規化座標/秒。静止時は予測を完全に切る
-
-  for(const tr of liveTracks){
-    if(nailCount >= MAX_NAILS) break;
-    /* 予測つきの画像座標（px, 映像ピクセル空間） */
-    const P = tr.lm.map(s=>{
-      const sp = Math.hypot(s.vx, s.vy);
-      const gate = clamp((sp - GATE_LO)/(GATE_HI - GATE_LO), 0, 1);
-      let dx = clamp(s.vx*predS*gate, -0.05, 0.05);
-      let dy = clamp(s.vy*predS*gate, -0.05, 0.05);
-      return [ (s.x+dx)*vw, (s.y+dy)*vh ];
+function makeHands(opts){
+  const h = new Hands({locateFile: f => MP_CDN + f});
+  h.setOptions(opts);
+  return h;
+}
+function ensureLive(){
+  if(window.__mpFailed) return Promise.reject(new Error('cdn'));
+  if(!liveReady){
+    liveHands = makeHands({maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.6, minTrackingConfidence:0.6});
+    liveHands.onResults(res => {
+      const lms = res.multiHandLandmarks || [];
+      if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms); }
+      else if(performance.now() - lastSeenT > 280){ smoothed.length = 0; }
+      liveBusy = false;
     });
-    const W = tr.w;
-
-    /* px / meter（手のひらの骨で最小二乗） */
-    let num=0, den=0;
-    if(W){
-      for(const [a,b] of PALM_BONES){
-        const dpx=[P[b][0]-P[a][0], P[b][1]-P[a][1]];
-        const dw =[W[b].x-W[a].x,  W[b].y-W[a].y];
-        num += dpx[0]*dw[0] + dpx[1]*dw[1];
-        den += dw[0]*dw[0] + dw[1]*dw[1];
-      }
+    liveReady = liveHands.initialize();
+  }
+  return liveReady;
+}
+let lastSeenT = 0;
+function updateLandmarks(lms){
+  const now = performance.now();
+  const dt = Math.min(0.1, Math.max(0.001, (now - (updateLandmarks._t||now-16))/1000));
+  updateLandmarks._t = now;
+  lms.forEach((lm,h) => {
+    if(!smoothed[h] || smoothed[h].length !== lm.length){
+      smoothed[h] = lm.map(p=>({x:p.x, y:p.y, vx:0, vy:0}));
+      return;
     }
-    const s2d = (W && den > 1e-9) ? Math.abs(num/den) : 0;
-
-    /* --- 手の甲がどちら向きかを決める ---
-       MediaPipe の左右手判定は「鏡像の映像」前提の仕様で、背面カメラの生映像では逆に出る。
-       そこで左右手には頼らず、指の反りから直接求める：
-       指は手のひら側にしか曲がらないので、第2関節(PIP)は
-       付け根(MCP)と指先(TIP)を結んだ線より必ず甲側に出っ張る。 */
-    let dorsal = [0,0,-1], radial = [1,0,0];
-    if(W){
-      const raw = V.norm(V.cross(V.sub(W[5], W[0]), V.sub(W[17], W[0])));
-      let cue = [0,0,0];
-      for(let f=1; f<5; f++){
-        const [tp,,pp,mc] = FINGERS[f];
-        /* 第2関節は「付け根−指先」の線より甲側に出る */
-        cue[0] += W[pp].x - (W[mc].x + W[tp].x)/2;
-        cue[1] += W[pp].y - (W[mc].y + W[tp].y)/2;
-        cue[2] += W[pp].z - (W[mc].z + W[tp].z)/2;
-        /* 指の付け根（拳）も手首−第2関節の線より甲側に出る */
-        cue[0] += (W[mc].x - (W[0].x + W[pp].x)/2) * 0.6;
-        cue[1] += (W[mc].y - (W[0].y + W[pp].y)/2) * 0.6;
-        cue[2] += (W[mc].z - (W[0].z + W[pp].z)/2) * 0.6;
-      }
-      const cueLen = V.len(cue);
-      const ev = cueLen > 1e-5
-        ? V.dot(V.scale(cue, 1/cueLen), raw) * Math.min(1, cueLen/0.020)
-        : 0;
-      if(tr.dscore === undefined){
-        /* 初期値：反りが読めればそれを優先。読めない時だけ左右手判定に頼る。
-           MediaPipeの左右手判定は鏡像前提の仕様なので、生映像では逆に読む */
-        tr.dscore = Math.abs(ev) > 0.12 ? ev*2.2 : (tr.handed === 'Left' ? 0.6 : -0.6);
-      }
-      tr.dscore = clamp(tr.dscore + ev*0.40, -2.5, 2.5);
-      dorsal = tr.dscore >= 0 ? raw : V.scale(raw, -1);
-      const rad = V.sub(W[5], W[17]);
-      radial = V.norm(V.addm(rad, dorsal, -V.dot(rad, dorsal)));   // 甲の向きに直交させる
-    }
-
-    if(!tr.st) tr.st = [];
-
-    for(let fi=0; fi<5 && nailCount<MAX_NAILS; fi++){
-      const [tip,dip,pip,,wf,lf] = FINGERS[fi];
-      const tipPx = P[tip], dipPx = P[dip];
-      fingerTipsPx.push(tipPx);
-
-      const lenPx = Math.hypot(tipPx[0]-dipPx[0], tipPx[1]-dipPx[1]);
-      if(lenPx < 3) continue;
-
-      let T, S, N, scale;
-      if(W && s2d > 1e-6){
-        T = V.norm(V.sub(W[tip], W[dip]));
-        /* 爪が向く基準。親指だけは甲より橈側寄りを向く */
-        const ref = fi===0
-          ? V.norm(V.addm(V.scale(dorsal, 0.50), radial, 0.87))
-          : dorsal;
-        /* 主：基準面から作る（指がまっすぐでも安定）
-           従：指の曲げ平面（はっきり曲がっている時だけ混ぜる） */
-        let side = V.cross(T, ref);
-        const bend = V.norm(V.sub(W[pip], W[dip]));
-        const sideB = V.cross(T, bend);
-        const sinT = V.len(sideB);
-        if(sinT > 0.20 && V.len(side) > 1e-3){
-          const a = V.norm(side);
-          let b = V.norm(sideB);
-          if(V.dot(a,b) < 0) b = V.scale(b,-1);
-          const wgt = clamp((sinT-0.20)/0.35, 0, 1);
-          side = [a[0]+(b[0]-a[0])*wgt, a[1]+(b[1]-a[1])*wgt, a[2]+(b[2]-a[2])*wgt];
-        }
-        if(V.len(side) < 1e-4) side = V.cross(T, [0,0,-1]);
-        S = V.norm(side);
-        N = V.norm(V.cross(S, T));
-        if(V.dot(N, ref) < 0){ N = V.scale(N,-1); S = V.scale(S,-1); }
-        scale = s2d;
-      }else{
-        /* worldLandmarks が無いときの平面フォールバック */
-        const ang = Math.atan2(tipPx[1]-dipPx[1], tipPx[0]-dipPx[0]);
-        T = [Math.cos(ang), Math.sin(ang), 0];
-        S = [-Math.sin(ang), Math.cos(ang), 0];
-        N = [0,0,-1];
-        scale = 1;
-      }
-
-      /* ================= 位置・大きさは2Dで決める =================
-         3Dのワールド座標は誤差が大きく、そこから寸法を作ると爪が脈打つ。
-         旧版と同じく「画面上の指先−第一関節」の2点だけで置き、
-         デッドゾーン付きで追従させる。3Dは陰影の計算だけに使う。 */
-      const rawAng = Math.atan2(tipPx[1]-dipPx[1], tipPx[0]-dipPx[0]);
-      const st = tr.st[fi] || (tr.st[fi] = {len:lenPx, ang:rawAng, n:null, s:null, t:null, face:0});
-
-      const dLen = lenPx - st.len;
-      if(Math.abs(dLen) > st.len*0.030) st.len += dLen*Math.min(1, 0.14 + Math.abs(dLen)/st.len);
-      let dAng = ((rawAng - st.ang + Math.PI*3) % (Math.PI*2)) - Math.PI;
-      if(Math.abs(dAng) > 0.030) st.ang += dAng*Math.min(1, 0.18 + Math.abs(dAng)*2);
-      const len = st.len, ang = st.ang;
-
-      /* 3Dの向きはゆっくり追従させてから使う（陰影・表裏判定のみ） */
-      const lerpN = (a,b,f)=> a ? V.norm([a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f]) : b.slice();
-      st.n = lerpN(st.n, N, 0.22);
-      st.s = lerpN(st.s, S, 0.22);
-      st.t = lerpN(st.t, T, 0.22);
-
-      /* 旧版の比率：幅 0.54×指節長、長さ 1.00×指節長、根元は指先の 0.426 手前 */
-      const halfWid = len * 0.270 * wf * tuneVals.widScale;
-      const halfLen = len * 0.498 * lf * tuneVals.lenScale;
-      const dirX = Math.cos(ang), dirY = Math.sin(ang);
-      /* 根元を固定して先端だけ伸ばす（スカルプと同じ伸び方） */
-      const baseX = tipPx[0] - dirX*len*0.426*lf;
-      const baseY = tipPx[1] - dirY*len*0.426*lf;
-
-      /* 幅方向。3Dの横軸と向きを揃えておく（陰影の左右が反転しないように） */
-      let pX = -dirY, pY = dirX;
-      if(st.s && (st.s[0]*pX + st.s[1]*pY) < 0){ pX = -pX; pY = -pY; }
-
-      let axU = [pX*halfWid, pY*halfWid];
-      let axV = [dirX*halfLen, dirY*halfLen];
-      let cx = baseX + axV[0], cy = baseY + axV[1];
-
-      /* キャンバス座標へ */
-      let [ccx, ccy] = toCanvas(cx, cy);
-      let uX = axU[0]*cover.sx, uY = axU[1]*cover.sx;
-      let vX = axV[0]*cover.sx, vY = axV[1]*cover.sx;
-      let tU=st.s.slice(), tV=st.t.slice(), nN=st.n.slice();
-      if(mirrored()){
-        uX=-uX; vX=-vX; tU[0]=-tU[0]; tV[0]=-tV[0]; nN[0]=-nN[0];
-      }
-
-      /* 表裏のフェードもゆっくり。1〜2フレームの誤判定で消えないように */
-      const faceTarget = clamp((-nN[2]+0.34)/0.44, 0, 1);
-      st.face += (faceTarget - st.face) * 0.14;
-      const facing3 = st.face;
-      if(facing3 <= 0.02) continue;
-
-      const o = nailCount*NAIL_STRIDE;
-      nailData[o+0]=ccx;  nailData[o+1]=ccy;
-      nailData[o+2]=uX;   nailData[o+3]=uY;
-      nailData[o+4]=vX;   nailData[o+5]=vY;
-      nailData[o+6]=tU[0];  nailData[o+7]=tU[1];  nailData[o+8]=tU[2];
-      nailData[o+9]=tV[0];  nailData[o+10]=tV[1]; nailData[o+11]=tV[2];
-      nailData[o+12]=nN[0]; nailData[o+13]=nN[1]; nailData[o+14]=nN[2];
-      nailData[o+15]=slotOf(currentLook);
-      nailData[o+16]=alphaBase*facing3;
-      nailData[o+17]=gloss;
-      nailData[o+18]=fi*3.7 + (nailCount>4?11:0);
-      nailData[o+19]=sh.nx; nailData[o+20]=sh.ny; nailData[o+21]=sh.taper;
-      nailData[o+22]=1.30;                 // 影のぶんだけ広げる
-      nailData[o+23]=0;
-      nailCount++;
-    }
-  }
+    lm.forEach((p,i)=>{
+      const s = smoothed[h][i];
+      [['x','vx'],['y','vy']].forEach(([ax,v])=>{
+        const d = p[ax]-s[ax];
+        if(Math.abs(d) < 0.0022){ s[v]*=0.5; return; }
+        const dv = d/dt;
+        s[v] += alphaFor(1.0, dt)*(dv - s[v]);
+        const cutoff = 1.0 + 25*Math.abs(s[v]);
+        s[ax] += alphaFor(cutoff, dt)*d;
+      });
+    });
+  });
+  smoothed.length = lms.length;
+}
+function alphaFor(cutoff, dt){
+  const r = 2*Math.PI*cutoff*dt;
+  return r/(r+1);
 }
 
-/* =====================================================================
-   6. 光の軌跡
-   ===================================================================== */
-let trailOn = true, trailIntensity = 55, trailHue = null;
-const TRAIL_LIFE = 640;
-const trails = [];
-function recordTrails(now){
-  if(!trailOn || !fingerTipsPx.length) return;
-  const col = trailHue || currentColor;
-  for(const p of fingerTipsPx){
-    const [x,y] = toCanvas(p[0], p[1]);
-    const last = trails.length ? trails[trails.length-1] : null;
-    if(last && Math.hypot(x-last.x, y-last.y) < 3.5) continue;
-    trails.push({x,y,born:now,color:col});
-  }
-  const cut = now - TRAIL_LIFE;
-  while(trails.length && trails[0].born < cut) trails.shift();
-  if(trails.length > MAX_TRAILS) trails.splice(0, trails.length-MAX_TRAILS);
-}
-function packTrails(now){
-  const strength = trailIntensity/100;
-  if(!trailOn || strength<=0.01) return 0;
-  let n=0;
-  for(const pt of trails){
-    if(n>=MAX_TRAILS) break;
-    const age = (now-pt.born)/TRAIL_LIFE;
-    if(age>=1) continue;
-    const life = (1-age);
-    const [r,g,b] = hex2rgb(pt.color);
-    const o = n*TRAIL_STRIDE;
-    trailData[o+0]=pt.x; trailData[o+1]=pt.y;
-    trailData[o+2]=(4+life*18)*(viewW/520);
-    trailData[o+3]=life*life*strength*0.60;
-    trailData[o+4]=r; trailData[o+5]=g; trailData[o+6]=b; trailData[o+7]=0;
-    n++;
-  }
-  return n;
-}
-
-/* =====================================================================
-   7. メインループ
-   ===================================================================== */
-let mode='idle', stream=null, rafOn=false;
-let frameTimes=[], fpsAvg=60, detectEvery=1, detectTick=0;
-let pendingCapture=false;
-
-function render(now){
-  resizeGL();
-  updateCover();
-
-  const predMs = FOLLOW[followKey].pred*1000 + detectLatency*1000*0.6;
-  buildNails(predMs);
-  recordTrails(now);
-
-  /* テクスチャは 0=柄アトラス / 1=映像 に固定 */
-  gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D, texVideo);
-  if(video.readyState >= 2){
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-  }
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texAtlas);
-  if(atlasDirty){
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlasCanvas);
-    atlasDirty = false;
-  }
-
-  /* 映像 */
-  const vw=video.videoWidth||1, vh=video.videoHeight||1;
-  const s = Math.max(viewW/vw, viewH/vh);
-  const dispW = vw*s, dispH = vh*s;
-  let u0 = (dispW-viewW)/2/dispW, du = viewW/dispW;
-  const v0 = (dispH-viewH)/2/dispH, dv = viewH/dispH;
-  if(mirrored()){ u0 = 1-u0; du = -du; }
-
-  gl.blendFunc(gl.ONE, gl.ZERO);
-  gl.useProgram(progVideo.p);
-  gl.bindVertexArray(videoVAO);
-  gl.uniform1i(progVideo.u.u_tex, 1);
-  gl.uniform4f(progVideo.u.u_uv, u0, v0, du, dv);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-  /* 軌跡（加算） */
-  const tn = packTrails(now);
-  if(tn){
-    gl.blendFunc(gl.ONE, gl.ONE);
-    gl.useProgram(progTrail.p);
-    gl.bindVertexArray(trailVAO);
-    gl.bindBuffer(gl.ARRAY_BUFFER, trailIBO);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, trailData, 0, tn*TRAIL_STRIDE);
-    gl.uniform2f(progTrail.u.u_res, viewW, viewH);
-    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, tn);
-  }
-
-  /* 爪 */
-  if(nailCount){
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.useProgram(progNail.p);
-    gl.bindVertexArray(nailVAO);
-    gl.bindBuffer(gl.ARRAY_BUFFER, nailIBO);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, nailData, 0, nailCount*NAIL_STRIDE);
-    gl.uniform1i(progNail.u.u_atlas, 0);
-    gl.uniform1i(progNail.u.u_video, 1);
-    gl.uniform2f(progNail.u.u_res, viewW, viewH);
-    gl.uniform2f(progNail.u.u_grid, ATLAS_COLS, ATLAS_ROWS);
-    gl.uniform4f(progNail.u.u_videoUV, u0, v0, du, dv);
-    const m = matOf(currentLook);
-    const sheerBoost = clamp((92 - tuneVals.opacity)/92, 0, 1)*0.65;
-    gl.uniform4f(progNail.u.u_mat0, m[0], m[1], m[2], m[3]);
-    gl.uniform4f(progNail.u.u_mat1, m[4], clamp(m[5]+sheerBoost,0,0.92), m[6], SHAPES[tuneVals.shape].curve);
-    gl.uniform1f(progNail.u.u_time, now/1000);
-    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, nailCount);
-  }
-  gl.bindVertexArray(null);
-
-  if(pendingCapture){ pendingCapture=false; grabFrame(); }
-}
-
-function startLoops(){
-  if(rafOn) return;
-  rafOn = true;
-  let last = performance.now();
-  (function frame(now){
-    requestAnimationFrame(frame);
-    if(mode !== 'live') return;
-    const dt = now-last; last = now;
-    frameTimes.push(dt); if(frameTimes.length>40) frameTimes.shift();
-    const avg = frameTimes.reduce((a,b)=>a+b,0)/frameTimes.length;
-    fpsAvg = 1000/Math.max(avg, 1);
-    if(perfOn) $('perf').textContent = `${fpsAvg.toFixed(0)} fps ／ 検出 ${(detectLatency*1000).toFixed(0)}ms`;
-    render(now);
-    setGuide(liveTracks.length ? '' : '手をかざしてください');
-  })(last);
-  scheduleDetect();
-}
-
-function detectOnce(){
-  if(mode !== 'live' || !landmarker || video.readyState < 2) return;
-  detectTick++;
-  if(detectTick % detectEvery) return;
-  const t0 = performance.now();
-  let ts = Math.max(t0, lastDetectT+1);
-  lastDetectT = ts;
-  try{
-    const res = landmarker.detectForVideo(video, ts);
-    const t1 = performance.now();
-    detectLatency = detectLatency*0.85 + ((t1-t0)/1000)*0.15;
-    ingest(res, t1);
-    if(!res.landmarks || !res.landmarks.length){ if(t1 - (liveTracks[0]?.seen||0) > 250) liveTracks = []; }
-  }catch(e){ /* 単発の失敗は無視 */ }
-  /* 発熱対策。ただし「検出そのものが重い時」だけ間引く
-     （描画が遅いだけの時に検出まで削ると、余計に追従が悪くなる） */
-  detectEvery = (detectLatency > 0.026 && fpsAvg < 38) ? 2 : 1;
-}
-/* 検出ループ。rVFC が発火しない端末があるので、止まったら rAF に切り替える */
-let rvfcAlive = 0, rafDetectOn = false;
-function startRafDetect(){
-  if(rafDetectOn) return;
-  rafDetectOn = true;
-  let acc = 0, last = performance.now();
-  const step = (now)=>{
-    requestAnimationFrame(step);
-    acc += now-last; last = now;
-    if(acc >= 30){ acc = 0; detectOnce(); }
-  };
-  requestAnimationFrame(step);
-}
-function scheduleDetect(){
-  if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
-    const step = ()=>{ rvfcAlive = performance.now(); detectOnce(); video.requestVideoFrameCallback(step); };
-    video.requestVideoFrameCallback(step);
-    rvfcAlive = performance.now();
-    /* 見張り：600ms 発火しなければ rAF に恒久フォールバック */
-    const watch = setInterval(()=>{
-      if(mode !== 'live') return;
-      if(performance.now() - rvfcAlive > 600){ clearInterval(watch); startRafDetect(); }
-    }, 400);
-  }else{
-    startRafDetect();
-  }
-}
-
-/* ---- カメラ ---- */
+/* ================= カメラ ================= */
 async function startCamera(){
-  $('startBtn').disabled = true;
-  try{ await loadModel(); }catch(e){ $('startBtn').disabled=false; return; }
-  if(!landmarker){ $('startBtn').disabled=false; return; }
+  setStatus('準備しています…');
+  try{ await ensureLive(); }
+  catch(e){
+    setStatus('AIモデルを読み込めませんでした。通信環境を確認して再読み込みしてください。');
+    return;
+  }
   try{
-    setStatus('カメラを準備しています…');
     if(stream) stream.getTracks().forEach(t=>t.stop());
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:facing, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:60} },
-      audio:false
+      video:{facingMode:facing, width:{ideal:1280}, height:{ideal:720}}, audio:false
     });
     video.srcObject = stream;
     await video.play();
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     mode = 'live';
-    tracks.length = 0; liveTracks = []; trails.length = 0;
+    smoothed = [];
+    nailState.length = 0;
+    trails.length = 0;
     $('startOverlay').style.display='none';
-    $('snap').style.display='none';
     $('liveBtns').style.display='flex';
     $('snapBar').style.display='none';
-    setGuide('手をかざしてください'); setStatus('');
-    resizeGL();
+    setGuide('手をかざしてください');
+    setStatus('');
     startLoops();
   }catch(e){
-    $('startBtn').disabled = false;
-    setStatus('カメラを使えませんでした。ブラウザの設定でカメラを許可してください。('+e.name+')');
+    setStatus('カメラを使えませんでした。ブラウザの設定でカメラを許可してください。(' + e.name + ')');
   }
 }
-$('startBtn').onclick = startCamera;
-$('flipBtn').onclick = ()=>{ facing = facing==='environment' ? 'user' : 'environment'; startCamera(); };
 
-/* ---- 撮影 ---- */
-const snapCanvas = $('snap');
-function grabFrame(){
-  snapCanvas.width = viewW; snapCanvas.height = viewH;
-  snapCanvas.getContext('2d').drawImage(glc, 0, 0);
-  snapCanvas.style.display = 'block';
+/* 描画ループ：AIとは独立して映像を常に描く */
+let liveBusy = false;
+function startLoops(){
+  if(rafOn) return;
+  rafOn = true;
+  let lastT = performance.now();
+  (function draw(now){
+    const dt = Math.min(0.05, Math.max(0.001, (now - lastT)/1000)); lastT = now;
+    if(mode === 'live' && video.readyState >= 2){
+      ctx.save();
+      if(mirrored()){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      ctx.restore();
+      recordTrails();
+      drawTrails(dt);
+      drawNails();
+      setGuide(smoothed.length ? '' : '手をかざしてください');
+    }
+    requestAnimationFrame(draw);
+  })(lastT);
+  (async function detect(){
+    if(mode === 'live' && video.readyState >= 2 && !liveBusy){
+      liveBusy = true;
+      try{ await liveHands.send({image: video}); }
+      catch(e){ liveBusy = false; }
+    }
+    requestAnimationFrame(detect);
+  })();
+}
+$('startBtn').onclick = startCamera;
+$('flipBtn').onclick = () => { facing = facing==='environment' ? 'user' : 'environment'; startCamera(); };
+
+/* ================= 撮影 ================= */
+function doCapture(){
   mode = 'frozen';
   $('liveBtns').style.display='none';
   $('snapBar').style.display='flex';
   setGuide('');
 }
-function doCapture(){ pendingCapture = true; }
 $('shutterBtn').onclick = doCapture;
-$('timerBtn').onclick = ()=>{
-  let n=3; const cd=$('countdown'); cd.style.display='flex';
-  (function tick(){ if(n===0){ cd.style.display='none'; doCapture(); return; } cd.textContent=n--; setTimeout(tick,1000); })();
+$('timerBtn').onclick = () => {
+  let n = 3;
+  const cd = $('countdown');
+  cd.style.display='flex';
+  (function tick(){
+    if(n===0){ cd.style.display='none'; doCapture(); return; }
+    cd.textContent = n--; setTimeout(tick, 1000);
+  })();
 };
-$('retryBtn').onclick = ()=>{
-  mode='live'; snapCanvas.style.display='none';
-  $('snapBar').style.display='none'; $('liveBtns').style.display='flex';
+$('retryBtn').onclick = () => {
+  mode='live'; $('snapBar').style.display='none'; $('liveBtns').style.display='flex';
 };
-$('saveBtn').onclick = ()=>{
-  const a=document.createElement('a'); a.download='tsuya.png';
-  a.href = snapCanvas.toDataURL('image/png'); a.click();
+$('saveBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.download = 'tsuya.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
   setGuide('保存しました（写真に出ない場合は画像を長押し）');
   setTimeout(()=>setGuide(''), 3000);
 };
 
-/* =====================================================================
-   8. UI
-   ===================================================================== */
 async function loadImage(file){
   let bmp;
   try{ bmp = await createImageBitmap(file, {imageOrientation:'from-image'}); }
-  catch(e){ bmp = await new Promise(r=>{const i=new Image(); i.onload=()=>r(i); i.src=URL.createObjectURL(file);}); }
-  const MAX=1200, sc=Math.min(1, MAX/Math.max(bmp.width,bmp.height));
-  const c=document.createElement('canvas');
-  c.width=Math.round(bmp.width*sc); c.height=Math.round(bmp.height*sc);
+  catch(e){
+    bmp = await new Promise(r=>{ const img=new Image(); img.onload=()=>r(img); img.src=URL.createObjectURL(file); });
+  }
+  const MAX = 1400;
+  const sc = Math.min(1, MAX/Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width*sc); c.height = Math.round(bmp.height*sc);
   c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
   return c;
 }
 
-/* デザイン一覧 */
+/* ================= 爪の描画 ================= */
+const FINGERS = [[4,3],[8,7],[12,11],[16,15],[20,19]];
+const nailState = [];
+function mirrored(){ return facing==='user'; }
+function lmXY(p){
+  let x = p.x*canvas.width, y = p.y*canvas.height;
+  if(mirrored()) x = canvas.width - x;
+  return [x,y];
+}
+function drawNails(){
+  const alpha = tuneVals.opacity/100;
+  const gloss = tuneVals.gloss/100;
+  const scale = tuneVals.nailSize/100;
+  smoothed.forEach((lm, hi)=>{
+    FINGERS.forEach(([tip,dip], fi)=>{
+      const [tx,ty]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]);
+      const rawLen = Math.hypot(tx-dx,ty-dy);
+      if(rawLen < 4) return;
+      const rawAng = Math.atan2(ty-dy,tx-dx);
+      const st = nailState[hi*5+fi] || (nailState[hi*5+fi] = {len:rawLen, ang:rawAng});
+      const dLen = rawLen - st.len;
+      if(Math.abs(dLen) > st.len*0.035) st.len += dLen*Math.min(1, 0.12 + Math.abs(dLen)/st.len);
+      let dAng = ((rawAng - st.ang + Math.PI*3) % (Math.PI*2)) - Math.PI;
+      if(Math.abs(dAng) > 0.035) st.ang += dAng*Math.min(1, 0.15 + Math.abs(dAng)*2);
+      const len = st.len, ang = st.ang;
+      const lenPct = tuneVals.sculptLen/100;
+      const shape = tuneVals.sculptShape;
+      const w = len*(0.54 - 0.06*(lenPct-1))*scale;
+      const h = len*0.94*scale*lenPct;
+      const pushOut = len*(0.10 + 0.30*(lenPct-1));
+      ctx.save();
+      ctx.translate(tx+Math.cos(ang)*pushOut, ty+Math.sin(ang)*pushOut);
+      ctx.rotate(ang+Math.PI/2);
+      nailPath(w,h,shape);
+      ctx.clip();
+      ctx.globalAlpha = alpha;
+      paintLook(ctx,w,h,currentColor,hi*5+fi);
+      ctx.globalAlpha = alpha*0.3;
+      const rim = ctx.createRadialGradient(0,0,Math.min(w,h)*0.35, 0,0,Math.max(w,h)*0.75);
+      rim.addColorStop(0,'rgba(0,0,0,0)');
+      rim.addColorStop(1,'rgba(60,30,20,.5)');
+      ctx.fillStyle=rim; ctx.fillRect(-w,-h,w*2,h*2);
+      if(gloss>0.05 && !flatLook()){
+        ctx.globalAlpha = alpha*gloss*0.6;
+        ctx.fillStyle='#fff';
+        ctx.beginPath();
+        ctx.ellipse(-w*0.18,-h*0.20,w*0.15,h*0.26,-0.3,0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = alpha*gloss*0.28;
+        ctx.beginPath();
+        ctx.ellipse(w*0.2,h*0.05,w*0.09,h*0.15,0.2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+  });
+}
+function flatLook(){ const lk=LOOKS[currentLook]; return !!(lk && lk.flat); }
+function nailPath(w,h,shape){
+  ctx.beginPath();
+  const base = h*0.28;
+  ctx.moveTo(-w/2, base);
+  switch(shape){
+    case 'round2':
+      ctx.bezierCurveTo(-w/2, h*0.02, -w*0.34, -h*0.42, 0, -h*0.46);
+      ctx.bezierCurveTo(w*0.34, -h*0.42, w/2, h*0.02, w/2, base);
+      break;
+    case 'almond':
+      ctx.bezierCurveTo(-w/2, -h*0.08, -w*0.20, -h*0.52, 0, -h*0.58);
+      ctx.bezierCurveTo(w*0.20, -h*0.52, w/2, -h*0.08, w/2, base);
+      break;
+    case 'square':
+      ctx.bezierCurveTo(-w/2, -h*0.10, -w/2, -h*0.42, -w/2, -h*0.50);
+      ctx.lineTo(w/2, -h*0.50);
+      ctx.bezierCurveTo(w/2, -h*0.42, w/2, -h*0.10, w/2, base);
+      break;
+    case 'coffin':
+      ctx.bezierCurveTo(-w/2, -h*0.05, -w*0.30, -h*0.40, -w*0.22, -h*0.50);
+      ctx.lineTo(w*0.22, -h*0.50);
+      ctx.bezierCurveTo(w*0.30, -h*0.40, w/2, -h*0.05, w/2, base);
+      break;
+    default:
+      ctx.bezierCurveTo(-w/2, -h*0.26, -w*0.32, -h*0.50, 0, -h*0.50);
+      ctx.bezierCurveTo(w*0.32, -h*0.50, w/2, -h*0.26, w/2, base);
+  }
+  ctx.bezierCurveTo(w/2, h*0.48, w*0.28, h*0.56, 0, h*0.56);
+  ctx.bezierCurveTo(-w*0.28, h*0.56, -w/2, h*0.48, -w/2, base);
+  ctx.closePath();
+}
+
+/* ================= 光の軌跡（アート表現） ================= */
+let trailOn = true;
+let trailIntensity = 55;
+let trailHue = null; // null = ネイルカラーに追従
+const TRAIL_LIFE = 620; // ms
+const trails = []; // {x,y,born,color}
+let lastTrailPos = null;
+
+function currentTrailColor(){
+  return trailHue || currentColor;
+}
+function recordTrails(){
+  if(!trailOn || !smoothed.length) return;
+  const now = performance.now();
+  const col = currentTrailColor();
+  smoothed.forEach(lm=>{
+    FINGERS.forEach(([tip])=>{
+      const [x,y] = lmXY(lm[tip]);
+      const key = x+','+y;
+      const last = trails.length ? trails[trails.length-1] : null;
+      if(last && Math.hypot(x-last.x, y-last.y) < 3) return;
+      trails.push({x,y,born:now,color:col});
+    });
+  });
+  const cutoff = now - TRAIL_LIFE;
+  while(trails.length && trails[0].born < cutoff) trails.shift();
+  if(trails.length > 420) trails.splice(0, trails.length-420);
+}
+function drawTrails(){
+  if(!trails.length) return;
+  const now = performance.now();
+  const strength = trailIntensity/100;
+  if(strength<=0) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  trails.forEach(pt=>{
+    const age = (now - pt.born)/TRAIL_LIFE;
+    if(age >= 1) return;
+    const life = 1-age;
+    const r = 4 + life*16;
+    const g = ctx.createRadialGradient(pt.x,pt.y,0, pt.x,pt.y,r);
+    const glow = shade(pt.color, 70);
+    g.addColorStop(0, hexA(glow, life*0.55*strength));
+    g.addColorStop(0.5, hexA(pt.color, life*0.28*strength));
+    g.addColorStop(1, hexA(pt.color, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(pt.x,pt.y,r,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+document.querySelectorAll('.swatch').forEach(()=>{}); // no-op placeholder for future
+function buildTrailSwatches(){
+  const row = $('trailSwatches');
+  row.innerHTML='';
+  const opts = [
+    {label:'ネイルカラーと同じ', val:null},
+    {label:'クリーム', val:'#f6e9da'},
+    {label:'ローズ', val:'#e8b8bb'},
+    {label:'セージ', val:'#b9c9b6'},
+    {label:'ラベンダー', val:'#c9bfe0'},
+  ];
+  opts.forEach(o=>{
+    const el = document.createElement('div');
+    el.className='swatch'+(trailHue===o.val?' active':'');
+    el.style.background = o.val || 'linear-gradient(135deg,#e8b8bb,#c9bfe0,#b9c9b6)';
+    el.title = o.label;
+    el.onclick = ()=>{
+      trailHue = o.val;
+      row.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+    };
+    row.appendChild(el);
+  });
+}
+$('trailSwitch').onclick = ()=>{
+  trailOn = !trailOn;
+  $('trailSwitch').classList.toggle('on', trailOn);
+  if(!trailOn) trails.length = 0;
+};
+$('trailIntensity').addEventListener('input', e=>{ trailIntensity = +e.target.value; });
+$('sculptLen').addEventListener('input', e=>{ tuneVals.sculptLen = +e.target.value; });
+
+/* ================= デザイン12種（2026年トレンド反映） ================= */
+function seeded(seed){ let s=seed*9301+49297; return ()=>{ s=(s*9301+49297)%233280; return s/233280; }; }
+function base(c,w,h,c1,c2){
+  const g = c.createLinearGradient(0,-h/2,0,h/2);
+  g.addColorStop(0,c1); g.addColorStop(1,c2);
+  c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+}
+function nudeBase(c,w,h,a){
+  const keep=c.globalAlpha; c.globalAlpha=keep*a;
+  base(c,w,h,'#f0dcd1','#e5c7b8'); c.globalAlpha=keep;
+}
+function heart(c,x,y,s){
+  c.save(); c.translate(x,y); c.scale(s,s);
+  c.beginPath();
+  c.moveTo(0,0.35);
+  c.bezierCurveTo(-1.1,-0.5,-0.45,-1.2,0,-0.5);
+  c.bezierCurveTo(0.45,-1.2,1.1,-0.5,0,0.35);
+  c.closePath(); c.fill(); c.restore();
+}
+function flower(c,x,y,r,col){
+  c.fillStyle=col;
+  for(let i=0;i<5;i++){
+    const a=i*Math.PI*2/5 - Math.PI/2;
+    c.beginPath();
+    c.ellipse(x+Math.cos(a)*r*0.72, y+Math.sin(a)*r*0.72, r*0.5, r*0.36, a, 0, Math.PI*2);
+    c.fill();
+  }
+  c.fillStyle='#f3d98b';
+  c.beginPath(); c.arc(x,y,r*0.3,0,Math.PI*2); c.fill();
+}
+const LOOKS = {
+  onecolor:{name:'ワンカラー', paint(c,w,h,col){ base(c,w,h,shade(col,18),shade(col,-14)); }},
+  churun:{name:'ちゅるん', paint(c,w,h,col){
+    nudeBase(c,w,h,.5);
+    const keep=c.globalAlpha; c.globalAlpha=keep*.72;
+    base(c,w,h,shade(col,30),shade(col,-2));
+    c.globalAlpha=keep*.5;
+    const g=c.createRadialGradient(0,h*0.05,0, 0,h*0.05,w*0.75);
+    g.addColorStop(0,shade(col,-10)); g.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    c.globalAlpha=keep;
+  }},
+  mizuhikari:{name:'水光マグネット', paint(c,w,h,col,seed){
+    base(c,w,h,shade(col,-18),shade(col,-38));
+    const g=c.createLinearGradient(-w*0.45,h*0.35,w*0.45,-h*0.45);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(.48,hexA(shade(col,85),.9));
+    g.addColorStop(.55,hexA(shade(col,110),.7));
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    const rnd=seeded(seed+11);
+    c.fillStyle='rgba(255,255,255,.9)';
+    for(let i=0;i<14;i++){
+      const x=(rnd()-0.5)*w, y=(rnd()-0.5)*h;
+      c.beginPath(); c.arc(x,y,w*0.014+rnd()*w*0.012,0,Math.PI*2); c.fill();
+    }
+  }},
+  flash:{name:'フラッシュ', paint(c,w,h,col,seed){
+    base(c,w,h,shade(col,-5),shade(col,-25));
+    const rnd=seeded(seed+29);
+    for(let i=0;i<60;i++){
+      const x=(rnd()-0.5)*w, y=(rnd()-0.5)*h*1.1, r=rnd()*w*0.03+w*0.008;
+      const t=rnd();
+      c.fillStyle = t>0.66 ? 'rgba(255,255,255,.95)' : t>0.33 ? hexA(shade(col,90),.85) : 'rgba(230,225,255,.7)';
+      c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+    }
+  }},
+  chrome:{name:'クロム', paint(c,w,h,col){
+    const g=c.createLinearGradient(-w/2,0,w/2,0);
+    g.addColorStop(0,shade(col,-30)); g.addColorStop(.22,shade(col,70));
+    g.addColorStop(.45,shade(col,-10)); g.addColorStop(.62,shade(col,105));
+    g.addColorStop(.82,shade(col,-24)); g.addColorStop(1,shade(col,35));
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    c.fillStyle='rgba(255,255,255,.55)';
+    c.fillRect(-w*0.06,-h/2,w*0.05,h*1.2);
+  }},
+  wanghong:{name:'ワンホン', paint(c,w,h,col,seed){
+    nudeBase(c,w,h,.85);
+    c.fillStyle=shade(col,8);
+    c.beginPath();
+    c.moveTo(-w/2,-h*0.10); c.quadraticCurveTo(0,-h*0.32,w/2,-h*0.10);
+    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
+    c.fillStyle='rgba(255,255,255,.95)';
+    c.beginPath(); c.arc(-w*0.12,h*0.10,w*0.055,0,Math.PI*2); c.fill();
+    c.fillStyle='#e8c987';
+    c.beginPath(); c.arc(w*0.02,h*0.16,w*0.04,0,Math.PI*2); c.fill();
+    c.fillStyle=hexA(col,.9);
+    heart(c, w*0.14, h*0.02, w*0.09);
+  }},
+  french:{name:'フレンチ', paint(c,w,h,col){
+    nudeBase(c,w,h,.45);
+    c.fillStyle=shade(col,5);
+    c.beginPath();
+    c.moveTo(-w/2,-h*0.14); c.quadraticCurveTo(0,-h*0.34,w/2,-h*0.14);
+    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
+  }},
+  grad:{name:'グラデ', paint(c,w,h,col){
+    nudeBase(c,w,h,.4);
+    const g=c.createLinearGradient(0,h/2,0,-h/2);
+    g.addColorStop(0,'rgba(240,220,209,.25)');
+    g.addColorStop(.42,hexA(col,.7));
+    g.addColorStop(1,shade(col,-10));
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+  }},
+  flower:{name:'フラワー', paint(c,w,h,col,seed){
+    base(c,w,h,'#fdf7f1','#f2e4d9');
+    const rnd=seeded(seed+17);
+    flower(c, -w*0.16, -h*0.05, w*0.22, shade(col,10));
+    flower(c, w*0.2, h*0.24, w*0.15, shade(col,35));
+    c.fillStyle=hexA(shade(col,-15),.8);
+    for(let i=0;i<4;i++){
+      c.beginPath();
+      c.arc((rnd()-0.5)*w*0.9,(rnd()-0.5)*h*0.9,w*0.02,0,Math.PI*2); c.fill();
+    }
+  }},
+  dot:{name:'レトロドット', paint(c,w,h,col){
+    base(c,w,h,'#fbf3ea','#f1e2d5');
+    c.fillStyle=shade(col,0);
+    const r=w*0.085;
+    for(let row=0;row<4;row++){
+      for(let k=0;k<3;k++){
+        const x=(k-1)*w*0.32 + (row%2? w*0.16:0);
+        const y=(row-1.5)*h*0.26;
+        c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+      }
+    }
+  }},
+  aurora:{name:'オーロラ', paint(c,w,h,col){
+    nudeBase(c,w,h,.55);
+    const keep=c.globalAlpha;
+    const veils=[['#ffd9e8',-w*0.2,-h*0.2],['#d3e6ff',w*0.18,h*0.05],['#dff5e1',-w*0.05,h*0.3],[shade(col,55),w*0.1,-h*0.3]];
+    veils.forEach(([vc,x,y])=>{
+      c.globalAlpha=keep*.4;
+      const g=c.createRadialGradient(x,y,0,x,y,w*0.7);
+      g.addColorStop(0,vc); g.addColorStop(1,'rgba(255,255,255,0)');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    });
+    c.globalAlpha=keep;
+  }},
+  milk:{name:'ミルキー', paint(c,w,h,col){
+    base(c,w,h,'#fdf8f3','#f4e6dc');
+    const keep=c.globalAlpha; c.globalAlpha=keep*.45;
+    base(c,w,h,shade(col,50),shade(col,22));
+    c.globalAlpha=keep;
+  }},
+
+  sheer:{name:'すけ感', paint(c,w,h,col){
+    nudeBase(c,w,h,.35);
+    const k=c.globalAlpha; c.globalAlpha=k*.55;
+    base(c,w,h,shade(col,40),shade(col,10)); c.globalAlpha=k;
+  }},
+  frenchmirror:{name:'ミラーフレンチ', paint(c,w,h,col){
+    nudeBase(c,w,h,.5);
+    const g=c.createLinearGradient(-w/2,0,w/2,0);
+    g.addColorStop(0,shade(col,-28)); g.addColorStop(.28,shade(col,85));
+    g.addColorStop(.55,shade(col,-6)); g.addColorStop(.78,shade(col,95)); g.addColorStop(1,shade(col,20));
+    c.save();
+    c.beginPath(); c.moveTo(-w/2,-h*0.13); c.quadraticCurveTo(0,-h*0.36,w/2,-h*0.13);
+    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.clip();
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
+    c.restore();
+  }},
+  pearl:{name:'パール', paint(c,w,h,col){
+    base(c,w,h,shade(col,48),shade(col,10));
+    const g=c.createRadialGradient(-w*0.18,-h*0.22,0,-w*0.18,-h*0.22,w*0.95);
+    g.addColorStop(0,'rgba(255,255,255,.7)');
+    g.addColorStop(.55,'rgba(255,246,250,.25)');
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    const rnd=seeded(61);
+    for(let i=0;i<26;i++){
+      c.fillStyle='rgba(255,255,255,'+(0.22+rnd()*0.38).toFixed(2)+')';
+      c.beginPath(); c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*0.012+rnd()*w*0.010,0,Math.PI*2); c.fill();
+    }
+  }},
+  stardust:{name:'スターダスト', paint(c,w,h,col){
+    nudeBase(c,w,h,.5);
+    const g=c.createLinearGradient(0,h/2,0,-h/2);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(.5,hexA(shade(col,20),.55));
+    g.addColorStop(1,shade(col,-4));
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    const rnd=seeded(53);
+    for(let i=0;i<95;i++){
+      const y=(rnd()-.5)*h*1.1;
+      const t=(h/2-y)/h;
+      if(rnd()>t*0.95+0.05) continue;
+      c.fillStyle = rnd()>.5 ? 'rgba(255,255,255,.9)' : hexA(shade(col,75),.8);
+      c.beginPath(); c.arc((rnd()-.5)*w, y, w*0.006+rnd()*w*0.015,0,Math.PI*2); c.fill();
+    }
+  }},
+  matte:{name:'マット', flat:true, paint(c,w,h,col){
+    c.fillStyle=shade(col,-4); c.fillRect(-w/2,-h/2,w,h*1.2);
+    const k=c.globalAlpha; c.globalAlpha=k*.16;
+    c.fillStyle='#efe7e0'; c.fillRect(-w/2,-h/2,w,h*1.2); c.globalAlpha=k;
+  }},
+  velvet:{name:'ベルベット', flat:true, paint(c,w,h,col){
+    c.fillStyle=shade(col,-26); c.fillRect(-w/2,-h/2,w,h*1.2);
+    const g=c.createRadialGradient(0,0,Math.min(w,h)*0.2,0,0,Math.max(w,h)*0.8);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(1,hexA(shade(col,55),.42));
+    c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+  }},
+  marble:{name:'大理石', paint(c,w,h,col){
+    base(c,w,h,'#fdfaf7','#f1ebe4');
+    const vein=(seed,color,wid,n)=>{
+      const rnd=seeded(seed); c.strokeStyle=color; c.lineCap='round'; c.lineJoin='round';
+      for(let i=0;i<n;i++){
+        c.lineWidth=wid*(0.5+rnd());
+        let x=(rnd()-.5)*w*1.2, y=-h*0.6;
+        c.beginPath(); c.moveTo(x,y);
+        for(let k2=0;k2<6;k2++){ x+=(rnd()-.5)*w*0.5; y+=h*0.22; c.lineTo(x,y); }
+        c.stroke();
+      }
+    };
+    vein(7,  hexA(shade(col,-35),.45), w*0.030, 3);
+    vein(23, hexA(shade(col,-10),.28), w*0.018, 4);
+    vein(41, 'rgba(200,168,106,.75)',  w*0.010, 2);
+  }},
+  nuance:{name:'ニュアンス', paint(c,w,h,col){
+    base(c,w,h,shade(col,44),shade(col,14));
+    const rnd=seeded(13);
+    for(let i=0;i<3;i++){
+      const x=(rnd()-.5)*w*0.8, y=(rnd()-.5)*h*0.8, r=w*(0.30+rnd()*0.35);
+      const g=c.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,hexA(shade(col,-28),.55)); g.addColorStop(1,'rgba(255,255,255,0)');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    }
+    c.strokeStyle='rgba(214,178,102,.9)'; c.lineWidth=w*0.022; c.lineCap='round';
+    c.beginPath(); c.moveTo(-w*0.30,h*0.06); c.quadraticCurveTo(0,-h*0.12,w*0.28,h*0.20); c.stroke();
+  }},
+  bekko:{name:'べっ甲', paint(c,w,h,col){
+    base(c,w,h,'#eabf72','#b8752f');
+    const rnd=seeded(7);
+    for(let i=0;i<9;i++){
+      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(0.13+rnd()*0.28);
+      const g=c.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,'rgba(74,38,12,.85)');
+      g.addColorStop(.6,'rgba(120,64,20,.32)');
+      g.addColorStop(1,'rgba(120,64,20,0)');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    }
+    const k=c.globalAlpha; c.globalAlpha=k*.25;
+    base(c,w,h,shade(col,30),shade(col,-8)); c.globalAlpha=k;
+  }},
+  check:{name:'チェック', paint(c,w,h,col){
+    base(c,w,h,'#fdf7f0','#f4e8dc');
+    const k=c.globalAlpha;
+    c.globalAlpha=k*.45; c.fillStyle=shade(col,20);
+    for(let i=-3;i<=3;i++){
+      c.fillRect(i*w*0.24-w*0.05,-h*0.6,w*0.10,h*1.2);
+      c.fillRect(-w/2,i*h*0.22-h*0.03,w,h*0.075);
+    }
+    c.globalAlpha=k*.85; c.fillStyle=shade(col,-16);
+    for(let i=-3;i<=3;i++){
+      c.fillRect(i*w*0.24-w*0.010,-h*0.6,w*0.020,h*1.2);
+      c.fillRect(-w/2,i*h*0.22-h*0.006,w,h*0.013);
+    }
+    c.globalAlpha=k;
+  }},
+  line:{name:'ワイヤー', paint(c,w,h,col){
+    nudeBase(c,w,h,.75);
+    const k=c.globalAlpha; c.globalAlpha=k*.5;
+    base(c,w,h,shade(col,50),shade(col,26)); c.globalAlpha=k;
+    c.strokeStyle='#d8b46a'; c.lineWidth=w*0.022; c.lineCap='round';
+    c.beginPath(); c.moveTo(-w*0.34,-h*0.24);
+    c.bezierCurveTo(w*0.10,-h*0.05,-w*0.20,h*0.16,w*0.32,h*0.30); c.stroke();
+    c.beginPath(); c.moveTo(-w*0.30,h*0.06);
+    c.quadraticCurveTo(0,h*0.30,w*0.30,-h*0.02); c.stroke();
+    c.fillStyle='#fff'; c.beginPath(); c.arc(w*0.10,-h*0.02,w*0.045,0,Math.PI*2); c.fill();
+  }},
+  shell:{name:'シェル', paint(c,w,h,col){
+    base(c,w,h,shade(col,52),shade(col,20));
+    const rnd=seeded(31);
+    for(let i=0;i<16;i++){
+      const x=(rnd()-.5)*w*0.95, y=(rnd()-.5)*h, r=w*(0.07+rnd()*0.14), a=rnd()*Math.PI;
+      c.save(); c.translate(x,y); c.rotate(a);
+      const g=c.createLinearGradient(-r,0,r,0);
+      const pal=['#ffd9ea','#d7ecff','#e5ffe9','#fff2cf'][Math.floor(rnd()*4)];
+      g.addColorStop(0,'rgba(255,255,255,.9)');
+      g.addColorStop(.5,pal);
+      g.addColorStop(1,'rgba(255,255,255,.25)');
+      c.fillStyle=g; c.beginPath(); c.ellipse(0,0,r,r*0.6,0,0,Math.PI*2); c.fill();
+      c.restore();
+    }
+  }},
+};
+
+/* ================= マイデザイン（自作を乗せる） ================= */
+const customLooks = [];   // {name, img}
+const DESIGN_KEY = 'tsuya.designs';
+(function loadSavedDesigns(){
+  let arr=[]; try{ arr=JSON.parse(localStorage.getItem(DESIGN_KEY)||'[]'); }catch(e){}
+  arr.forEach(d=>{
+    const img=new Image();
+    img.onload=()=>{ try{ buildLooks(); }catch(e){} };
+    img.src=d.data;
+    customLooks.push({name:d.name, img});
+  });
+})();
+function paintLook(c,w,h,col,seed){ paintByKey(c,currentLook,w,h,col,seed); }
+function paintByKey(c,key,w,h,col,seed){
+  if(key.startsWith('custom:')){
+    const cl = customLooks[+key.slice(7)];
+    if(cl) drawCover(c, cl.img, w, h);
+    return;
+  }
+  const lk = LOOKS[key];
+  lk.paint(c,w,h,col,seed);
+}
+function drawCover(c,img,w,h){
+  const H = h*1.2;
+  const sc = Math.max(w/img.width, H/img.height);
+  c.drawImage(img, -img.width*sc/2, -h/2 + (H-img.height*sc)/2, img.width*sc, img.height*sc);
+}
+function addCustomLook(img, name){
+  customLooks.push({name: name || 'マイデザイン'+(customLooks.length+1), img});
+  currentLook = 'custom:' + (customLooks.length-1);
+  buildLooks();
+}
+$('designInput').addEventListener('change', async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const img=await loadImage(file);
+  addCustomLook(img, file.name.replace(/\.[^.]+$/,'').slice(0,8));
+  e.target.value='';
+});
+
+/* ルックサムネ */
 function buildLooks(){
-  const row = $('looksRow'); row.innerHTML='';
-  const entries = [...LOOK_KEYS.map(k=>[k, LOOKS[k].name]), ...customLooks.map((cl,i)=>['custom:'+i, cl.name])];
-  entries.forEach(([key,name])=>{
+  const row = $('looksRow');
+  row.innerHTML='';
+  const entries = [
+    ...Object.entries(LOOKS),
+    ...customLooks.map((cl,i)=>['custom:'+i, cl]),
+  ];
+  entries.forEach(([key,look])=>{
     const div=document.createElement('div');
-    div.className='look'+(key===currentLook?' active':''); div.dataset.key=key;
-    const cv=document.createElement('canvas'); cv.width=100; cv.height=128; div.appendChild(cv);
-    const sp=document.createElement('span'); sp.textContent=name; div.appendChild(sp);
+    div.className='look'+(key===currentLook?' active':'');
+    div.dataset.key=key;
+    const cv=document.createElement('canvas'); cv.width=104; cv.height=132;
+    div.appendChild(cv);
+    const sp=document.createElement('span'); sp.textContent=look.name; div.appendChild(sp);
     div.onclick=()=>{
       currentLook=key;
       row.querySelectorAll('.look').forEach(x=>x.classList.remove('active'));
       div.classList.add('active');
+      refreshThumbs();
     };
     row.appendChild(div);
   });
-  if(customLooks.length < MAX_CUSTOM){
-    [['✎ 描く', ()=>openEditor()], ['＋ 画像', ()=>$('designInput').click()]].forEach(([label,fn])=>{
-      const div=document.createElement('div'); div.className='look addtile';
-      const box=document.createElement('div'); box.className='addbox'; box.textContent=label; div.appendChild(box);
-      const sp=document.createElement('span'); sp.textContent='マイデザイン'; div.appendChild(sp);
-      div.onclick=fn; row.appendChild(div);
-    });
-  }
+  [['✎ 描く', ()=>openEditor()], ['＋ 画像', ()=>$('designInput').click()]].forEach(([label,fn])=>{
+    const div=document.createElement('div');
+    div.className='look addtile';
+    const box=document.createElement('div'); box.className='addbox'; box.textContent=label;
+    div.appendChild(box);
+    const sp=document.createElement('span'); sp.textContent='マイデザイン'; div.appendChild(sp);
+    div.onclick=fn;
+    row.appendChild(div);
+  });
   refreshThumbs();
 }
 function refreshThumbs(){
-  $('looksRow').querySelectorAll('.look').forEach(div=>{
+  const row=$('looksRow');
+  [...row.children].forEach(div=>{
     const key=div.dataset.key; if(!key) return;
     const cv=div.querySelector('canvas'); const c=cv.getContext('2d');
-    const [sx,sy,sw,sh] = cellRect(slotOf(key));
-    c.clearRect(0,0,cv.width,cv.height);
-    c.drawImage(atlasCanvas, sx,sy,sw,sh, 0,0,cv.width,cv.height);
-    c.globalAlpha=.32; c.fillStyle='#fff';
-    c.beginPath(); c.ellipse(cv.width*0.34, cv.height*0.30, cv.width*0.15, cv.height*0.22, -0.3, 0, Math.PI*2); c.fill();
-    c.globalAlpha=1;
+    c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,104,132);
+    c.translate(52,66);
+    const w=88,hh=120;
+    c.save();
+    paintByKey(c,key,w,hh,currentColor,Object.keys(LOOKS).indexOf(key));
+    c.globalAlpha=.35; c.fillStyle='#fff';
+    c.beginPath(); c.ellipse(-w*0.18,-hh*0.2,w*0.15,hh*0.24,-0.3,0,Math.PI*2); c.fill();
+    c.restore();
   });
 }
-/* カラーピッカーのドラッグ中は毎フレーム呼ばれるので1フレームにまとめる */
-let atlasQueued = false;
-function refreshDesigns(){
-  if(atlasQueued) return;
-  atlasQueued = true;
-  requestAnimationFrame(()=>{ atlasQueued=false; rebuildAtlas(); refreshThumbs(); });
-}
 
-function addCustomLook(img, name){
-  if(customLooks.length >= MAX_CUSTOM) customLooks.shift();
-  customLooks.push({name: name || 'マイ'+(customLooks.length+1), img});
-  currentLook = 'custom:'+(customLooks.length-1);
-  refreshDesigns(); buildLooks();
+/* ================= お絵かきエディタ ================= */
+const ed = { canvas:null, ctx:null, drawing:false, size:14, erase:false };
+function openEditor(){
+  $('editor').style.display='flex';
+  if(!ed.canvas){
+    ed.canvas=$('edCanvas'); ed.ctx=ed.canvas.getContext('2d');
+    const c=ed.ctx;
+    edClear();
+    const pos=ev=>{
+      const r=ed.canvas.getBoundingClientRect();
+      const p=ev.touches? ev.touches[0]: ev;
+      return [(p.clientX-r.left)*ed.canvas.width/r.width, (p.clientY-r.top)*ed.canvas.height/r.height];
+    };
+    const start=ev=>{ ed.drawing=true; const [x,y]=pos(ev); stroke(x,y,true); ev.preventDefault(); };
+    const move=ev=>{ if(!ed.drawing) return; const [x,y]=pos(ev); stroke(x,y,false); ev.preventDefault(); };
+    const end=()=>{ ed.drawing=false; };
+    function stroke(x,y,first){
+      c.globalCompositeOperation = ed.erase ? 'destination-out' : 'source-over';
+      c.strokeStyle=currentColor; c.fillStyle=currentColor;
+      c.lineWidth=ed.size; c.lineCap='round'; c.lineJoin='round';
+      if(first){ c.beginPath(); c.arc(x,y,ed.size/2,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(x,y); }
+      else { c.lineTo(x,y); c.stroke(); }
+    }
+    ed.canvas.addEventListener('pointerdown',start);
+    ed.canvas.addEventListener('pointermove',move);
+    window.addEventListener('pointerup',end);
+    $('edSize').addEventListener('input',e=>{ ed.size=+e.target.value; });
+    $('edPen').onclick=()=>{ ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
+    $('edErase').onclick=()=>{ ed.erase=true; $('edErase').classList.add('on'); $('edPen').classList.remove('on'); };
+    $('edClear').onclick=edClear;
+    $('edCancel').onclick=()=>{ $('editor').style.display='none'; };
+    $('edDone').onclick=()=>{
+      const out=document.createElement('canvas');
+      out.width=ed.canvas.width; out.height=ed.canvas.height;
+      const oc=out.getContext('2d');
+      const g=oc.createLinearGradient(0,0,0,out.height);
+      g.addColorStop(0,'#f4e2d7'); g.addColorStop(1,'#eccfc0');
+      oc.fillStyle=g; oc.fillRect(0,0,out.width,out.height);
+      oc.drawImage(ed.canvas,0,0);
+      addCustomLook(out);
+      $('editor').style.display='none';
+    };
+  }
+  const sw=$('edSwatches'); sw.innerHTML='';
+  currentPalette.forEach(col=>{
+    const s=document.createElement('div');
+    s.className='edsw'; s.style.background=col;
+    s.onclick=()=>{ currentColor=col; ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
+    sw.appendChild(s);
+  });
 }
-$('designInput').addEventListener('change', async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  addCustomLook(await loadImage(f), f.name.replace(/\.[^.]+$/,'').slice(0,6));
-  e.target.value='';
-});
+function edClear(){ ed.ctx.clearRect(0,0,ed.canvas.width,ed.canvas.height); }
 
-/* カラー */
-const defaultPalette=['#b76e79','#f3d98b','#f0bcc8','#b9d2e4','#c47a5a','#8b6a55',
-                      '#9d7a8c','#b23a48','#cfe3d4','#c5b6dc','#e8c9ba','#5d6a80'];
-let currentPalette=[];
+/* ================= カラー（トレンド色入り） ================= */
+const defaultPalette=[
+  '#b76e79', /* ローズ */        '#f3d98b', /* バターイエロー */
+  '#f0bcc8', /* パステルピンク */ '#b9d2e4', /* パステルブルー */
+  '#c47a5a', /* テラコッタ */     '#8b6a55', /* モカ */
+  '#9d7a8c', /* モーヴ */        '#b23a48', /* クラシックレッド */
+  '#cfe3d4', /* ミント */        '#c5b6dc', /* ラベンダー */
+  '#e8c9ba', /* ヌード */        '#5d6a80', /* スモーキーブルー */
+];
+let currentPalette = [];
 function renderChips(pal){
-  currentPalette = pal.slice();
+  currentPalette = pal;
   const box=$('chips'); box.innerHTML='';
   pal.forEach((col,i)=>{
     const el=document.createElement('div');
@@ -1618,150 +1214,80 @@ function renderChips(pal){
     el.onclick=()=>{
       currentColor=col;
       box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active'); refreshDesigns();
+      el.classList.add('active');
+      refreshThumbs();
     };
     box.appendChild(el);
     if(i===0) currentColor=col;
   });
-  // カラーピッカーは input 自体をチップとして押させる（iOSでproxy clickが効かないため）
   const pick=document.createElement('input');
-  pick.type='color'; pick.className='chip'; pick.value=currentColor;
+  pick.type='color'; pick.className='chip pick'; pick.value=currentColor;
   pick.addEventListener('input', e=>{
-    currentColor = e.target.value;
+    currentColor=e.target.value;
     box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-    pick.classList.add('active'); refreshDesigns();
+    pick.classList.add('active');
+    refreshThumbs();
   });
   box.appendChild(pick);
-  refreshDesigns();
+  refreshThumbs();
 }
-$('inspoLink').onclick = ()=>$('inspoInput').click();
-$('resetPalLink').onclick = ()=>{ renderChips(defaultPalette); $('note').textContent=''; };
 $('inspoInput').addEventListener('change', async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  renderChips(extractPalette(await loadImage(f), 12));
+  const file=e.target.files[0]; if(!file) return;
+  const img=await loadImage(file);
+  renderChips(extractPalette(img,12));
   $('note').textContent='この写真からもらった配色です。';
-  e.target.value='';
 });
 function extractPalette(img,n){
-  const s=80, c=document.createElement('canvas'); c.width=s; c.height=s;
-  const cc=c.getContext('2d', {willReadFrequently:true});
-  cc.drawImage(img,0,0,s,s);
-  const d=cc.getImageData(0,0,s,s).data, buckets={};
+  const c=document.createElement('canvas'); const s=80; c.width=s;c.height=s;
+  c.getContext('2d').drawImage(img,0,0,s,s);
+  const d=c.getContext('2d').getImageData(0,0,s,s).data;
+  const buckets={};
   for(let i=0;i<d.length;i+=4){
     const r=d[i],g=d[i+1],b=d[i+2];
     const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
-    if(mx-mn<18 && (mx>230||mx<40)) continue;
+    if(mx-mn<18&&(mx>230||mx<40)) continue;
     const k=`${r>>5}_${g>>5}_${b>>5}`;
-    (buckets[k] || (buckets[k]={r:0,g:0,b:0,c:0}));
-    buckets[k].r+=r; buckets[k].g+=g; buckets[k].b+=b; buckets[k].c++;
+    if(!buckets[k])buckets[k]={r:0,g:0,b:0,c:0};
+    buckets[k].r+=r;buckets[k].g+=g;buckets[k].b+=b;buckets[k].c++;
   }
-  const out = Object.values(buckets).sort((a,b)=>b.c-a.c).slice(0,n).map(x=>rgb2hex(x.r/x.c,x.g/x.c,x.b/x.c));
-  return out.length ? out : defaultPalette;
+  return Object.values(buckets).sort((a,b)=>b.c-a.c).slice(0,n)
+    .map(x=>rgb2hex(x.r/x.c,x.g/x.c,x.b/x.c));
 }
-
-/* お絵かき */
-const ed = {canvas:null, ctx:null, drawing:false, size:14, erase:false};
-function openEditor(){
-  $('editor').style.display='flex';
-  if(!ed.canvas){
-    ed.canvas=$('edCanvas'); ed.ctx=ed.canvas.getContext('2d');
-    const c=ed.ctx; edClear();
-    const pos=ev=>{ const r=ed.canvas.getBoundingClientRect();
-      return [(ev.clientX-r.left)*ed.canvas.width/r.width, (ev.clientY-r.top)*ed.canvas.height/r.height]; };
-    function stroke(x,y,first){
-      c.globalCompositeOperation = ed.erase ? 'destination-out' : 'source-over';
-      c.strokeStyle=currentColor; c.fillStyle=currentColor;
-      c.lineWidth=ed.size; c.lineCap='round'; c.lineJoin='round';
-      if(first){ c.beginPath(); c.arc(x,y,ed.size/2,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(x,y); }
-      else{ c.lineTo(x,y); c.stroke(); }
-    }
-    ed.canvas.addEventListener('pointerdown', ev=>{ ed.drawing=true; ed.canvas.setPointerCapture(ev.pointerId);
-      const [x,y]=pos(ev); stroke(x,y,true); ev.preventDefault(); });
-    ed.canvas.addEventListener('pointermove', ev=>{ if(!ed.drawing) return; const [x,y]=pos(ev); stroke(x,y,false); ev.preventDefault(); });
-    window.addEventListener('pointerup', ()=>{ ed.drawing=false; });
-    $('edSize').addEventListener('input', e=>{ ed.size=+e.target.value; });
-    $('edPen').onclick=()=>{ ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
-    $('edErase').onclick=()=>{ ed.erase=true; $('edErase').classList.add('on'); $('edPen').classList.remove('on'); };
-    $('edClear').onclick=edClear;
-    $('edCancel').onclick=()=>{ $('editor').style.display='none'; };
-    $('edDone').onclick=()=>{
-      const out=document.createElement('canvas'); out.width=ed.canvas.width; out.height=ed.canvas.height;
-      const oc=out.getContext('2d');
-      const g=oc.createLinearGradient(0,0,0,out.height);
-      g.addColorStop(0,'#f4e2d7'); g.addColorStop(1,'#eccfc0');
-      oc.fillStyle=g; oc.fillRect(0,0,out.width,out.height);
-      oc.drawImage(ed.canvas,0,0);
-      addCustomLook(out); $('editor').style.display='none';
-    };
-  }
-  const sw=$('edSwatches'); sw.innerHTML='';
-  currentPalette.forEach(col=>{
-    const s=document.createElement('div'); s.className='edsw'; s.style.background=col;
-    s.onclick=()=>{ currentColor=col; ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
-    sw.appendChild(s);
-  });
+/* ================= ユーティリティ ================= */
+function rgb2hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('')}
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  return rgb2hex((n>>16)+amt,(n>>8&255)+amt,(n&255)+amt);
 }
-function edClear(){ ed.ctx.clearRect(0,0,ed.canvas.width,ed.canvas.height); }
-
-/* タブ・プリセット */
+function hexA(hex,a){
+  const n=parseInt(hex.slice(1),16);
+  return `rgba(${n>>16},${n>>8&255},${n&255},${a})`;
+}
+/* タブ */
 document.querySelectorAll('.tab').forEach(t=>{
   t.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tray').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active'); $('tray-'+t.dataset.t).classList.add('active');
+    t.classList.add('active');
+    $('tray-'+t.dataset.t).classList.add('active');
   };
 });
 document.querySelectorAll('.presetrow').forEach(row=>{
-  const key=row.dataset.key;
+  const key = row.dataset.key;
   row.querySelectorAll('.presetbtn').forEach(btn=>{
-    btn.onclick=()=>{
-      document.querySelectorAll(`.presetrow[data-key="${key}"] .presetbtn`).forEach(b=>b.classList.remove('active'));
+    btn.onclick = ()=>{
+      row.querySelectorAll('.presetbtn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      const v = btn.dataset.val;
-      if(key==='follow') followKey=v;
-      else if(key==='quality'){ qualityKey=v; viewW=0; resizeGL(); }
-      else if(key==='shape') tuneVals.shape=v;
-      else tuneVals[key]=+v;
+      const raw = btn.dataset.val;
+      tuneVals[key] = isNaN(+raw) ? raw : +raw;
     };
   });
 });
-$('lenSlider').addEventListener('input', e=>{ tuneVals.lenScale = +e.target.value/100; });
-$('widSlider').addEventListener('input', e=>{ tuneVals.widScale = +e.target.value/100; });
 
-/* 光 */
-function buildTrailSwatches(){
-  const row=$('trailSwatches'); row.innerHTML='';
-  [{l:'ネイルと同じ',v:null},{l:'クリーム',v:'#f6e9da'},{l:'ローズ',v:'#e8b8bb'},
-   {l:'セージ',v:'#b9c9b6'},{l:'ラベンダー',v:'#c9bfe0'}].forEach(o=>{
-    const el=document.createElement('div');
-    el.className='swatch'+(trailHue===o.v?' active':'');
-    el.style.background=o.v||'linear-gradient(135deg,#e8b8bb,#c9bfe0,#b9c9b6)';
-    el.title=o.l;
-    el.onclick=()=>{ trailHue=o.v; row.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
-    row.appendChild(el);
-  });
-}
-$('trailSwitch').onclick=()=>{ trailOn=!trailOn; $('trailSwitch').classList.toggle('on',trailOn); if(!trailOn) trails.length=0; };
-$('trailIntensity').addEventListener('input', e=>{ trailIntensity=+e.target.value; });
-let perfOn=false;
-$('perfSwitch').onclick=()=>{ perfOn=!perfOn; $('perfSwitch').classList.toggle('on',perfOn); $('perf').style.display=perfOn?'block':'none'; };
-
-window.addEventListener('resize', ()=>{ viewW=0; });
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) trails.length=0; });
-
-/* ---- 起動 ---- */
-try{
-  initGL();
-  renderChips(defaultPalette);
-  rebuildAtlas();
-  buildLooks();
-  buildTrailSwatches();
-  resizeGL();
-  loadModel();     // 「はじめる」を押す前から裏で読み込む
-}catch(e){
-  setStatus('初期化に失敗しました：'+e.message);
-  console.error(e);
-}
+if(window.__mpFailed) setStatus('AIモデルを読み込めませんでした。通信環境を確認して再読み込みしてください。');
+buildLooks();
+renderChips(defaultPalette);
+buildTrailSwatches();
 </script>
 </body>
 </html>
