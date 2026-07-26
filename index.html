@@ -261,8 +261,8 @@
         <button class="presetbtn" data-val="stiletto">スティレット</button>
       </div>
     </div>
-    <div class="minirow">長さ <input type="range" id="lenSlider" min="90" max="230" value="100"></div>
-    <div class="minirow">幅 <input type="range" id="widSlider" min="80" max="125" value="100"></div>
+    <div class="minirow">長さ <input type="range" id="lenSlider" min="55" max="230" value="100"></div>
+    <div class="minirow">幅 <input type="range" id="widSlider" min="70" max="135" value="100"></div>
     <p class="hikari-desc">長さを伸ばすと、根元は爪の付け根に留まったまま先端だけが伸びます（スカルプと同じ伸び方）。</p>
   </div>
 
@@ -319,7 +319,9 @@
 
 <input type="file" id="inspoInput" accept="image/*">
 <input type="file" id="designInput" accept="image/*">
-<video id="video" playsinline muted style="display:none"></video>
+<!-- display:none にすると requestVideoFrameCallback が発火しない端末があるため、極小で置く -->
+<video id="video" playsinline muted
+       style="position:fixed;top:0;left:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1"></video>
 
 <div id="editor">
   <div class="edcard">
@@ -724,7 +726,7 @@ void main(){
 
   float aa = fwidth(d)*1.1 + 0.004;      // discard より前に微分を取る
   float mask = 1.0 - smoothstep(1.0-aa, 1.0+aa, d);
-  float ring = (1.0 - smoothstep(1.0, 1.60, d)) * (1.0 - mask);
+  float ring = (1.0 - smoothstep(1.0, 1.30, d)) * (1.0 - mask);   // 接地影。強いとシール感が出る
   if(d > 1.75) discard;
 
   /* --- 立体的な法線 --- */
@@ -814,10 +816,10 @@ void main(){
   /* 根元をわずかに落とす */
   col *= 0.90 + 0.10*smoothstep(-1.0, -0.42, p.y);
 
-  /* 手の甲が向こうを向いたら消える */
-  float face = smoothstep(0.015, 0.30, NoV);
+  /* 表裏のフェードはJS側で計算済み。ここは真横のときの縁だけ落とす */
+  float face = smoothstep(0.0, 0.10, NoV);
   float a = mask * alpha * face;
-  float sa = ring * 0.30 * alpha * face;
+  float sa = ring * 0.11 * alpha * face;
 
   vec3 outc = mix(vec3(0.10,0.062,0.050), col, a/max(a+sa, 1e-4));
   o = vec4(outc, clamp(a+sa, 0.0, 1.0));
@@ -845,7 +847,7 @@ void main(){
   if(r >= 1.0) discard;
   float f = 1.0-r;
   float core = pow(f, 2.4);
-  o = vec4((v_col*0.55 + vec3(0.45))*core*v_life, 1.0);
+  o = vec4((v_col*0.74 + vec3(0.28))*core*v_life, 1.0);
 }`;
 
 let progVideo, progNail, progTrail;
@@ -979,7 +981,7 @@ async function loadModel(){
 /* ---- One Euro フィルタ + 遅延補正 ---- */
 const FOLLOW = {
   calm : {mc:0.9,  beta:14, pred:0,    dead:0.00030},
-  std  : {mc:1.7,  beta:27, pred:0.020, dead:0.00045},
+  std  : {mc:2.1,  beta:32, pred:0.026, dead:0.00045},
   quick: {mc:2.9,  beta:44, pred:0.042, dead:0.00060},
 };
 let followKey = 'std';
@@ -1054,12 +1056,13 @@ let liveTracks = [], lastHandT = 0;
    5. 幾何：指ごとの3D基底から爪の四角形を作る
    ===================================================================== */
 const FINGERS = [
-  // [tip, dip, pip, mcp, 幅係数, 長さ係数]
-  [4, 3, 2, 1, 0.80, 0.74],
-  [8, 7, 6, 5, 0.63, 0.80],
-  [12,11,10, 9, 0.63, 0.80],
-  [16,15,14,13, 0.61, 0.78],
-  [20,19,18,17, 0.59, 0.76],
+  /* [tip, dip, pip, mcp, 幅, 長さ]（幅と長さは |指先−第一関節| に対する割合）
+     実機の映像から採寸。爪は第一関節から指先までをほぼ覆う。 */
+  [4, 3, 2, 1, 0.78, 0.88],
+  [8, 7, 6, 5, 0.67, 0.96],
+  [12,11,10, 9, 0.67, 0.96],
+  [16,15,14,13, 0.65, 0.94],
+  [20,19,18,17, 0.62, 0.90],
 ];
 const PALM_BONES = [[0,5],[0,17],[5,17],[5,9],[9,13],[13,17],[0,9]];
 const SHAPES = {
@@ -1139,12 +1142,37 @@ function buildNails(predMs){
     }
     const s2d = (W && den > 1e-9) ? Math.abs(num/den) : 0;
 
-    /* 手の甲の向き／親指側（橈側）の向き */
+    /* --- 手の甲がどちら向きかを決める ---
+       MediaPipe の左右手判定は「鏡像の映像」前提の仕様で、背面カメラの生映像では逆に出る。
+       そこで左右手には頼らず、指の反りから直接求める：
+       指は手のひら側にしか曲がらないので、第2関節(PIP)は
+       付け根(MCP)と指先(TIP)を結んだ線より必ず甲側に出っ張る。 */
     let dorsal = [0,0,-1], radial = [1,0,0];
     if(W){
-      const v1 = V.sub(W[5], W[0]), v2 = V.sub(W[17], W[0]);
-      dorsal = V.norm(V.cross(v1, v2));
-      if(tr.handed === 'Left') dorsal = V.scale(dorsal, -1);
+      const raw = V.norm(V.cross(V.sub(W[5], W[0]), V.sub(W[17], W[0])));
+      let cue = [0,0,0];
+      for(let f=1; f<5; f++){
+        const [tp,,pp,mc] = FINGERS[f];
+        /* 第2関節は「付け根−指先」の線より甲側に出る */
+        cue[0] += W[pp].x - (W[mc].x + W[tp].x)/2;
+        cue[1] += W[pp].y - (W[mc].y + W[tp].y)/2;
+        cue[2] += W[pp].z - (W[mc].z + W[tp].z)/2;
+        /* 指の付け根（拳）も手首−第2関節の線より甲側に出る */
+        cue[0] += (W[mc].x - (W[0].x + W[pp].x)/2) * 0.6;
+        cue[1] += (W[mc].y - (W[0].y + W[pp].y)/2) * 0.6;
+        cue[2] += (W[mc].z - (W[0].z + W[pp].z)/2) * 0.6;
+      }
+      const cueLen = V.len(cue);
+      const ev = cueLen > 1e-5
+        ? V.dot(V.scale(cue, 1/cueLen), raw) * Math.min(1, cueLen/0.020)
+        : 0;
+      if(tr.dscore === undefined){
+        /* 初期値：反りが読めればそれを優先。読めない時だけ左右手判定に頼る。
+           MediaPipeの左右手判定は鏡像前提の仕様なので、生映像では逆に読む */
+        tr.dscore = Math.abs(ev) > 0.12 ? ev*2.2 : (tr.handed === 'Left' ? 0.6 : -0.6);
+      }
+      tr.dscore = clamp(tr.dscore + ev*0.40, -2.5, 2.5);
+      dorsal = tr.dscore >= 0 ? raw : V.scale(raw, -1);
       const rad = V.sub(W[5], W[17]);
       radial = V.norm(V.addm(rad, dorsal, -V.dot(rad, dorsal)));   // 甲の向きに直交させる
     }
@@ -1193,12 +1221,20 @@ function buildNails(predMs){
 
       /* 実寸（world）または画素での指節長 */
       const boneLen = (W && s2d>1e-6) ? V.len(V.sub(W[tip], W[dip])) : lenPx;
-      const halfLen = boneLen * 0.43 * lf * tuneVals.lenScale;
-      const halfWid = boneLen * 0.5  * wf * tuneVals.widScale;
-      const baseOff = boneLen * 0.16;
+      const halfLen = boneLen * lf * 0.5 * tuneVals.lenScale;
+      const halfWid = boneLen * wf * 0.5 * tuneVals.widScale;
+      const baseOff = boneLen * 0.02;   // 爪の根元は第一関節のすぐ先
 
-      /* 画面上の軸（奥行きで自然に縮む） */
-      const k = scale;
+      /* 倍率は指ごとに測り直す。
+         指先は手のひらより数cmカメラに近いので、手のひら基準の倍率だと爪が小さくなる。
+         その指の骨の「画面上の長さ」から直接出せば、見えている大きさと必ず一致する。 */
+      let k = scale;
+      if(W && s2d > 1e-6){
+        const tproj = Math.hypot(T[0], T[1]);       // 指が正面を向くほど 0 に近づく
+        if(tproj > 0.30){
+          k = clamp(lenPx / (boneLen * tproj), s2d*0.60, s2d*2.30);
+        }
+      }
       let axU = [S[0]*halfWid*k, S[1]*halfWid*k];
       let axV = [T[0]*halfLen*k, T[1]*halfLen*k];
       let cx = dipPx[0] + T[0]*baseOff*k + axV[0];
@@ -1213,8 +1249,8 @@ function buildNails(predMs){
         uX=-uX; vX=-vX; tU[0]=-tU[0]; tV[0]=-tV[0]; nN[0]=-nN[0];
       }
 
-      /* 手の甲が向こう向きならフェード */
-      const facing3 = clamp((-nN[2]-0.02)/0.30, 0, 1);
+      /* 手のひら側を見せた時だけ消す。真横あたりまでは残す */
+      const facing3 = clamp((-nN[2]+0.14)/0.40, 0, 1);
       if(facing3 <= 0.001) continue;
 
       const o = nailCount*NAIL_STRIDE;
@@ -1225,7 +1261,7 @@ function buildNails(predMs){
       nailData[o+9]=tV[0];  nailData[o+10]=tV[1]; nailData[o+11]=tV[2];
       nailData[o+12]=nN[0]; nailData[o+13]=nN[1]; nailData[o+14]=nN[2];
       nailData[o+15]=slotOf(currentLook);
-      nailData[o+16]=alphaBase;
+      nailData[o+16]=alphaBase*facing3;
       nailData[o+17]=gloss;
       nailData[o+18]=fi*3.7 + (nailCount>4?11:0);
       nailData[o+19]=sh.nx; nailData[o+20]=sh.ny; nailData[o+21]=sh.taper;
@@ -1268,7 +1304,7 @@ function packTrails(now){
     const o = n*TRAIL_STRIDE;
     trailData[o+0]=pt.x; trailData[o+1]=pt.y;
     trailData[o+2]=(4+life*18)*(viewW/520);
-    trailData[o+3]=life*life*strength*0.85;
+    trailData[o+3]=life*life*strength*0.60;
     trailData[o+4]=r; trailData[o+5]=g; trailData[o+6]=b; trailData[o+7]=0;
     n++;
   }
@@ -1386,21 +1422,35 @@ function detectOnce(){
     ingest(res, t1);
     if(!res.landmarks || !res.landmarks.length){ if(t1 - (liveTracks[0]?.seen||0) > 250) liveTracks = []; }
   }catch(e){ /* 単発の失敗は無視 */ }
-  /* 発熱対策：重いときは検出を間引く */
-  detectEvery = fpsAvg < 42 ? 2 : 1;
+  /* 発熱対策。ただし「検出そのものが重い時」だけ間引く
+     （描画が遅いだけの時に検出まで削ると、余計に追従が悪くなる） */
+  detectEvery = (detectLatency > 0.026 && fpsAvg < 38) ? 2 : 1;
+}
+/* 検出ループ。rVFC が発火しない端末があるので、止まったら rAF に切り替える */
+let rvfcAlive = 0, rafDetectOn = false;
+function startRafDetect(){
+  if(rafDetectOn) return;
+  rafDetectOn = true;
+  let acc = 0, last = performance.now();
+  const step = (now)=>{
+    requestAnimationFrame(step);
+    acc += now-last; last = now;
+    if(acc >= 30){ acc = 0; detectOnce(); }
+  };
+  requestAnimationFrame(step);
 }
 function scheduleDetect(){
   if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
-    const step = ()=>{ detectOnce(); video.requestVideoFrameCallback(step); };
+    const step = ()=>{ rvfcAlive = performance.now(); detectOnce(); video.requestVideoFrameCallback(step); };
     video.requestVideoFrameCallback(step);
+    rvfcAlive = performance.now();
+    /* 見張り：600ms 発火しなければ rAF に恒久フォールバック */
+    const watch = setInterval(()=>{
+      if(mode !== 'live') return;
+      if(performance.now() - rvfcAlive > 600){ clearInterval(watch); startRafDetect(); }
+    }, 400);
   }else{
-    let acc = 0, last = performance.now();
-    const step = (now)=>{
-      requestAnimationFrame(step);
-      acc += now-last; last = now;
-      if(acc >= 32){ acc = 0; detectOnce(); }
-    };
-    requestAnimationFrame(step);
+    startRafDetect();
   }
 }
 
