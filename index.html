@@ -744,7 +744,8 @@ void main(){
   /* --- 柄 --- */
   vec2 lp = clamp(p, vec2(-0.999), vec2(0.999));
   vec2 cell = vec2(mod(slot, u_grid.x), floor(slot/u_grid.x));
-  vec2 auv = (cell + vec2(lp.x*0.5+0.5, lp.y*0.5+0.5)) / u_grid;
+  /* 柄は上端が爪先（フレンチの色が乗る側）。幾何は +y が爪先なので上下を入れ替える */
+  vec2 auv = (cell + vec2(lp.x*0.5+0.5, 0.5-lp.y*0.5)) / u_grid;
   vec4 tex = texture(u_atlas, auv);
   vec3 albedo = mix(vec3(0.90,0.78,0.72), tex.rgb, tex.a);
 
@@ -981,7 +982,7 @@ async function loadModel(){
 /* ---- One Euro フィルタ + 遅延補正 ---- */
 const FOLLOW = {
   calm : {mc:0.9,  beta:14, pred:0,    dead:0.00030},
-  std  : {mc:2.1,  beta:32, pred:0.026, dead:0.00045},
+  std  : {mc:1.3,  beta:25, pred:0.010, dead:0.00040},   /* 旧版の設定にほぼ揃えた */
   quick: {mc:2.9,  beta:44, pred:0.042, dead:0.00060},
 };
 let followKey = 'std';
@@ -1056,13 +1057,13 @@ let liveTracks = [], lastHandT = 0;
    5. 幾何：指ごとの3D基底から爪の四角形を作る
    ===================================================================== */
 const FINGERS = [
-  /* [tip, dip, pip, mcp, 幅, 長さ]（幅と長さは |指先−第一関節| に対する割合）
-     実機の映像から採寸。爪は第一関節から指先までをほぼ覆う。 */
-  [4, 3, 2, 1, 0.78, 0.88],
-  [8, 7, 6, 5, 0.67, 0.96],
-  [12,11,10, 9, 0.67, 0.96],
-  [16,15,14,13, 0.65, 0.94],
-  [20,19,18,17, 0.62, 0.90],
+  /* [tip, dip, pip, mcp, 幅の微調整, 長さの微調整]
+     基準は旧版と同じ（幅 0.54 / 長さ 1.00 × 画面上の指節長）。ここは指ごとの微差だけ。 */
+  [4, 3, 2, 1, 1.08, 0.94],
+  [8, 7, 6, 5, 1.00, 1.00],
+  [12,11,10, 9, 1.00, 1.00],
+  [16,15,14,13, 0.98, 0.98],
+  [20,19,18,17, 0.94, 0.94],
 ];
 const PALM_BONES = [[0,5],[0,17],[5,17],[5,9],[9,13],[13,17],[0,9]];
 const SHAPES = {
@@ -1177,6 +1178,8 @@ function buildNails(predMs){
       radial = V.norm(V.addm(rad, dorsal, -V.dot(rad, dorsal)));   // 甲の向きに直交させる
     }
 
+    if(!tr.st) tr.st = [];
+
     for(let fi=0; fi<5 && nailCount<MAX_NAILS; fi++){
       const [tip,dip,pip,,wf,lf] = FINGERS[fi];
       const tipPx = P[tip], dipPx = P[dip];
@@ -1219,39 +1222,55 @@ function buildNails(predMs){
         scale = 1;
       }
 
-      /* 実寸（world）または画素での指節長 */
-      const boneLen = (W && s2d>1e-6) ? V.len(V.sub(W[tip], W[dip])) : lenPx;
-      const halfLen = boneLen * lf * 0.5 * tuneVals.lenScale;
-      const halfWid = boneLen * wf * 0.5 * tuneVals.widScale;
-      const baseOff = boneLen * 0.02;   // 爪の根元は第一関節のすぐ先
+      /* ================= 位置・大きさは2Dで決める =================
+         3Dのワールド座標は誤差が大きく、そこから寸法を作ると爪が脈打つ。
+         旧版と同じく「画面上の指先−第一関節」の2点だけで置き、
+         デッドゾーン付きで追従させる。3Dは陰影の計算だけに使う。 */
+      const rawAng = Math.atan2(tipPx[1]-dipPx[1], tipPx[0]-dipPx[0]);
+      const st = tr.st[fi] || (tr.st[fi] = {len:lenPx, ang:rawAng, n:null, s:null, t:null, face:0});
 
-      /* 倍率は指ごとに測り直す。
-         指先は手のひらより数cmカメラに近いので、手のひら基準の倍率だと爪が小さくなる。
-         その指の骨の「画面上の長さ」から直接出せば、見えている大きさと必ず一致する。 */
-      let k = scale;
-      if(W && s2d > 1e-6){
-        const tproj = Math.hypot(T[0], T[1]);       // 指が正面を向くほど 0 に近づく
-        if(tproj > 0.30){
-          k = clamp(lenPx / (boneLen * tproj), s2d*0.60, s2d*2.30);
-        }
-      }
-      let axU = [S[0]*halfWid*k, S[1]*halfWid*k];
-      let axV = [T[0]*halfLen*k, T[1]*halfLen*k];
-      let cx = dipPx[0] + T[0]*baseOff*k + axV[0];
-      let cy = dipPx[1] + T[1]*baseOff*k + axV[1];
+      const dLen = lenPx - st.len;
+      if(Math.abs(dLen) > st.len*0.030) st.len += dLen*Math.min(1, 0.14 + Math.abs(dLen)/st.len);
+      let dAng = ((rawAng - st.ang + Math.PI*3) % (Math.PI*2)) - Math.PI;
+      if(Math.abs(dAng) > 0.030) st.ang += dAng*Math.min(1, 0.18 + Math.abs(dAng)*2);
+      const len = st.len, ang = st.ang;
+
+      /* 3Dの向きはゆっくり追従させてから使う（陰影・表裏判定のみ） */
+      const lerpN = (a,b,f)=> a ? V.norm([a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f]) : b.slice();
+      st.n = lerpN(st.n, N, 0.22);
+      st.s = lerpN(st.s, S, 0.22);
+      st.t = lerpN(st.t, T, 0.22);
+
+      /* 旧版の比率：幅 0.54×指節長、長さ 1.00×指節長、根元は指先の 0.426 手前 */
+      const halfWid = len * 0.270 * wf * tuneVals.widScale;
+      const halfLen = len * 0.498 * lf * tuneVals.lenScale;
+      const dirX = Math.cos(ang), dirY = Math.sin(ang);
+      /* 根元を固定して先端だけ伸ばす（スカルプと同じ伸び方） */
+      const baseX = tipPx[0] - dirX*len*0.426*lf;
+      const baseY = tipPx[1] - dirY*len*0.426*lf;
+
+      /* 幅方向。3Dの横軸と向きを揃えておく（陰影の左右が反転しないように） */
+      let pX = -dirY, pY = dirX;
+      if(st.s && (st.s[0]*pX + st.s[1]*pY) < 0){ pX = -pX; pY = -pY; }
+
+      let axU = [pX*halfWid, pY*halfWid];
+      let axV = [dirX*halfLen, dirY*halfLen];
+      let cx = baseX + axV[0], cy = baseY + axV[1];
 
       /* キャンバス座標へ */
       let [ccx, ccy] = toCanvas(cx, cy);
       let uX = axU[0]*cover.sx, uY = axU[1]*cover.sx;
       let vX = axV[0]*cover.sx, vY = axV[1]*cover.sx;
-      let tU=[S[0],S[1],S[2]], tV=[T[0],T[1],T[2]], nN=[N[0],N[1],N[2]];
+      let tU=st.s.slice(), tV=st.t.slice(), nN=st.n.slice();
       if(mirrored()){
         uX=-uX; vX=-vX; tU[0]=-tU[0]; tV[0]=-tV[0]; nN[0]=-nN[0];
       }
 
-      /* 手のひら側を見せた時だけ消す。真横あたりまでは残す */
-      const facing3 = clamp((-nN[2]+0.14)/0.40, 0, 1);
-      if(facing3 <= 0.001) continue;
+      /* 表裏のフェードもゆっくり。1〜2フレームの誤判定で消えないように */
+      const faceTarget = clamp((-nN[2]+0.34)/0.44, 0, 1);
+      st.face += (faceTarget - st.face) * 0.14;
+      const facing3 = st.face;
+      if(facing3 <= 0.02) continue;
 
       const o = nailCount*NAIL_STRIDE;
       nailData[o+0]=ccx;  nailData[o+1]=ccy;
@@ -1463,7 +1482,7 @@ async function startCamera(){
     setStatus('カメラを準備しています…');
     if(stream) stream.getTracks().forEach(t=>t.stop());
     stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:facing, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30, max:30} },
+      video:{ facingMode:facing, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:60} },
       audio:false
     });
     video.srcObject = stream;
