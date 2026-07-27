@@ -638,6 +638,12 @@ async function loadImage(file){
 
 /* ================= 爪の描画 ================= */
 const FINGERS = [[4,3],[8,7],[12,11],[16,15],[20,19]];
+/* 手のひらの骨。どれか1本が奥行きでつぶれても、一番長いものは残る */
+const PALM_BONES = [[0,5],[0,17],[5,17],[0,9],[0,13],[9,17]];
+/* 手のひらの大きさに対する、指節の長さの目安（手を平らにした時の実測比の75%）。
+   爪の大きさの下限に使う。指先をカメラに向けると画面上の指節長がほぼ0になり、
+   そのままだと爪が消えてしまうため。 */
+const MIN_LEN_RATIO = [0.240, 0.173, 0.188, 0.173, 0.143];   /* 親指は常に角度がつくので下限を高めに */
 const nailState = [];
 function mirrored(){ return facing==='user'; }
 function lmXY(p){
@@ -650,9 +656,17 @@ function drawNails(){
   const gloss = tuneVals.gloss/100;
   const scale = tuneVals.nailSize/100;
   smoothed.forEach((lm, hi)=>{
+    /* この手が画面上でどれくらいの大きさか（指の向きに左右されない基準） */
+    let handRef = 0;
+    PALM_BONES.forEach(([a,b])=>{
+      const [ax,ay]=lmXY(lm[a]), [bx,by]=lmXY(lm[b]);
+      const d = Math.hypot(ax-bx, ay-by);
+      if(d > handRef) handRef = d;
+    });
     FINGERS.forEach(([tip,dip], fi)=>{
       const [tx,ty]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]);
-      const rawLen = Math.hypot(tx-dx,ty-dy);
+      /* 奥行きで指節がつぶれても、爪がここまでしか小さくならないようにする */
+      const rawLen = Math.max(Math.hypot(tx-dx,ty-dy), handRef*MIN_LEN_RATIO[fi]);
       if(rawLen < 4) return;
       const rawAng = Math.atan2(ty-dy,tx-dx);
       const st = nailState[hi*5+fi] || (nailState[hi*5+fi] = {len:rawLen, ang:rawAng});
