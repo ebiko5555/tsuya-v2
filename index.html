@@ -163,9 +163,39 @@
     transition:transform .2s ease;
   }
   .chip.active{border-color:var(--ink); transform:scale(1.12)}
-  input.chip{padding:0; -webkit-appearance:none; appearance:none; background:none}
+  input.chip{-webkit-appearance:none; appearance:none}
   input.chip::-webkit-color-swatch-wrapper{padding:0}
   input.chip::-webkit-color-swatch{border:none; border-radius:50%}
+  /* 自分で色をつくるボタン */
+  #chips{align-items:flex-start}
+  .pickwrap{flex:none; position:relative; width:44px; text-align:center; margin-left:4px}
+  input.chip.pick{
+    width:36px; height:36px; padding:4px; margin:0 4px;
+    box-shadow:0 2px 8px rgba(90,66,50,.2);
+    background:conic-gradient(from .25turn,
+      #e46d6d,#e4a35c,#ded95e,#78cf72,#63c6ce,#6f8ede,#bb79dd,#e46d6d);
+  }
+  input.chip.pick::-webkit-color-swatch{border:1.6px solid rgba(255,255,255,.95)}
+  .pickplus{
+    position:absolute; top:-2px; right:0; width:16px; height:16px; border-radius:50%;
+    background:var(--ink); color:#fffdfa; font-size:10px; line-height:16px;
+    pointer-events:none; box-shadow:0 1px 4px rgba(0,0,0,.25);
+  }
+  .pickcap{
+    display:block; margin-top:5px; font-size:8.5px; letter-spacing:.02em;
+    color:var(--sub); white-space:nowrap; pointer-events:none;
+  }
+  /* 濃淡 */
+  .tonewrap{display:flex; align-items:center; gap:10px; margin-top:7px}
+  .tonelabel{flex:none; font-size:10px; letter-spacing:.15em; color:var(--sub)}
+  .tonewrap .scroller{flex:1; min-width:0; padding:5px 2px}
+  .tone{
+    flex:none; width:28px; height:28px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent;
+    box-shadow:inset 0 -5px 8px rgba(0,0,0,.13), inset 0 3px 5px rgba(255,255,255,.32), 0 2px 6px rgba(90,66,50,.14);
+    transition:transform .18s ease;
+  }
+  .tone.active{border-color:var(--ink); transform:scale(1.12)}
   .minirow{
     display:flex; align-items:center; gap:12px; margin-top:10px;
     font-size:10px; letter-spacing:.15em; color:var(--sub);
@@ -371,8 +401,13 @@
   <div class="tray" id="tray-colors">
     <div class="fingerrow" id="fingerRow2"></div>
     <div class="scroller" id="chips"></div>
+    <div class="tonewrap">
+      <span class="tonelabel">濃淡</span>
+      <div class="scroller" id="toneRow"></div>
+    </div>
     <div class="minirow">
-      <span class="ghostlink" onclick="document.getElementById('inspoInput').click()">写真</span>
+      <span class="ghostlink" onclick="document.getElementById('inspoInput').click()">写真から配色</span>
+      <span class="ghostlink" id="resetPal">標準にもどす</span>
     </div>
     <div id="note"></div>
   </div>
@@ -1170,6 +1205,7 @@ function activeColor(){ return targetFinger<0 ? nailColors[2] : nailColors[targe
 function setColor(col){
   if(targetFinger<0) nailColors.fill(col); else nailColors[targetFinger]=col;
   currentColor = col;
+  buildToneRow();
   refreshThumbs();
 }
 function setLook(key){
@@ -1226,6 +1262,18 @@ function buildFingerRowInto(row){
     row.appendChild(d);
   });
 }
+function buildToneRow(){
+  const row=$('toneRow'); if(!row) return;
+  const cur=(activeColor()||'#b76e79');
+  row.innerHTML='';
+  toneVariants(cur).forEach(col=>{
+    const el=document.createElement('div');
+    el.className='tone'+(col.toLowerCase()===cur.toLowerCase()?' active':'');
+    el.style.background=`linear-gradient(145deg, ${col}, ${shade(col,-22)})`;
+    el.onclick=()=>{ setColor(col); markActiveChip(); };
+    row.appendChild(el);
+  });
+}
 function markActiveChip(){
   const box=$('chips'); if(!box) return;
   const cur=(activeColor()||'').toLowerCase();
@@ -1234,6 +1282,7 @@ function markActiveChip(){
   });
   const pick=box.querySelector('input[type=color]');
   if(pick) pick.value = activeColor();
+  buildToneRow();
 }
 function drawCover(c,img,w,h){
   const H = h*1.2;
@@ -1399,14 +1448,20 @@ function renderChips(pal){
     el.onclick=()=>{ setColor(col); markActiveChip(); };
     box.appendChild(el);
   });
+  /* 列の最後に「自分で色をつくる」。虹の輪＋＋印＋文字で、押せば色を選べると分かるようにする。
+     iOS では input を直接押させないと開かないので、input 自体を押させる。 */
+  const wrap=document.createElement('div'); wrap.className='pickwrap';
   const pick=document.createElement('input');
-  pick.type='color'; pick.className='chip pick'; pick.value=currentColor;
+  pick.type='color'; pick.className='chip pick'; pick.value=activeColor();
   pick.addEventListener('input', e=>{
     setColor(e.target.value);
     box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
     pick.classList.add('active');
   });
-  box.appendChild(pick);
+  const plus=document.createElement('div'); plus.className='pickplus'; plus.textContent='＋';
+  const cap=document.createElement('span'); cap.className='pickcap'; cap.textContent='自分でつくる';
+  wrap.appendChild(pick); wrap.appendChild(plus); wrap.appendChild(cap);
+  box.appendChild(wrap);
   /* 起動時と写真から配色したときは、従来どおり全部の指に1色目を入れる */
   if(pal.length){ nailColors.fill(pal[0]); currentColor = pal[0]; }
   markActiveChip();
@@ -1436,6 +1491,42 @@ function extractPalette(img,n){
 }
 /* ================= ユーティリティ ================= */
 function rgb2hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('')}
+function hex2hsl(hex){
+  const n=parseInt(hex.slice(1),16);
+  const r=(n>>16)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2;
+  let h=0, sat=0;
+  if(mx!==mn){
+    const d=mx-mn;
+    sat = l>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+    h = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4;
+    h/=6;
+  }
+  return [h,sat,l];
+}
+function hsl2hex(h,sat,l){
+  h=((h%1)+1)%1; sat=Math.max(0,Math.min(1,sat)); l=Math.max(0,Math.min(1,l));
+  const f=(p,q,t)=>{ t=((t%1)+1)%1;
+    if(t<1/6) return p+(q-p)*6*t;
+    if(t<1/2) return q;
+    if(t<2/3) return p+(q-p)*(2/3-t)*6;
+    return p; };
+  const q = l<0.5 ? l*(1+sat) : l+sat-l*sat, p = 2*l-q;
+  return rgb2hex(f(p,q,h+1/3)*255, f(p,q,h)*255, f(p,q,h-1/3)*255);
+}
+/* 選んでいる色から、濃さ・くすみ違いを作る（ネイルの選び方に合わせた並び） */
+function toneVariants(hex){
+  const [h,sat,l]=hex2hsl(hex);
+  return [
+    hsl2hex(h, Math.min(1,sat*1.10), Math.max(0.06, l-0.24)),
+    hsl2hex(h, Math.min(1,sat*1.05), Math.max(0.08, l-0.12)),
+    hex,
+    hsl2hex(h, sat*0.92, Math.min(0.95, l+0.12)),
+    hsl2hex(h, sat*0.85, Math.min(0.97, l+0.24)),
+    hsl2hex(h, sat*0.42, l*0.94+0.05),
+    hsl2hex(h, Math.min(1, sat*1.75+0.12), l*0.95),
+  ];
+}
 function shade(hex,amt){
   const n=parseInt(hex.slice(1),16);
   return rgb2hex((n>>16)+amt,(n>>8&255)+amt,(n&255)+amt);
@@ -1530,6 +1621,7 @@ $('saveSetLink').onclick=()=>{
   if(!name) return;
   const a=loadSets(); a.unshift(snapshotSet(name)); storeSets(a.slice(0,20)); buildSetsRow();
 };
+$('resetPal').onclick=()=>{ renderChips(defaultPalette); $('note').textContent=''; };
 $('varSlider').addEventListener('input', e=>{
   lookVar[activeLook()] = +e.target.value/100;
   refreshThumbs();
