@@ -369,6 +369,7 @@
   </div>
 
   <div class="tray" id="tray-colors">
+    <div class="fingerrow" id="fingerRow2"></div>
     <div class="scroller" id="chips"></div>
     <div class="minirow">
       <span class="ghostlink" onclick="document.getElementById('inspoInput').click()">写真</span>
@@ -671,7 +672,7 @@ function drawNails(){
       nailPath(w,h,shape);
       ctx.clip();
       ctx.globalAlpha = alpha;
-      paintByKey(ctx,nailLooks[fi],w,h,currentColor,hi*5+fi);
+      paintByKey(ctx,nailLooks[fi],w,h,nailColors[fi],hi*5+fi);
       ctx.globalAlpha = alpha*0.3;
       const rim = ctx.createRadialGradient(0,0,Math.min(w,h)*0.35, 0,0,Math.max(w,h)*0.75);
       rim.addColorStop(0,'rgba(0,0,0,0)');
@@ -1103,6 +1104,7 @@ const DESIGN_KEY = 'tsuya.designs';
 /* 指ごとのデザイン（親指→小指）。targetFinger が -1 なら「すべて」 */
 const FINGER_NAMES = ['親','人','中','薬','小'];
 const nailLooks = ['onecolor','onecolor','onecolor','onecolor','onecolor'];
+const nailColors = ['#b76e79','#b76e79','#b76e79','#b76e79','#b76e79'];
 let targetFinger = -1;
 /* 柄のつまみ：デザインごとに 0〜1 を憶える（既定 0.5 = 元の見た目） */
 const lookVar = {};
@@ -1120,10 +1122,17 @@ function paintByKey(c,key,w,h,col,seed){
   LOOKS[key].paint(c,w,h,col,seed,varOf(key));
 }
 function activeLook(){ return targetFinger<0 ? nailLooks[2] : nailLooks[targetFinger]; }
+function activeColor(){ return targetFinger<0 ? nailColors[2] : nailColors[targetFinger]; }
+/* 色も「すべて」か指1本かで塗り分ける */
+function setColor(col){
+  if(targetFinger<0) nailColors.fill(col); else nailColors[targetFinger]=col;
+  currentColor = col;
+  refreshThumbs();
+}
 function setLook(key){
   if(targetFinger<0) nailLooks.fill(key); else nailLooks[targetFinger]=key;
   currentLook = key;
-  markActiveLook(); buildFingerRow(); syncVarSlider();
+  markActiveLook(); buildFingerRow(); syncVarSlider(); markActiveChip();
 }
 function markActiveLook(){
   const cur = activeLook();
@@ -1142,13 +1151,21 @@ function syncVarSlider(){
     $('varRow').style.display='none';
   }
 }
-/* 指セレクタ（小さな手） */
+function onTargetChange(){
+  currentLook = activeLook();
+  currentColor = activeColor();
+  buildFingerRow(); markActiveLook(); markActiveChip(); syncVarSlider();
+}
+/* 指セレクタ（小さな手）。デザインとカラーの両方のタブに出す */
 function buildFingerRow(){
-  const row=$('fingerRow'); row.innerHTML='';
+  ['fingerRow','fingerRow2'].forEach(rid=>{ const r=$(rid); if(r) buildFingerRowInto(r); });
+}
+function buildFingerRowInto(row){
+  row.innerHTML='';
   const all=document.createElement('button');
   all.className='allbtn'+(targetFinger<0?' active':'');
   all.textContent='すべて';
-  all.onclick=()=>{ targetFinger=-1; buildFingerRow(); markActiveLook(); syncVarSlider(); };
+  all.onclick=()=>{ targetFinger=-1; onTargetChange(); };
   row.appendChild(all);
   const lift=[0,9,12,10,4];
   FINGER_NAMES.forEach((nm,i)=>{
@@ -1157,14 +1174,23 @@ function buildFingerRow(){
     d.style.marginBottom=lift[i]+'px';
     const cv=document.createElement('canvas'); cv.width=52; cv.height=66;
     const c=cv.getContext('2d'); c.translate(26,33);
-    c.save(); paintByKey(c,nailLooks[i],44,60,currentColor,i); c.restore();
+    c.save(); paintByKey(c,nailLooks[i],44,60,nailColors[i],i); c.restore();
     c.globalAlpha=.3; c.fillStyle='#fff';
     c.beginPath(); c.ellipse(-8,-12,7,12,-0.3,0,Math.PI*2); c.fill(); c.globalAlpha=1;
     d.appendChild(cv);
     const sp=document.createElement('span'); sp.textContent=nm; d.appendChild(sp);
-    d.onclick=()=>{ targetFinger=i; buildFingerRow(); markActiveLook(); syncVarSlider(); };
+    d.onclick=()=>{ targetFinger=i; onTargetChange(); };
     row.appendChild(d);
   });
+}
+function markActiveChip(){
+  const box=$('chips'); if(!box) return;
+  const cur=(activeColor()||'').toLowerCase();
+  box.querySelectorAll('.chip').forEach(x=>{
+    x.classList.toggle('active', (x.dataset.col||'').toLowerCase()===cur);
+  });
+  const pick=box.querySelector('input[type=color]');
+  if(pick) pick.value = activeColor();
 }
 function drawCover(c,img,w,h){
   const H = h*1.2;
@@ -1232,9 +1258,10 @@ function refreshThumbs(){
 }
 
 /* ================= お絵かきエディタ ================= */
-const ed = { canvas:null, ctx:null, drawing:false, size:14, tool:'pen', lx:0, ly:0 };
+const ed = { canvas:null, ctx:null, drawing:false, size:14, tool:'pen', lx:0, ly:0, color:'#b76e79' };
 function openEditor(){
   $('editor').style.display='flex';
+  ed.color = currentColor;
   if(!ed.canvas){
     ed.canvas=$('edCanvas'); ed.ctx=ed.canvas.getContext('2d');
     const c=ed.ctx;
@@ -1250,9 +1277,9 @@ function openEditor(){
     function spray(x,y){
       const r = ed.size*1.25;
       const g = c.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0, hexA(currentColor,.16));
-      g.addColorStop(.55, hexA(currentColor,.06));
-      g.addColorStop(1, hexA(currentColor,0));
+      g.addColorStop(0, hexA(ed.color,.16));
+      g.addColorStop(.55, hexA(ed.color,.06));
+      g.addColorStop(1, hexA(ed.color,0));
       c.fillStyle=g; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
     }
     function stroke(x,y,first){
@@ -1268,7 +1295,7 @@ function openEditor(){
         ed.lx=x; ed.ly=y; return;
       }
       const lw = ed.tool==='fine' ? Math.max(1.6, ed.size*0.26) : ed.size;
-      c.strokeStyle=currentColor; c.fillStyle=currentColor;
+      c.strokeStyle=ed.color; c.fillStyle=ed.color;
       c.lineWidth=lw; c.lineCap='round'; c.lineJoin='round';
       if(first){ c.beginPath(); c.arc(x,y,lw/2,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(x,y); }
       else { c.lineTo(x,y); c.stroke(); }
@@ -1302,7 +1329,7 @@ function openEditor(){
   currentPalette.forEach(col=>{
     const s=document.createElement('div');
     s.className='edsw'; s.style.background=col;
-    s.onclick=()=>{ currentColor=col; if(ed.tool==='erase') edSetTool('pen'); };
+    s.onclick=()=>{ ed.color=col; if(ed.tool==='erase') edSetTool('pen'); };
     sw.appendChild(s);
   });
 }
@@ -1325,24 +1352,21 @@ function renderChips(pal){
     const el=document.createElement('div');
     el.className='chip'+(i===0?' active':'');
     el.style.background=`linear-gradient(145deg, ${col}, ${shade(col,-22)})`;
-    el.onclick=()=>{
-      currentColor=col;
-      box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active');
-      refreshThumbs();
-    };
+    el.dataset.col=col;
+    el.onclick=()=>{ setColor(col); markActiveChip(); };
     box.appendChild(el);
-    if(i===0) currentColor=col;
   });
   const pick=document.createElement('input');
   pick.type='color'; pick.className='chip pick'; pick.value=currentColor;
   pick.addEventListener('input', e=>{
-    currentColor=e.target.value;
+    setColor(e.target.value);
     box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
     pick.classList.add('active');
-    refreshThumbs();
   });
   box.appendChild(pick);
+  /* 起動時と写真から配色したときは、従来どおり全部の指に1色目を入れる */
+  if(pal.length){ nailColors.fill(pal[0]); currentColor = pal[0]; }
+  markActiveChip();
   refreshThumbs();
 }
 $('inspoInput').addEventListener('change', async e=>{
@@ -1404,7 +1428,7 @@ const SETS_KEY='tsuya.sets';
 function loadSets(){ try{ return JSON.parse(localStorage.getItem(SETS_KEY)||'[]'); }catch(e){ return []; } }
 function storeSets(a){ try{ localStorage.setItem(SETS_KEY, JSON.stringify(a)); }catch(e){} }
 function snapshotSet(name){
-  return { name, looks:nailLooks.slice(), color:currentColor,
+  return { name, looks:nailLooks.slice(), colors:nailColors.slice(), color:currentColor,
            tune:Object.assign({},tuneVals), vars:Object.assign({},lookVar) };
 }
 function withVars(vars, fn){
@@ -1418,7 +1442,9 @@ function applySet(st){
   st.looks.forEach((k,i)=>{
     nailLooks[i] = (k && (LOOKS[k] || k.indexOf('custom:')===0)) ? k : 'onecolor';
   });
-  if(st.color) currentColor = st.color;
+  if(st.colors) st.colors.forEach((c,i)=>{ if(c) nailColors[i]=c; });
+  else if(st.color) nailColors.fill(st.color);
+  currentColor = activeColor();
   Object.assign(tuneVals, st.tune||{});
   Object.keys(lookVar).forEach(k=>delete lookVar[k]); Object.assign(lookVar, st.vars||{});
   document.querySelectorAll('.presetrow').forEach(row=>{
@@ -1426,9 +1452,8 @@ function applySet(st){
     row.querySelectorAll('.presetbtn').forEach(b=>b.classList.toggle('active', String(tuneVals[key])===b.dataset.val));
   });
   if($('sculptLen')) $('sculptLen').value = tuneVals.sculptLen;
-  $('chips').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
   currentLook = activeLook();
-  buildLooks(); syncVarSlider();
+  buildLooks(); syncVarSlider(); markActiveChip();
 }
 function buildSetsRow(){
   const row=$('setsRow'); row.innerHTML='';
@@ -1444,7 +1469,7 @@ function buildSetsRow(){
       st.looks.forEach((k,i)=>{
         c.save(); c.translate(11+i*22, 24);
         c.beginPath(); c.rect(-8,-15,16,30); c.clip();
-        paintByKey(c,k,16,26,st.color||currentColor,i);
+        paintByKey(c,k,16,26,(st.colors&&st.colors[i])||st.color||currentColor,i);
         c.restore();
       });
     });
