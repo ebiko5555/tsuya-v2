@@ -215,6 +215,37 @@
     background:rgba(255,253,250,.6);
   }
   .addtile .addbox svg{width:22px; height:22px; display:block}
+  /* 指ごとのデザイン */
+  .fingerrow{display:flex; align-items:flex-end; justify-content:center; gap:5px; margin-bottom:5px}
+  .fingerbtn{flex:none; cursor:pointer; text-align:center; padding:3px 3px 0}
+  .fingerbtn canvas{
+    width:26px; height:33px; display:block; border-radius:12px 12px 10px 10px;
+    background:var(--card); box-shadow:0 2px 6px rgba(90,66,50,.14);
+    border:1.4px solid transparent; transition:border-color .2s, transform .2s;
+  }
+  .fingerbtn.active canvas{border-color:var(--ink); transform:translateY(-2px)}
+  .fingerbtn span{font-size:8.5px; color:var(--faint); display:block; margin-top:4px}
+  .fingerbtn.active span{color:var(--ink)}
+  .allbtn{
+    flex:none; align-self:center; border:1px solid var(--line); border-radius:999px;
+    padding:7px 11px; margin-right:3px; background:transparent; color:var(--sub);
+    font-family:inherit; font-size:10px; letter-spacing:.05em; cursor:pointer;
+  }
+  .allbtn.active{background:var(--accent); border-color:var(--accent); color:#fffdfa}
+  /* 保存した組み合わせ */
+  .setrow{display:flex; align-items:center; gap:10px; margin-top:2px}
+  .setrow .scroller{flex:1; min-width:0; padding:7px 2px 2px}
+  .setchip{flex:none; cursor:pointer; text-align:center; position:relative}
+  .setchip canvas{display:block; border-radius:7px; background:var(--card); box-shadow:0 2px 7px rgba(90,66,50,.14)}
+  .setchip span{
+    font-size:9px; color:var(--sub); display:block; margin-top:3px;
+    max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .setchip .del{
+    position:absolute; top:-7px; right:-7px; width:17px; height:17px; border-radius:50%;
+    background:rgba(42,37,34,.5); color:#fff; font-size:11px; line-height:17px; text-align:center;
+  }
+  .setempty{font-size:10px; color:var(--faint); letter-spacing:.05em; padding:10px 2px}
   /* 光の軌跡タブ */
   .toggle-row{
     display:flex; align-items:center; justify-content:space-between;
@@ -325,7 +356,16 @@
   </div>
 
   <div class="tray active" id="tray-looks">
+    <div class="fingerrow" id="fingerRow"></div>
     <div class="scroller" id="looksRow"></div>
+    <div class="minirow" id="varRow" style="display:none">
+      <span id="varLabel">柄</span>
+      <input type="range" id="varSlider" min="0" max="100" value="50">
+    </div>
+    <div class="setrow">
+      <div class="scroller" id="setsRow"></div>
+      <span class="ghostlink" id="saveSetLink">この組み合わせを保存</span>
+    </div>
   </div>
 
   <div class="tray" id="tray-colors">
@@ -631,13 +671,13 @@ function drawNails(){
       nailPath(w,h,shape);
       ctx.clip();
       ctx.globalAlpha = alpha;
-      paintLook(ctx,w,h,currentColor,hi*5+fi);
+      paintByKey(ctx,nailLooks[fi],w,h,currentColor,hi*5+fi);
       ctx.globalAlpha = alpha*0.3;
       const rim = ctx.createRadialGradient(0,0,Math.min(w,h)*0.35, 0,0,Math.max(w,h)*0.75);
       rim.addColorStop(0,'rgba(0,0,0,0)');
       rim.addColorStop(1,'rgba(60,30,20,.5)');
       ctx.fillStyle=rim; ctx.fillRect(-w,-h,w*2,h*2);
-      if(gloss>0.05 && !flatLook()){
+      if(gloss>0.05 && !flatLook(nailLooks[fi])){
         ctx.globalAlpha = alpha*gloss*0.6;
         ctx.fillStyle='#fff';
         ctx.beginPath();
@@ -652,7 +692,7 @@ function drawNails(){
     });
   });
 }
-function flatLook(){ const lk=LOOKS[currentLook]; return !!(lk && lk.flat); }
+function flatLook(key){ const lk=LOOKS[key]; return !!(lk && lk.flat); }
 function nailPath(w,h,shape){
   ctx.beginPath();
   const base = h*0.28;
@@ -809,12 +849,12 @@ const LOOKS = {
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
     c.globalAlpha=keep;
   }},
-  mizuhikari:{name:'水光マグネット', paint(c,w,h,col,seed){
+  mizuhikari:{name:'水光マグネット', varLabel:'光の帯の太さ', paint(c,w,h,col,seed,v){
     base(c,w,h,shade(col,-18),shade(col,-38));
     const g=c.createLinearGradient(-w*0.45,h*0.35,w*0.45,-h*0.45);
     g.addColorStop(0,'rgba(255,255,255,0)');
-    g.addColorStop(.48,hexA(shade(col,85),.9));
-    g.addColorStop(.55,hexA(shade(col,110),.7));
+    g.addColorStop(Math.max(.02,.48-(v-.5)*.30),hexA(shade(col,85),.9));
+    g.addColorStop(Math.min(.98,.55+(v-.5)*.30),hexA(shade(col,110),.7));
     g.addColorStop(1,'rgba(255,255,255,0)');
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
     const rnd=seeded(seed+11);
@@ -824,10 +864,11 @@ const LOOKS = {
       c.beginPath(); c.arc(x,y,w*0.014+rnd()*w*0.012,0,Math.PI*2); c.fill();
     }
   }},
-  flash:{name:'フラッシュ', paint(c,w,h,col,seed){
+  flash:{name:'フラッシュ', varLabel:'ラメの量', paint(c,w,h,col,seed,v){
     base(c,w,h,shade(col,-5),shade(col,-25));
     const rnd=seeded(seed+29);
-    for(let i=0;i<60;i++){
+    const nF=Math.round(14+v*92);
+    for(let i=0;i<nF;i++){
       const x=(rnd()-0.5)*w, y=(rnd()-0.5)*h*1.1, r=rnd()*w*0.03+w*0.008;
       const t=rnd();
       c.fillStyle = t>0.66 ? 'rgba(255,255,255,.95)' : t>0.33 ? hexA(shade(col,90),.85) : 'rgba(230,225,255,.7)';
@@ -843,36 +884,37 @@ const LOOKS = {
     c.fillStyle='rgba(255,255,255,.55)';
     c.fillRect(-w*0.06,-h/2,w*0.05,h*1.2);
   }},
-  french:{name:'フレンチ', paint(c,w,h,col){
+  french:{name:'フレンチ', varLabel:'フレンチの幅', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.45);
     c.fillStyle=shade(col,5);
+    const e=h*(0.26-v*0.24), m=h*(0.62-v*0.56);   /* v が大きいほど太いフレンチ */
     c.beginPath();
-    c.moveTo(-w/2,-h*0.14); c.quadraticCurveTo(0,-h*0.34,w/2,-h*0.14);
+    c.moveTo(-w/2,-e); c.quadraticCurveTo(0,-m,w/2,-e);
     c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
   }},
-  grad:{name:'グラデ', paint(c,w,h,col){
+  grad:{name:'グラデ', varLabel:'グラデの深さ', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.4);
     const g=c.createLinearGradient(0,h/2,0,-h/2);
     g.addColorStop(0,'rgba(240,220,209,.25)');
-    g.addColorStop(.42,hexA(col,.7));
+    g.addColorStop(0.72-v*0.60,hexA(col,.7));   /* v が大きいほど深いグラデ */
     g.addColorStop(1,shade(col,-10));
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
   }},
-  flower:{name:'フラワー', paint(c,w,h,col,seed){
+  flower:{name:'フラワー', varLabel:'お花の大きさ', paint(c,w,h,col,seed,v){
     base(c,w,h,'#fdf7f1','#f2e4d9');
-    const rnd=seeded(seed+17);
-    flower(c, -w*0.16, -h*0.05, w*0.22, shade(col,10));
-    flower(c, w*0.2, h*0.24, w*0.15, shade(col,35));
+    const rnd=seeded(seed+17); const fs=0.5+v;
+    flower(c, -w*0.16, -h*0.05, w*0.22*fs, shade(col,10));
+    flower(c, w*0.2, h*0.24, w*0.15*fs, shade(col,35));
     c.fillStyle=hexA(shade(col,-15),.8);
     for(let i=0;i<4;i++){
       c.beginPath();
       c.arc((rnd()-0.5)*w*0.9,(rnd()-0.5)*h*0.9,w*0.02,0,Math.PI*2); c.fill();
     }
   }},
-  dot:{name:'レトロドット', paint(c,w,h,col){
+  dot:{name:'レトロドット', varLabel:'ドットの大きさ', paint(c,w,h,col,seed,v){
     base(c,w,h,'#fbf3ea','#f1e2d5');
     c.fillStyle=shade(col,0);
-    const r=w*0.085;
+    const r=w*(0.035+v*0.10);
     for(let row=0;row<4;row++){
       for(let k=0;k<3;k++){
         const x=(k-1)*w*0.32 + (row%2? w*0.16:0);
@@ -881,37 +923,38 @@ const LOOKS = {
       }
     }
   }},
-  aurora:{name:'オーロラ', paint(c,w,h,col){
+  aurora:{name:'オーロラ', varLabel:'ヴェールの広さ', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.55);
     const keep=c.globalAlpha;
     const veils=[['#ffd9e8',-w*0.2,-h*0.2],['#d3e6ff',w*0.18,h*0.05],['#dff5e1',-w*0.05,h*0.3],[shade(col,55),w*0.1,-h*0.3]];
     veils.forEach(([vc,x,y])=>{
       c.globalAlpha=keep*.4;
-      const g=c.createRadialGradient(x,y,0,x,y,w*0.7);
+      const g=c.createRadialGradient(x,y,0,x,y,w*(0.35+v*0.70));
       g.addColorStop(0,vc); g.addColorStop(1,'rgba(255,255,255,0)');
       c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
     });
     c.globalAlpha=keep;
   }},
-  milk:{name:'ミルキー', paint(c,w,h,col){
+  milk:{name:'ミルキー', varLabel:'濃さ', paint(c,w,h,col,seed,v){
     base(c,w,h,'#fdf8f3','#f4e6dc');
-    const keep=c.globalAlpha; c.globalAlpha=keep*.45;
+    const keep=c.globalAlpha; c.globalAlpha=keep*(0.18+v*0.54);
     base(c,w,h,shade(col,50),shade(col,22));
     c.globalAlpha=keep;
   }},
 
-  sheer:{name:'すけ感', paint(c,w,h,col){
+  sheer:{name:'すけ感', varLabel:'濃さ', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.35);
-    const k=c.globalAlpha; c.globalAlpha=k*.55;
+    const k=c.globalAlpha; c.globalAlpha=k*(0.25+v*0.60);
     base(c,w,h,shade(col,40),shade(col,10)); c.globalAlpha=k;
   }},
-  frenchmirror:{name:'ミラーフレンチ', paint(c,w,h,col){
+  frenchmirror:{name:'ミラーフレンチ', varLabel:'フレンチの幅', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.5);
     const g=c.createLinearGradient(-w/2,0,w/2,0);
     g.addColorStop(0,shade(col,-28)); g.addColorStop(.28,shade(col,85));
     g.addColorStop(.55,shade(col,-6)); g.addColorStop(.78,shade(col,95)); g.addColorStop(1,shade(col,20));
     c.save();
-    c.beginPath(); c.moveTo(-w/2,-h*0.13); c.quadraticCurveTo(0,-h*0.36,w/2,-h*0.13);
+    const e2=h*(0.25-v*0.24), m2=h*(0.64-v*0.56);
+    c.beginPath(); c.moveTo(-w/2,-e2); c.quadraticCurveTo(0,-m2,w/2,-e2);
     c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.clip();
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
     c.restore();
@@ -929,7 +972,7 @@ const LOOKS = {
       c.beginPath(); c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*0.012+rnd()*w*0.010,0,Math.PI*2); c.fill();
     }
   }},
-  stardust:{name:'スターダスト', paint(c,w,h,col){
+  stardust:{name:'スターダスト', varLabel:'ラメの量', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.5);
     const g=c.createLinearGradient(0,h/2,0,-h/2);
     g.addColorStop(0,'rgba(255,255,255,0)');
@@ -937,7 +980,8 @@ const LOOKS = {
     g.addColorStop(1,shade(col,-4));
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
     const rnd=seeded(53);
-    for(let i=0;i<95;i++){
+    const nS=Math.round(25+v*140);
+    for(let i=0;i<nS;i++){
       const y=(rnd()-.5)*h*1.1;
       const t=(h/2-y)/h;
       if(rnd()>t*0.95+0.05) continue;
@@ -957,10 +1001,11 @@ const LOOKS = {
     g.addColorStop(1,hexA(shade(col,55),.42));
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
   }},
-  marble:{name:'大理石', paint(c,w,h,col){
+  marble:{name:'大理石', varLabel:'模様の量', paint(c,w,h,col,seed,v){
     base(c,w,h,shade(col,66),shade(col,40));
     const vein=(seed,color,wid,n)=>{
       const rnd=seeded(seed); c.strokeStyle=color; c.lineCap='round'; c.lineJoin='round';
+      n=Math.max(1, Math.round(n*(0.4+v*1.2)));
       for(let i=0;i<n;i++){
         c.lineWidth=wid*(0.5+rnd());
         let x=(rnd()-.5)*w*1.2, y=-h*0.6;
@@ -985,11 +1030,11 @@ const LOOKS = {
     c.strokeStyle='rgba(214,178,102,.9)'; c.lineWidth=w*0.022; c.lineCap='round';
     c.beginPath(); c.moveTo(-w*0.30,h*0.06); c.quadraticCurveTo(0,-h*0.12,w*0.28,h*0.20); c.stroke();
   }},
-  bekko:{name:'べっ甲', paint(c,w,h,col){
+  bekko:{name:'べっ甲', varLabel:'斑の大きさ', paint(c,w,h,col,seed,v){
     base(c,w,h,shade(col,52),shade(col,4));
     const rnd=seeded(7);
     for(let i=0;i<9;i++){
-      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(0.13+rnd()*0.28);
+      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(0.13+rnd()*0.28)*(0.5+v);
       const g=c.createRadialGradient(x,y,0,x,y,r);
       g.addColorStop(0,hexA(shade(col,-72),.9));
       g.addColorStop(.6,hexA(shade(col,-45),.35));
@@ -999,26 +1044,27 @@ const LOOKS = {
     const k=c.globalAlpha; c.globalAlpha=k*.16;      /* べっ甲らしい飴色をひと匙 */
     base(c,w,h,'#e8bd74','#a9682a'); c.globalAlpha=k;
   }},
-  check:{name:'チェック', paint(c,w,h,col){
+  check:{name:'チェック', varLabel:'チェックの細かさ', paint(c,w,h,col,seed,v){
     base(c,w,h,'#fdf7f0','#f4e8dc');
     const k=c.globalAlpha;
+    const sx=w*(0.40-v*0.32), sy=h*(0.37-v*0.30), nn=Math.ceil(0.6/Math.max(0.08,(0.40-v*0.32)));
     c.globalAlpha=k*.45; c.fillStyle=shade(col,20);
-    for(let i=-3;i<=3;i++){
-      c.fillRect(i*w*0.24-w*0.05,-h*0.6,w*0.10,h*1.2);
-      c.fillRect(-w/2,i*h*0.22-h*0.03,w,h*0.075);
+    for(let i=-nn;i<=nn;i++){
+      c.fillRect(i*sx-w*0.05,-h*0.6,w*0.10,h*1.2);
+      c.fillRect(-w/2,i*sy-h*0.03,w,h*0.075);
     }
     c.globalAlpha=k*.85; c.fillStyle=shade(col,-16);
-    for(let i=-3;i<=3;i++){
-      c.fillRect(i*w*0.24-w*0.010,-h*0.6,w*0.020,h*1.2);
-      c.fillRect(-w/2,i*h*0.22-h*0.006,w,h*0.013);
+    for(let i=-nn;i<=nn;i++){
+      c.fillRect(i*sx-w*0.010,-h*0.6,w*0.020,h*1.2);
+      c.fillRect(-w/2,i*sy-h*0.006,w,h*0.013);
     }
     c.globalAlpha=k;
   }},
-  line:{name:'ワイヤー', paint(c,w,h,col){
+  line:{name:'ワイヤー', varLabel:'線の太さ', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.75);
     const k=c.globalAlpha; c.globalAlpha=k*.5;
     base(c,w,h,shade(col,50),shade(col,26)); c.globalAlpha=k;
-    c.strokeStyle='#d8b46a'; c.lineWidth=w*0.022; c.lineCap='round';
+    c.strokeStyle='#d8b46a'; c.lineWidth=w*(0.008+v*0.028); c.lineCap='round';
     c.beginPath(); c.moveTo(-w*0.34,-h*0.24);
     c.bezierCurveTo(w*0.10,-h*0.05,-w*0.20,h*0.16,w*0.32,h*0.30); c.stroke();
     c.beginPath(); c.moveTo(-w*0.30,h*0.06);
@@ -1054,15 +1100,71 @@ const DESIGN_KEY = 'tsuya.designs';
     customLooks.push({name:d.name, img});
   });
 })();
+/* 指ごとのデザイン（親指→小指）。targetFinger が -1 なら「すべて」 */
+const FINGER_NAMES = ['親','人','中','薬','小'];
+const nailLooks = ['onecolor','onecolor','onecolor','onecolor','onecolor'];
+let targetFinger = -1;
+/* 柄のつまみ：デザインごとに 0〜1 を憶える（既定 0.5 = 元の見た目） */
+const lookVar = {};
+const varOf = key => (key in lookVar) ? lookVar[key] : 0.5;
+
 function paintLook(c,w,h,col,seed){ paintByKey(c,currentLook,w,h,col,seed); }
 function paintByKey(c,key,w,h,col,seed){
+  if(!key || (!LOOKS[key] && !key.startsWith('custom:'))) key='onecolor';
   if(key.startsWith('custom:')){
     const cl = customLooks[+key.slice(7)];
     if(cl) drawCover(c, cl.img, w, h);
+    else base(c,w,h,shade(col,18),shade(col,-14));
     return;
   }
+  LOOKS[key].paint(c,w,h,col,seed,varOf(key));
+}
+function activeLook(){ return targetFinger<0 ? nailLooks[2] : nailLooks[targetFinger]; }
+function setLook(key){
+  if(targetFinger<0) nailLooks.fill(key); else nailLooks[targetFinger]=key;
+  currentLook = key;
+  markActiveLook(); buildFingerRow(); syncVarSlider();
+}
+function markActiveLook(){
+  const cur = activeLook();
+  $('looksRow').querySelectorAll('.look').forEach(d=>{
+    if(d.dataset.key) d.classList.toggle('active', d.dataset.key===cur);
+  });
+}
+function syncVarSlider(){
+  const key = activeLook();
   const lk = LOOKS[key];
-  lk.paint(c,w,h,col,seed);
+  if(lk && lk.varLabel){
+    $('varRow').style.display='flex';
+    $('varLabel').textContent = lk.varLabel;
+    $('varSlider').value = Math.round(varOf(key)*100);
+  }else{
+    $('varRow').style.display='none';
+  }
+}
+/* 指セレクタ（小さな手） */
+function buildFingerRow(){
+  const row=$('fingerRow'); row.innerHTML='';
+  const all=document.createElement('button');
+  all.className='allbtn'+(targetFinger<0?' active':'');
+  all.textContent='すべて';
+  all.onclick=()=>{ targetFinger=-1; buildFingerRow(); markActiveLook(); syncVarSlider(); };
+  row.appendChild(all);
+  const lift=[0,9,12,10,4];
+  FINGER_NAMES.forEach((nm,i)=>{
+    const d=document.createElement('div');
+    d.className='fingerbtn'+(targetFinger===i?' active':'');
+    d.style.marginBottom=lift[i]+'px';
+    const cv=document.createElement('canvas'); cv.width=52; cv.height=66;
+    const c=cv.getContext('2d'); c.translate(26,33);
+    c.save(); paintByKey(c,nailLooks[i],44,60,currentColor,i); c.restore();
+    c.globalAlpha=.3; c.fillStyle='#fff';
+    c.beginPath(); c.ellipse(-8,-12,7,12,-0.3,0,Math.PI*2); c.fill(); c.globalAlpha=1;
+    d.appendChild(cv);
+    const sp=document.createElement('span'); sp.textContent=nm; d.appendChild(sp);
+    d.onclick=()=>{ targetFinger=i; buildFingerRow(); markActiveLook(); syncVarSlider(); };
+    row.appendChild(d);
+  });
 }
 function drawCover(c,img,w,h){
   const H = h*1.2;
@@ -1071,7 +1173,7 @@ function drawCover(c,img,w,h){
 }
 function addCustomLook(img, name){
   customLooks.push({name: name || 'マイデザイン'+(customLooks.length+1), img});
-  currentLook = 'custom:' + (customLooks.length-1);
+  setLook('custom:' + (customLooks.length-1));
   buildLooks();
 }
 $('designInput').addEventListener('change', async e=>{
@@ -1091,17 +1193,12 @@ function buildLooks(){
   ];
   entries.forEach(([key,look])=>{
     const div=document.createElement('div');
-    div.className='look'+(key===currentLook?' active':'');
+    div.className='look'+(key===activeLook()?' active':'');
     div.dataset.key=key;
     const cv=document.createElement('canvas'); cv.width=104; cv.height=132;
     div.appendChild(cv);
     const sp=document.createElement('span'); sp.textContent=look.name; div.appendChild(sp);
-    div.onclick=()=>{
-      currentLook=key;
-      row.querySelectorAll('.look').forEach(x=>x.classList.remove('active'));
-      div.classList.add('active');
-      refreshThumbs();
-    };
+    div.onclick=()=>{ setLook(key); refreshThumbs(); };
     row.appendChild(div);
   });
   const ICON_PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 4.6 19.4 8.8"/><path d="M17.3 2.5a1.6 1.6 0 0 1 2.3 0l1.9 1.9a1.6 1.6 0 0 1 0 2.3L8.9 19.3l-5 1.8 1.8-5Z"/><path d="M4.4 20.7 8 17.1"/></svg>';
@@ -1131,6 +1228,7 @@ function refreshThumbs(){
     c.beginPath(); c.ellipse(-w*0.18,-hh*0.2,w*0.15,hh*0.24,-0.3,0,Math.PI*2); c.fill();
     c.restore();
   });
+  buildFingerRow();
 }
 
 /* ================= お絵かきエディタ ================= */
@@ -1301,9 +1399,80 @@ document.querySelectorAll('.presetrow').forEach(row=>{
 });
 
 if(window.__mpFailed) setStatus('AIモデルを読み込めませんでした。通信環境を確認して再読み込みしてください。');
+/* ================= 組み合わせの保存 ================= */
+const SETS_KEY='tsuya.sets';
+function loadSets(){ try{ return JSON.parse(localStorage.getItem(SETS_KEY)||'[]'); }catch(e){ return []; } }
+function storeSets(a){ try{ localStorage.setItem(SETS_KEY, JSON.stringify(a)); }catch(e){} }
+function snapshotSet(name){
+  return { name, looks:nailLooks.slice(), color:currentColor,
+           tune:Object.assign({},tuneVals), vars:Object.assign({},lookVar) };
+}
+function withVars(vars, fn){
+  const keep=Object.assign({},lookVar);
+  Object.keys(lookVar).forEach(k=>delete lookVar[k]); Object.assign(lookVar, vars||{});
+  try{ fn(); } finally {
+    Object.keys(lookVar).forEach(k=>delete lookVar[k]); Object.assign(lookVar, keep);
+  }
+}
+function applySet(st){
+  st.looks.forEach((k,i)=>{
+    nailLooks[i] = (k && (LOOKS[k] || k.indexOf('custom:')===0)) ? k : 'onecolor';
+  });
+  if(st.color) currentColor = st.color;
+  Object.assign(tuneVals, st.tune||{});
+  Object.keys(lookVar).forEach(k=>delete lookVar[k]); Object.assign(lookVar, st.vars||{});
+  document.querySelectorAll('.presetrow').forEach(row=>{
+    const key=row.dataset.key;
+    row.querySelectorAll('.presetbtn').forEach(b=>b.classList.toggle('active', String(tuneVals[key])===b.dataset.val));
+  });
+  if($('sculptLen')) $('sculptLen').value = tuneVals.sculptLen;
+  $('chips').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  currentLook = activeLook();
+  buildLooks(); syncVarSlider();
+}
+function buildSetsRow(){
+  const row=$('setsRow'); row.innerHTML='';
+  const sets=loadSets();
+  if(!sets.length){ row.style.display='none'; return; }
+  row.style.display='flex';
+  sets.forEach((st,idx)=>{
+    const d=document.createElement('div'); d.className='setchip';
+    const cv=document.createElement('canvas'); cv.width=110; cv.height=48;
+    cv.style.width='55px'; cv.style.height='24px';
+    const c=cv.getContext('2d');
+    withVars(st.vars, ()=>{
+      st.looks.forEach((k,i)=>{
+        c.save(); c.translate(11+i*22, 24);
+        c.beginPath(); c.rect(-8,-15,16,30); c.clip();
+        paintByKey(c,k,16,26,st.color||currentColor,i);
+        c.restore();
+      });
+    });
+    d.appendChild(cv);
+    const sp=document.createElement('span'); sp.textContent=st.name; d.appendChild(sp);
+    const del=document.createElement('div'); del.className='del'; del.textContent='×';
+    del.onclick=ev=>{ ev.stopPropagation(); const a=loadSets(); a.splice(idx,1); storeSets(a); buildSetsRow(); };
+    d.appendChild(del);
+    d.onclick=()=>applySet(st);
+    row.appendChild(d);
+  });
+}
+$('saveSetLink').onclick=()=>{
+  const name=(prompt('この組み合わせの名前は？','セット'+(loadSets().length+1))||'').trim();
+  if(!name) return;
+  const a=loadSets(); a.unshift(snapshotSet(name)); storeSets(a.slice(0,20)); buildSetsRow();
+};
+$('varSlider').addEventListener('input', e=>{
+  lookVar[activeLook()] = +e.target.value/100;
+  refreshThumbs();
+});
+
 buildLooks();
 renderChips(defaultPalette);
 buildTrailSwatches();
+buildFingerRow();
+syncVarSlider();
+buildSetsRow();
 </script>
 </body>
 </html>
