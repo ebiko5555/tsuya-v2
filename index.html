@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>艶 II — 手と光のアトリエ</title>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
         onerror="window.__mpFailed=true"></script>
@@ -428,7 +429,7 @@
   </div>
 
   <div id="snapBar">
-    <button class="pill primary" id="saveBtn">保存する</button>
+    <button class="pill primary" id="saveBtn">写真に保存</button>
     <button class="pill" id="retryBtn">もう一度</button>
   </div>
 </div>
@@ -797,13 +798,22 @@ $('cmpClose').onclick = closeCompare;
 $('retryBtn').onclick = () => {
   mode='live'; $('snapBar').style.display='none'; $('liveBtns').style.display='flex';
 };
-$('saveBtn').onclick = () => {
+$('saveBtn').onclick = async () => {
+  /* iOS は Web ページから写真ライブラリへ直接書き込めない。
+     ダウンロードの確認ではなく共有シートを出せば「"写真"に保存」が1タップで済む。 */
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+  if(!blob){ setGuide('保存できませんでした'); setTimeout(()=>setGuide(''),2500); return; }
+  const file = new File([blob], 'tsuya.jpg', {type:'image/jpeg'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file]}); return; }
+    catch(e){ if(e && e.name === 'AbortError') return; }
+  }
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.download = 'tsuya.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-  setGuide('保存しました（写真に出ない場合は画像を長押し）');
-  setTimeout(()=>setGuide(''), 3000);
+  a.download = 'tsuya.jpg'; a.href = url; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  setGuide('保存しました');
+  setTimeout(()=>setGuide(''), 2500);
 };
 
 async function loadImage(file){
