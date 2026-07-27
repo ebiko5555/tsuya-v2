@@ -652,6 +652,7 @@ function lmXY(p){
   return [x,y];
 }
 function drawNails(){
+  sparkT = performance.now()/1000;
   const alpha = tuneVals.opacity/100;
   const gloss = tuneVals.gloss/100;
   const scale = tuneVals.nailSize/100;
@@ -824,6 +825,15 @@ $('sculptLen').addEventListener('input', e=>{ tuneVals.sculptLen = +e.target.val
 
 /* ================= デザイン12種（2026年トレンド反映） ================= */
 function seeded(seed){ let s=seed*9301+49297; return ()=>{ s=(s*9301+49297)%233280; return s/233280; }; }
+/* ラメの瞬き。柄は毎フレーム描き直されているので、時間の項を足すだけで光る。
+   本物のラメは角度が合った一瞬だけ強く光るので、なだらかな明滅ではなく鋭い山にする。 */
+let sparkT = 0;
+function sparkle(ph, sp){
+  const u = Math.sin(sparkT*sp + ph);
+  if(u <= 0) return 0;
+  const u2 = u*u;
+  return u2*u2;
+}
 function base(c,w,h,c1,c2){
   const g = c.createLinearGradient(0,-h/2,0,h/2);
   g.addColorStop(0,c1); g.addColorStop(1,c2);
@@ -883,12 +893,24 @@ const LOOKS = {
     base(c,w,h,shade(col,-5),shade(col,-25));
     const rnd=seeded(seed+29);
     const nF=Math.round(14+v*92);
+    const keep=c.globalAlpha;
     for(let i=0;i<nF;i++){
       const x=(rnd()-0.5)*w, y=(rnd()-0.5)*h*1.1, r=rnd()*w*0.03+w*0.008;
       const t=rnd();
-      c.fillStyle = t>0.66 ? 'rgba(255,255,255,.95)' : t>0.33 ? hexA(shade(col,90),.85) : 'rgba(230,225,255,.7)';
-      c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+      const fl=sparkle(rnd()*6.283, 1.5+rnd()*2.6);
+      c.globalAlpha = keep*(0.55+fl*0.45);
+      c.fillStyle = fl>0.35 ? 'rgba(255,255,255,.98)'
+                 : t>0.66 ? 'rgba(255,255,255,.95)'
+                 : t>0.33 ? hexA(shade(col,90),.85) : 'rgba(230,225,255,.7)';
+      c.beginPath(); c.arc(x,y,r*(1+fl*0.85),0,Math.PI*2); c.fill();
+      if(fl>0.62){          /* 強く光った粒だけ十字に伸ばす */
+        const L=r*(2.2+fl*2.6);
+        c.globalAlpha=keep*fl*0.85; c.strokeStyle='rgba(255,255,255,.95)';
+        c.lineWidth=Math.max(0.6, r*0.32); c.lineCap='round';
+        c.beginPath(); c.moveTo(x-L,y); c.lineTo(x+L,y); c.moveTo(x,y-L); c.lineTo(x,y+L); c.stroke();
+      }
     }
+    c.globalAlpha=keep;
   }},
   chrome:{name:'クロム', paint(c,w,h,col){
     const g=c.createLinearGradient(-w/2,0,w/2,0);
@@ -994,15 +1016,22 @@ const LOOKS = {
     g.addColorStop(.5,hexA(shade(col,20),.55));
     g.addColorStop(1,shade(col,-4));
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
-    const rnd=seeded(53);
+    const rnd=seeded(seed+53);
     const nS=Math.round(25+v*140);
+    const keep=c.globalAlpha;
     for(let i=0;i<nS;i++){
       const y=(rnd()-.5)*h*1.1;
       const t=(h/2-y)/h;
       if(rnd()>t*0.95+0.05) continue;
-      c.fillStyle = rnd()>.5 ? 'rgba(255,255,255,.9)' : hexA(shade(col,75),.8);
-      c.beginPath(); c.arc((rnd()-.5)*w, y, w*0.006+rnd()*w*0.015,0,Math.PI*2); c.fill();
+      const white = rnd()>.5;
+      const x=(rnd()-.5)*w, r=w*0.006+rnd()*w*0.015;
+      const fl=sparkle(rnd()*6.283, 1.2+rnd()*2.4);
+      c.globalAlpha = keep*(0.5+fl*0.5);
+      c.fillStyle = fl>0.4 ? 'rgba(255,255,255,.98)'
+                 : white ? 'rgba(255,255,255,.9)' : hexA(shade(col,75),.8);
+      c.beginPath(); c.arc(x, y, r*(1+fl*0.9),0,Math.PI*2); c.fill();
     }
+    c.globalAlpha=keep;
   }},
   matte:{name:'マット', flat:true, paint(c,w,h,col){
     c.fillStyle=shade(col,-4); c.fillRect(-w/2,-h/2,w,h*1.2);
