@@ -120,6 +120,23 @@
     box-shadow:0 1px 4px rgba(0,0,0,.25); display:none;
   }
   .roundbtn{position:relative}
+  /* ---------- 保存の受け皿 ---------- */
+  #saveHint{
+    position:fixed; inset:0; z-index:70; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    background:rgba(28,22,18,.92); padding:24px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  #saveHint img{
+    max-width:100%; max-height:64vh; border-radius:14px; display:block;
+    box-shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  .shTxt{color:#f6efe8; font-size:11.5px; letter-spacing:.16em; text-align:center; line-height:1.9}
+  .shBtn{
+    border:1px solid rgba(255,255,255,.35); background:transparent; color:#f6efe8;
+    border-radius:999px; padding:11px 26px; font-family:inherit; font-size:12px;
+    letter-spacing:.18em; cursor:pointer;
+  }
   /* ---------- 比べる ---------- */
   #compare{
     position:fixed; inset:0; z-index:55; display:none; flex-direction:column;
@@ -524,6 +541,11 @@
   </div>
 </div>
 
+<div id="saveHint">
+  <img id="saveImg" alt="">
+  <div class="shTxt">画像を長押しして「"写真"に保存」</div>
+  <button class="shBtn" id="saveHintClose">閉じる</button>
+</div>
 <div id="compare">
   <div class="cmpHead">
     <span class="cmpTitle">比べる</span>
@@ -808,12 +830,29 @@ $('saveBtn').onclick = async () => {
     try{ await navigator.share({files:[file]}); return; }
     catch(e){ if(e && e.name === 'AbortError') return; }
   }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.download = 'tsuya.jpg'; a.href = url; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 5000);
-  setGuide('保存しました');
-  setTimeout(()=>setGuide(''), 2500);
+  fallbackSave(blob);
+};
+/* 共有シートが使えないブラウザ向け。
+   iOS は Safari でも Chrome でも、画像を長押しすれば「"写真"に保存」が出る。
+   パソコンではそのままダウンロードする。 */
+let saveUrl = null;
+function fallbackSave(blob){
+  if(saveUrl) URL.revokeObjectURL(saveUrl);
+  saveUrl = URL.createObjectURL(blob);
+  const touch = matchMedia('(hover: none)').matches;
+  if(touch){
+    $('saveImg').src = saveUrl;
+    $('saveHint').style.display = 'flex';
+  }else{
+    const a = document.createElement('a');
+    a.download = 'tsuya.jpg'; a.href = saveUrl; a.click();
+    setGuide('保存しました'); setTimeout(()=>setGuide(''), 2500);
+  }
+}
+$('saveHintClose').onclick = ()=>{
+  $('saveHint').style.display='none';
+  $('saveImg').removeAttribute('src');
+  if(saveUrl){ URL.revokeObjectURL(saveUrl); saveUrl=null; }
 };
 
 async function loadImage(file){
