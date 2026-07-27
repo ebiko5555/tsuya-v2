@@ -214,6 +214,7 @@
     font-size:9.5px; letter-spacing:.05em; line-height:1.5;
     background:rgba(255,253,250,.6);
   }
+  .addtile .addbox svg{width:22px; height:22px; display:block}
   /* 光の軌跡タブ */
   .toggle-row{
     display:flex; align-items:center; justify-content:space-between;
@@ -401,6 +402,8 @@
     <div class="edrow" id="edSwatches"></div>
     <div class="edrow tools">
       <button class="edbtn on" id="edPen">ペン</button>
+      <button class="edbtn" id="edFine">細ペン</button>
+      <button class="edbtn" id="edAir">エアブラシ</button>
       <button class="edbtn" id="edErase">消しゴム</button>
       <button class="edbtn" id="edClear">全消し</button>
       <input type="range" id="edSize" min="3" max="46" value="14">
@@ -840,19 +843,6 @@ const LOOKS = {
     c.fillStyle='rgba(255,255,255,.55)';
     c.fillRect(-w*0.06,-h/2,w*0.05,h*1.2);
   }},
-  wanghong:{name:'ワンホン', paint(c,w,h,col,seed){
-    nudeBase(c,w,h,.85);
-    c.fillStyle=shade(col,8);
-    c.beginPath();
-    c.moveTo(-w/2,-h*0.10); c.quadraticCurveTo(0,-h*0.32,w/2,-h*0.10);
-    c.lineTo(w/2,-h/2); c.lineTo(-w/2,-h/2); c.closePath(); c.fill();
-    c.fillStyle='rgba(255,255,255,.95)';
-    c.beginPath(); c.arc(-w*0.12,h*0.10,w*0.055,0,Math.PI*2); c.fill();
-    c.fillStyle='#e8c987';
-    c.beginPath(); c.arc(w*0.02,h*0.16,w*0.04,0,Math.PI*2); c.fill();
-    c.fillStyle=hexA(col,.9);
-    heart(c, w*0.14, h*0.02, w*0.09);
-  }},
   french:{name:'フレンチ', paint(c,w,h,col){
     nudeBase(c,w,h,.45);
     c.fillStyle=shade(col,5);
@@ -968,7 +958,7 @@ const LOOKS = {
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
   }},
   marble:{name:'大理石', paint(c,w,h,col){
-    base(c,w,h,'#fdfaf7','#f1ebe4');
+    base(c,w,h,shade(col,66),shade(col,40));
     const vein=(seed,color,wid,n)=>{
       const rnd=seeded(seed); c.strokeStyle=color; c.lineCap='round'; c.lineJoin='round';
       for(let i=0;i<n;i++){
@@ -979,9 +969,9 @@ const LOOKS = {
         c.stroke();
       }
     };
-    vein(7,  hexA(shade(col,-35),.45), w*0.030, 3);
-    vein(23, hexA(shade(col,-10),.28), w*0.018, 4);
-    vein(41, 'rgba(200,168,106,.75)',  w*0.010, 2);
+    vein(7,  hexA(shade(col,-55),.60), w*0.032, 3);
+    vein(23, hexA(shade(col,-15),.40), w*0.018, 4);
+    vein(41, 'rgba(200,168,106,.7)',   w*0.010, 2);
   }},
   nuance:{name:'ニュアンス', paint(c,w,h,col){
     base(c,w,h,shade(col,44),shade(col,14));
@@ -996,18 +986,18 @@ const LOOKS = {
     c.beginPath(); c.moveTo(-w*0.30,h*0.06); c.quadraticCurveTo(0,-h*0.12,w*0.28,h*0.20); c.stroke();
   }},
   bekko:{name:'べっ甲', paint(c,w,h,col){
-    base(c,w,h,'#eabf72','#b8752f');
+    base(c,w,h,shade(col,52),shade(col,4));
     const rnd=seeded(7);
     for(let i=0;i<9;i++){
       const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(0.13+rnd()*0.28);
       const g=c.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,'rgba(74,38,12,.85)');
-      g.addColorStop(.6,'rgba(120,64,20,.32)');
-      g.addColorStop(1,'rgba(120,64,20,0)');
+      g.addColorStop(0,hexA(shade(col,-72),.9));
+      g.addColorStop(.6,hexA(shade(col,-45),.35));
+      g.addColorStop(1,hexA(shade(col,-45),0));
       c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
     }
-    const k=c.globalAlpha; c.globalAlpha=k*.25;
-    base(c,w,h,shade(col,30),shade(col,-8)); c.globalAlpha=k;
+    const k=c.globalAlpha; c.globalAlpha=k*.16;      /* べっ甲らしい飴色をひと匙 */
+    base(c,w,h,'#e8bd74','#a9682a'); c.globalAlpha=k;
   }},
   check:{name:'チェック', paint(c,w,h,col){
     base(c,w,h,'#fdf7f0','#f4e8dc');
@@ -1114,10 +1104,12 @@ function buildLooks(){
     };
     row.appendChild(div);
   });
-  [['✎ 描く', ()=>openEditor()], ['＋ 画像', ()=>$('designInput').click()]].forEach(([label,fn])=>{
+  const ICON_PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 4.6 19.4 8.8"/><path d="M17.3 2.5a1.6 1.6 0 0 1 2.3 0l1.9 1.9a1.6 1.6 0 0 1 0 2.3L8.9 19.3l-5 1.8 1.8-5Z"/><path d="M4.4 20.7 8 17.1"/></svg>';
+  const ICON_CAM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.4h3.3l1.4-2.2h8.6l1.4 2.2H21v10.2H3Z"/><circle cx="12" cy="13.2" r="3.5"/></svg>';
+  [[ICON_PEN, ()=>openEditor()], [ICON_CAM, ()=>$('designInput').click()]].forEach(([icon,fn])=>{
     const div=document.createElement('div');
     div.className='look addtile';
-    const box=document.createElement('div'); box.className='addbox'; box.textContent=label;
+    const box=document.createElement('div'); box.className='addbox'; box.innerHTML=icon;
     div.appendChild(box);
     const sp=document.createElement('span'); sp.textContent='マイデザイン'; div.appendChild(sp);
     div.onclick=fn;
@@ -1142,7 +1134,7 @@ function refreshThumbs(){
 }
 
 /* ================= お絵かきエディタ ================= */
-const ed = { canvas:null, ctx:null, drawing:false, size:14, erase:false };
+const ed = { canvas:null, ctx:null, drawing:false, size:14, tool:'pen', lx:0, ly:0 };
 function openEditor(){
   $('editor').style.display='flex';
   if(!ed.canvas){
@@ -1157,19 +1149,43 @@ function openEditor(){
     const start=ev=>{ ed.drawing=true; const [x,y]=pos(ev); stroke(x,y,true); ev.preventDefault(); };
     const move=ev=>{ if(!ed.drawing) return; const [x,y]=pos(ev); stroke(x,y,false); ev.preventDefault(); };
     const end=()=>{ ed.drawing=false; };
+    function spray(x,y){
+      const r = ed.size*1.25;
+      const g = c.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0, hexA(currentColor,.16));
+      g.addColorStop(.55, hexA(currentColor,.06));
+      g.addColorStop(1, hexA(currentColor,0));
+      c.fillStyle=g; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+    }
     function stroke(x,y,first){
-      c.globalCompositeOperation = ed.erase ? 'destination-out' : 'source-over';
+      c.globalCompositeOperation = ed.tool==='erase' ? 'destination-out' : 'source-over';
+      if(ed.tool==='air'){
+        /* 点がとびとびに来るので、前の位置との間を埋める */
+        if(first){ spray(x,y); }
+        else{
+          const d=Math.hypot(x-ed.lx, y-ed.ly);
+          const n=Math.max(1, Math.ceil(d/Math.max(2, ed.size*0.28)));
+          for(let i=1;i<=n;i++) spray(ed.lx+(x-ed.lx)*i/n, ed.ly+(y-ed.ly)*i/n);
+        }
+        ed.lx=x; ed.ly=y; return;
+      }
+      const lw = ed.tool==='fine' ? Math.max(1.6, ed.size*0.26) : ed.size;
       c.strokeStyle=currentColor; c.fillStyle=currentColor;
-      c.lineWidth=ed.size; c.lineCap='round'; c.lineJoin='round';
-      if(first){ c.beginPath(); c.arc(x,y,ed.size/2,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(x,y); }
+      c.lineWidth=lw; c.lineCap='round'; c.lineJoin='round';
+      if(first){ c.beginPath(); c.arc(x,y,lw/2,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(x,y); }
       else { c.lineTo(x,y); c.stroke(); }
+      ed.lx=x; ed.ly=y;
     }
     ed.canvas.addEventListener('pointerdown',start);
     ed.canvas.addEventListener('pointermove',move);
     window.addEventListener('pointerup',end);
     $('edSize').addEventListener('input',e=>{ ed.size=+e.target.value; });
-    $('edPen').onclick=()=>{ ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
-    $('edErase').onclick=()=>{ ed.erase=true; $('edErase').classList.add('on'); $('edPen').classList.remove('on'); };
+    const TOOLS={pen:'edPen', fine:'edFine', air:'edAir', erase:'edErase'};
+    window.edSetTool = t=>{
+      ed.tool=t;
+      Object.entries(TOOLS).forEach(([k,id])=>$(id).classList.toggle('on', k===t));
+    };
+    Object.entries(TOOLS).forEach(([k,id])=>{ $(id).onclick=()=>edSetTool(k); });
     $('edClear').onclick=edClear;
     $('edCancel').onclick=()=>{ $('editor').style.display='none'; };
     $('edDone').onclick=()=>{
@@ -1188,7 +1204,7 @@ function openEditor(){
   currentPalette.forEach(col=>{
     const s=document.createElement('div');
     s.className='edsw'; s.style.background=col;
-    s.onclick=()=>{ currentColor=col; ed.erase=false; $('edPen').classList.add('on'); $('edErase').classList.remove('on'); };
+    s.onclick=()=>{ currentColor=col; if(ed.tool==='erase') edSetTool('pen'); };
     sw.appendChild(s);
   });
 }
