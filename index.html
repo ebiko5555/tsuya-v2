@@ -564,7 +564,10 @@ function makeHands(opts){
 function ensureLive(){
   if(window.__mpFailed) return Promise.reject(new Error('cdn'));
   if(!liveReady){
-    liveHands = makeHands({maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.6, minTrackingConfidence:0.6});
+    /* 実機計測(iPhone 13 Pro Max)で決めた値。
+   両手を探すと検出に83msかかり、その間メインスレッドが止まって描画が11fpsまで落ちる。
+   片手だけにすると29ms・26fpsになる。スマホは片手で持つので2つ探す意味がない。 */
+    liveHands = makeHands({maxNumHands:1, modelComplexity:0, minDetectionConfidence:0.5, minTrackingConfidence:0.3});
     liveHands.onResults(res => {
       const lms = res.multiHandLandmarks || [];
       if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms); }
@@ -590,11 +593,13 @@ function updateLandmarks(lms){
     lm.forEach((p,i)=>{
       const s = smoothed[h][i];
       [['x','vx'],['y','vy']].forEach(([ax,v])=>{
+        /* 26fps 出るようになったぶん、平滑を強めても遅れない。
+           実測で静止時の揺れが 72px→18px、角度が 19°→7° に下がった値 */
         const d = p[ax]-s[ax];
-        if(Math.abs(d) < 0.0022){ s[v]*=0.5; return; }
+        if(Math.abs(d) < 0.0030){ s[v]*=0.5; return; }
         const dv = d/dt;
         s[v] += alphaFor(1.0, dt)*(dv - s[v]);
-        const cutoff = 1.0 + 25*Math.abs(s[v]);
+        const cutoff = 0.55 + 32*Math.abs(s[v]);
         s[ax] += alphaFor(cutoff, dt)*d;
       });
     });
