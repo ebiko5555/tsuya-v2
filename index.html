@@ -725,11 +725,6 @@ const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShap
 const SKIN_FX = {div:5, a:0.42, lift:0.45};
 const skinCv = document.createElement('canvas');
 const skinCtx = skinCv.getContext('2d');
-/* 手は自然に残し、周囲だけを柔らかくぼかして少し暗くする。
-   低解像度のレイヤーで処理し、手の追跡速度への影響を抑える。 */
-const SURROUND_FX = {div:4, opacity:0.86, blur:7, dark:0.18, warm:0.07};
-const surroundCv = document.createElement('canvas');
-const surroundCtx = surroundCv.getContext('2d');
 const $ = id => document.getElementById(id);
 
 function setStatus(t){ $('status').textContent = t || ''; }
@@ -858,7 +853,6 @@ function startLoops(){
         ctx.globalAlpha = 1;
       }
       ctx.restore();
-      drawSurroundFx();
       recordTrails();
       drawTrails(dt);
       drawNails();
@@ -1017,87 +1011,6 @@ function lmXY(p){
   let x = p.x*canvas.width, y = p.y*canvas.height;
   if(mirrored()) x = canvas.width - x;
   return [x,y];
-}
-/* ================= 手の周囲の画像処理 =================
-   1. 映像を1/4へ縮小し、柔らかな暗さと暖色を加える
-   2. 追跡点の周りをグラデーションで透明に抜く
-   3. 元の映像へぼかして重ね、手だけを自然に残す
-   人物切り抜き用の重いAIを増やさないため、既存の21点をそのまま使う。 */
-function drawSurroundFx(){
-  const fx=SURROUND_FX;
-  if(!fx || video.readyState<2) return;
-  const sw=Math.max(32,Math.round(canvas.width/fx.div));
-  const sh=Math.max(32,Math.round(canvas.height/fx.div));
-  if(surroundCv.width!==sw || surroundCv.height!==sh){
-    surroundCv.width=sw; surroundCv.height=sh;
-  }
-  const c=surroundCtx;
-  c.setTransform(1,0,0,1,0,0);
-  c.globalCompositeOperation='source-over';
-  c.globalAlpha=1;
-  c.clearRect(0,0,sw,sh);
-  c.save();
-  if(mirrored()){ c.translate(sw,0); c.scale(-1,1); }
-  /* ぼかしは小さいキャンバス側で行い、スマホの負荷を抑える */
-  c.filter=`blur(${Math.max(1,fx.blur/fx.div)}px)`;
-  c.drawImage(video,0,0,sw,sh);
-  c.restore();
-  c.filter='none';
-
-  /* 背景の情報を残したまま、室内の雑多な色だけを静かに沈める */
-  c.fillStyle=`rgba(39,29,25,${fx.dark})`;
-  c.fillRect(0,0,sw,sh);
-  c.fillStyle=`rgba(181,126,92,${fx.warm})`;
-  c.fillRect(0,0,sw,sh);
-
-  if(smoothed.length){
-    c.globalCompositeOperation='destination-out';
-    smoothed.forEach(lm=>{
-      let handRef=0;
-      PALM_BONES.forEach(([a,b])=>{
-        const [ax,ay]=lmXY(lm[a]), [bx,by]=lmXY(lm[b]);
-        handRef=Math.max(handRef,Math.hypot(ax-bx,ay-by));
-      });
-      handRef/=fx.div;
-      if(handRef<3) return;
-
-      const erase=(x,y,r,core=.60)=>{
-        const g=c.createRadialGradient(x,y,r*core,x,y,r);
-        g.addColorStop(0,'rgba(0,0,0,1)');
-        g.addColorStop(.72,'rgba(0,0,0,.88)');
-        g.addColorStop(1,'rgba(0,0,0,0)');
-        c.fillStyle=g; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
-      };
-      const pt=i=>{ const [x,y]=lmXY(lm[i]); return [x/fx.div,y/fx.div]; };
-
-      /* 手のひらと手首を大きく、指は関節ごと＋中間点を抜いて輪郭をつなぐ */
-      const palmIds=[0,5,9,13,17];
-      const palm=palmIds.reduce((a,i)=>{ const p=pt(i); a[0]+=p[0]; a[1]+=p[1]; return a; },[0,0]);
-      palm[0]/=palmIds.length; palm[1]/=palmIds.length;
-      erase(palm[0],palm[1],handRef*.66,.64);
-      const wrist=pt(0); erase(wrist[0],wrist[1],handRef*.40,.58);
-
-      const chains=[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[17,18,19,20]];
-      chains.forEach((chain,fi)=>{
-        chain.forEach((id,j)=>{
-          const p=pt(id);
-          const r=handRef*(fi===0 ? .235 : (j===3 ? .185 : .215));
-          erase(p[0],p[1],r,.58);
-          if(j){
-            const q=pt(chain[j-1]);
-            erase((p[0]+q[0])/2,(p[1]+q[1])/2,r*.92,.58);
-          }
-        });
-      });
-    });
-  }
-  c.globalCompositeOperation='source-over';
-  c.globalAlpha=1;
-
-  ctx.save();
-  ctx.globalAlpha=fx.opacity;
-  ctx.drawImage(surroundCv,0,0,canvas.width,canvas.height);
-  ctx.restore();
 }
 function drawNails(){
   sparkT = performance.now()/1000;
