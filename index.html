@@ -418,6 +418,131 @@
   .edbtn.on{border-color:var(--ink); color:var(--ink)}
   .edbtn.primary{background:var(--ink); color:#fdfaf7; border-color:var(--ink)}
   .edrow.acts{justify-content:flex-end; margin-top:14px}
+
+  /* ================================================================
+     UI BRUSH-UP 1 — 静かな鏡台
+     追跡・爪描画・撮影・保存のコードは変えず、見せ方だけを整える。
+     ================================================================ */
+  body{
+    height:100dvh;
+    background:
+      radial-gradient(80% 48% at 50% 0%, rgba(255,255,255,.92), transparent 72%),
+      linear-gradient(180deg,#f8f5f1 0%,#f1ebe5 100%);
+  }
+  header{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    min-height:54px;
+    padding:calc(7px + env(safe-area-inset-top)) 18px 7px;
+  }
+  .overline{
+    position:absolute; left:22px; top:calc(14px + env(safe-area-inset-top));
+    margin:0; max-width:100px; line-height:1.6;
+    text-align:left; font-size:7px; letter-spacing:.32em; text-indent:0;
+  }
+  header h1{
+    font-size:32px; line-height:1; letter-spacing:.12em;
+    background:linear-gradient(120deg,#765142 4%,#d4aa89 48%,#8b604d 92%);
+    -webkit-background-clip:text; background-clip:text;
+  }
+  header .rule{
+    position:absolute; right:22px; top:50%;
+    width:42px; margin:0; opacity:.18;
+  }
+  .stage{
+    margin:0 10px;
+    border-radius:28px;
+    border:1px solid rgba(255,255,255,.78);
+    background:#ded6ce;
+    box-shadow:0 16px 42px rgba(79,57,45,.13), 0 2px 8px rgba(79,57,45,.06);
+  }
+  #startOverlay{
+    background:
+      radial-gradient(70% 54% at 50% 34%,rgba(255,255,255,.82),transparent 70%),
+      linear-gradient(150deg,#f6f1eb,#e9ded4);
+  }
+  #startOverlay .invite{margin-bottom:28px; color:#77675c}
+  .bigbtn{
+    padding:14px 46px;
+    background:#2f2926;
+    box-shadow:0 8px 24px rgba(42,37,34,.2);
+  }
+  .panel{
+    position:relative;
+    margin:10px 10px 0;
+    padding:5px 12px calc(10px + env(safe-area-inset-bottom));
+    border:1px solid rgba(255,255,255,.88);
+    border-bottom:none;
+    border-radius:25px 25px 0 0;
+    background:rgba(255,253,250,.88);
+    box-shadow:0 -8px 30px rgba(75,52,41,.08);
+    backdrop-filter:blur(18px) saturate(1.08);
+    -webkit-backdrop-filter:blur(18px) saturate(1.08);
+    transition:padding .26s ease, background .26s ease;
+  }
+  .sheet-handle{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; height:24px; margin:0 0 2px;
+    border:0; background:transparent; color:var(--faint);
+    font:inherit; font-size:8px; letter-spacing:.18em; cursor:pointer;
+  }
+  .sheet-handle::before{
+    content:""; width:30px; height:2px; border-radius:999px;
+    background:rgba(42,37,34,.22); transition:width .25s ease, background .25s ease;
+  }
+  .sheet-handle span{opacity:.8}
+  .panel.collapsed{padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+  .panel.collapsed .sheet-handle::before{width:42px; background:rgba(164,115,92,.48)}
+  .panel.collapsed .tray{display:none!important}
+  .panel.collapsed .tabs{margin-bottom:0}
+  .tabs{
+    display:grid; grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:3px; margin:0 0 10px; justify-content:initial; flex-wrap:initial;
+    border-bottom:1px solid rgba(42,37,34,.07);
+  }
+  .tab{
+    min-width:0; padding:7px 1px 9px;
+    text-align:center; font-size:9.5px; letter-spacing:.08em; text-indent:0;
+    white-space:nowrap;
+  }
+  .tab::after{height:1.5px; background:var(--accent)}
+  .tab.active{color:#5d4034}
+  .tray.active{
+    max-height:min(27vh,220px); overflow-y:auto; overscroll-behavior:contain;
+    padding:1px 2px 3px;
+  }
+  .scroller{gap:11px}
+  .look canvas{
+    border-radius:26px 26px 20px 20px;
+    box-shadow:0 3px 10px rgba(90,66,50,.10);
+  }
+  .look.active canvas{
+    border-color:var(--accent); transform:translateY(-2px);
+    box-shadow:0 5px 16px rgba(164,115,92,.18);
+  }
+  .chip,.tone{box-shadow:inset 0 -5px 9px rgba(0,0,0,.10),inset 0 4px 6px rgba(255,255,255,.4)}
+  .chip.active,.tone.active{border-color:var(--accent)}
+  .presetbtn{background:rgba(255,255,255,.34)}
+  .presetbtn.active{background:#705044; border-color:#705044}
+  .stagebtns{bottom:14px; gap:16px}
+  .roundbtn{
+    background:rgba(31,25,22,.36);
+    border:1px solid rgba(255,255,255,.25);
+    box-shadow:0 3px 12px rgba(0,0,0,.13);
+  }
+  .shutter{width:62px; height:62px; box-shadow:0 4px 18px rgba(0,0,0,.18)}
+  .shutter::after{width:48px; height:48px}
+  #snapBar .pill{background:rgba(36,29,25,.58)}
+  #snapBar .pill.primary{background:rgba(255,253,250,.94)}
+
+  @media (max-height:720px){
+    header{min-height:43px; padding-top:calc(4px + env(safe-area-inset-top)); padding-bottom:4px}
+    header h1{font-size:27px}
+    .overline{display:none}
+    header .rule{top:52%}
+    .panel{margin-top:7px}
+    .tray.active{max-height:min(25vh,170px)}
+  }
 </style>
 </head>
 <body>
@@ -451,7 +576,10 @@
   </div>
 </div>
 
-<div class="panel">
+<div class="panel" id="controlPanel">
+  <button type="button" class="sheet-handle" id="sheetHandle" aria-expanded="true">
+    <span>操作をしまう</span>
+  </button>
   <div class="tabs">
     <div class="tab active" data-t="looks">デザイン</div>
     <div class="tab" data-t="colors">カラー</div>
@@ -1832,6 +1960,31 @@ buildFingerRow();
 syncVarSlider();
 buildSetsRow();
 updateCmpBadge();
+</script>
+<script>
+/* UI BRUSH-UP 1：機能を減らさず、操作パネルだけを静かに開閉する */
+(()=>{
+  const panel=document.getElementById('controlPanel');
+  const handle=document.getElementById('sheetHandle');
+  const label=handle.querySelector('span');
+  const setCollapsed=collapsed=>{
+    panel.classList.toggle('collapsed',collapsed);
+    handle.setAttribute('aria-expanded',String(!collapsed));
+    label.textContent=collapsed?'操作をひらく':'操作をしまう';
+  };
+  handle.addEventListener('click',()=>setCollapsed(!panel.classList.contains('collapsed')));
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click',()=>setCollapsed(false));
+  });
+  const overlay=document.getElementById('startOverlay');
+  const observer=new MutationObserver(()=>{
+    if(overlay.style.display==='none'){
+      setCollapsed(true);
+      observer.disconnect();
+    }
+  });
+  observer.observe(overlay,{attributes:true,attributeFilter:['style']});
+})();
 </script>
 </body>
 </html>
