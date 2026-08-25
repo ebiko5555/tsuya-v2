@@ -725,11 +725,6 @@ const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShap
 const SKIN_FX = {div:5, a:0.42, lift:0.45};
 const skinCv = document.createElement('canvas');
 const skinCtx = skinCv.getContext('2d');
-/* カメラ映像の背景だけを、明るく白っぽくぼかす。
-   手・腕・ネイルは加工レイヤーから抜き、元の映像をそのまま見せる。 */
-const BACKGROUND_FX = {div:4, opacity:0.94, blur:8, white:0.38};
-const backgroundCv = document.createElement('canvas');
-const backgroundCtx = backgroundCv.getContext('2d');
 const $ = id => document.getElementById(id);
 
 function setStatus(t){ $('status').textContent = t || ''; }
@@ -858,7 +853,6 @@ function startLoops(){
         ctx.globalAlpha = 1;
       }
       ctx.restore();
-      drawCameraBackgroundFx();
       recordTrails();
       drawTrails(dt);
       drawNails();
@@ -1017,93 +1011,6 @@ function lmXY(p){
   let x = p.x*canvas.width, y = p.y*canvas.height;
   if(mirrored()) x = canvas.width - x;
   return [x,y];
-}
-/* ================= カメラ背景だけの画像処理 =================
-   低解像度で「ぼかした白い背景レイヤー」を作り、既存の21点を使って
-   手・指・手首・腕の領域を柔らかく透明に抜いてから元映像へ重ねる。
-   暗さや色味は手に加えない。 */
-function drawCameraBackgroundFx(){
-  const fx=BACKGROUND_FX;
-  if(!fx || video.readyState<2) return;
-  const sw=Math.max(32,Math.round(canvas.width/fx.div));
-  const sh=Math.max(32,Math.round(canvas.height/fx.div));
-  if(backgroundCv.width!==sw || backgroundCv.height!==sh){
-    backgroundCv.width=sw; backgroundCv.height=sh;
-  }
-  const c=backgroundCtx;
-  c.setTransform(1,0,0,1,0,0);
-  c.globalCompositeOperation='source-over';
-  c.globalAlpha=1;
-  c.clearRect(0,0,sw,sh);
-  c.save();
-  if(mirrored()){ c.translate(sw,0); c.scale(-1,1); }
-  /* ぼかしは1/4解像度で行い、スマホの負荷を抑える */
-  c.filter=`blur(${Math.max(1,fx.blur/fx.div)}px)`;
-  c.drawImage(video,0,0,sw,sh);
-  c.restore();
-  c.filter='none';
-
-  /* 背景を暗くせず、白へ近づける */
-  c.fillStyle=`rgba(255,253,250,${fx.white})`;
-  c.fillRect(0,0,sw,sh);
-
-  if(smoothed.length){
-    c.globalCompositeOperation='destination-out';
-    smoothed.forEach(lm=>{
-      let handRef=0;
-      PALM_BONES.forEach(([a,b])=>{
-        const [ax,ay]=lmXY(lm[a]), [bx,by]=lmXY(lm[b]);
-        handRef=Math.max(handRef,Math.hypot(ax-bx,ay-by));
-      });
-      handRef/=fx.div;
-      if(handRef<3) return;
-
-      const erase=(x,y,r,core=.68)=>{
-        const g=c.createRadialGradient(x,y,r*core,x,y,r);
-        g.addColorStop(0,'rgba(0,0,0,1)');
-        g.addColorStop(.76,'rgba(0,0,0,.94)');
-        g.addColorStop(1,'rgba(0,0,0,0)');
-        c.fillStyle=g;
-        c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
-      };
-      const pt=i=>{ const [x,y]=lmXY(lm[i]); return [x/fx.div,y/fx.div]; };
-
-      const palmIds=[0,5,9,13,17];
-      const palm=palmIds.reduce((a,i)=>{ const p=pt(i); a[0]+=p[0]; a[1]+=p[1]; return a; },[0,0]);
-      palm[0]/=palmIds.length; palm[1]/=palmIds.length;
-      erase(palm[0],palm[1],handRef*.72,.72);
-
-      /* 指は関節と関節の中間も抜き、指の間へ白い背景が入りすぎないようにする */
-      const chains=[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[17,18,19,20]];
-      chains.forEach((chain,fi)=>{
-        chain.forEach((id,j)=>{
-          const p=pt(id);
-          const r=handRef*(fi===0 ? .25 : (j===3 ? .20 : .23));
-          erase(p[0],p[1],r,.66);
-          if(j){
-            const q=pt(chain[j-1]);
-            erase((p[0]+q[0])/2,(p[1]+q[1])/2,r*.95,.66);
-          }
-        });
-      });
-
-      /* 手首から画面外へ腕の方向を延ばし、腕まで元映像のまま残す */
-      const wrist=pt(0);
-      let vx=wrist[0]-palm[0], vy=wrist[1]-palm[1];
-      const vl=Math.hypot(vx,vy)||1; vx/=vl; vy/=vl;
-      for(let k=0;k<8;k++){
-        const d=handRef*k*.34;
-        erase(wrist[0]+vx*d,wrist[1]+vy*d,handRef*(.44+k*.025),.70);
-      }
-    });
-  }
-  c.globalCompositeOperation='source-over';
-  c.globalAlpha=1;
-
-  ctx.save();
-  ctx.globalAlpha=fx.opacity;
-  ctx.drawImage(backgroundCv,0,0,canvas.width,canvas.height);
-  ctx.restore();
 }
 function drawNails(){
   sparkT = performance.now()/1000;
