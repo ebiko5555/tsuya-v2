@@ -625,6 +625,7 @@
     backdrop-filter:blur(24px) saturate(.8); -webkit-backdrop-filter:blur(24px) saturate(.8);
   }
   body:not(.camera-started) .panel{display:none}
+  body.work-tryon .panel{display:none!important}
   .sheet-handle{color:rgba(255,255,255,.42)}
   .sheet-handle::before{height:1px; background:rgba(255,255,255,.28)}
   .panel.collapsed .sheet-handle::before{background:rgba(209,165,141,.72)}
@@ -689,6 +690,37 @@
   .work-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em; opacity:.58}
   .work-title{margin:10px 0 9px; font:300 clamp(48px,16vw,82px)/.95 "Times New Roman","Yu Mincho",serif; letter-spacing:.04em}
   .work-text{max-width:28em; font-size:11px; line-height:1.9; letter-spacing:.05em; opacity:.78}
+  .work-actions{display:flex; align-items:center; gap:18px; margin-top:18px}
+  .work-try,.work-custom{
+    border:1px solid rgba(255,255,255,.36); padding:12px 18px; color:#fff;
+    background:rgba(8,9,12,.28); font-size:9px; letter-spacing:.1em; text-decoration:none;
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  }
+  .work-custom{border:0; border-bottom:1px solid rgba(255,255,255,.3); padding:9px 2px; color:rgba(255,255,255,.7)}
+  .opening-actions{position:relative; z-index:2; display:flex; align-items:center; gap:20px}
+  .make-link{padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.32); color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.12em; text-decoration:none}
+  .opening-index{
+    position:absolute; z-index:3; right:18px; bottom:calc(34px + env(safe-area-inset-bottom));
+    display:flex; gap:8px;
+  }
+  .opening-index button{
+    width:25px; height:28px; border:0; border-top:1px solid rgba(255,255,255,.2);
+    color:rgba(255,255,255,.44); background:none;
+    font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .opening-index button:hover,.opening-index button:focus{color:#fff; border-top-color:#d7b39e}
+  .try-identity{
+    position:absolute; z-index:9; display:none; left:18px; top:calc(92px + env(safe-area-inset-top));
+    color:#fff; font:500 8px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em;
+  }
+  .try-identity a{display:block; margin-top:13px; color:rgba(255,255,255,.62); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
+  body.work-tryon.camera-started .try-identity{display:block}
+  body.work-tryon .opening-film.a{left:0; top:0; width:100%; height:100%; clip-path:none; opacity:.62}
+  body.work-tryon .opening-film.b,body.work-tryon .opening-film.c{display:none}
+  body.work-tryon .opening-index,body.custom-mode .opening-index{display:none}
+  body.work-tryon #startOverlay .invite{max-width:11em}
+  body.work-tryon .art-signal{top:calc(92px + env(safe-area-inset-top))}
+  body.art-page header{display:none}
 
   @media (min-width:640px){
     .art-signal{width:132px; height:206px; right:24px}
@@ -716,7 +748,18 @@
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite">自分の手から、<br>作品へ。</p>
-    <button class="bigbtn" id="startBtn">はじめる</button>
+    <div class="opening-actions">
+      <button class="bigbtn" id="startBtn">作品を見る</button>
+      <a class="make-link" href="?mode=custom">自分で作る</a>
+    </div>
+    <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
+      <button type="button" data-opening-work="COLOR" aria-label="COLOR 色">01</button>
+      <button type="button" data-opening-work="SURFACE" aria-label="SURFACE 表面">02</button>
+      <button type="button" data-opening-work="SCULPT" aria-label="SCULPT 形">03</button>
+      <button type="button" data-opening-work="LIGHT" aria-label="LIGHT 光">04</button>
+      <button type="button" data-opening-work="HAND" aria-label="HAND 手">05</button>
+      <button type="button" data-opening-work="TRACE" aria-label="TRACE 痕跡">06</button>
+    </nav>
     <div id="status"></div>
   </div>
 
@@ -725,6 +768,11 @@
     <span class="signal-no" id="signalNo">01</span>
     <span class="signal-name" id="signalName">COLOR / 色</span>
   </button>
+  <div class="try-identity" id="tryIdentity">
+    <span id="tryIdentityText">01 / COLOR</span>
+    <a href="?work=COLOR" id="tryWorkBack">作品を見る</a>
+    <a href="?mode=custom">自分で作る</a>
+  </div>
 
   <div class="stagebtns" id="liveBtns" style="display:none">
     <button class="roundbtn" id="cmpBtn" title="比べる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3.2" y="3.2" width="7.6" height="7.6" rx="1.4"/><rect x="13.2" y="3.2" width="7.6" height="7.6" rx="1.4"/><rect x="3.2" y="13.2" width="7.6" height="7.6" rx="1.4"/><rect x="13.2" y="13.2" width="7.6" height="7.6" rx="1.4"/></svg><span class="badge" id="cmpBadge"></span></button>
@@ -840,6 +888,10 @@
     <div class="work-code" id="workCode">01 / COLOR</div>
     <h2 class="work-title" id="workTitle">色</h2>
     <p class="work-text" id="workText"></p>
+    <div class="work-actions">
+      <button type="button" class="work-try" id="workTryBtn">この作品を手にのせる</button>
+      <a class="work-custom" href="?mode=custom">自分で作る</a>
+    </div>
   </div>
 </section>
 
@@ -2161,15 +2213,39 @@ updateCmpBadge();
 })();
 </script>
 <script>
-/* 試作2：操作と作品動画を同じ画面で結び、試着状態を保ったまま作品へ展開する。 */
+/* 試作3：作品別の固定ネイル試着と「自分で作る」を別ページとして分ける。 */
 (()=>{
   const works={
-    COLOR:{no:'01',title:'色',label:'COLOR / 色',film:'art-assets/color-pattern.mp4',text:'色を選ぶ行為から、身体の表面に模様が増殖する作品へ。爪の小さな面が、手全体の色彩へひらく。'},
-    SURFACE:{no:'02',title:'表面',label:'SURFACE / 表面',film:'art-assets/surface-gold.mp4',text:'艶、膜、液体、反射。触れられない画面のなかで、素材の重さと皮膚の距離を想像する。'},
-    SCULPT:{no:'03',title:'形',label:'SCULPT / 形',film:'art-assets/sculpt-wire.mp4',text:'爪先を伸ばす操作から、線だけで立ち上がる手の構造へ。装飾は小さな彫刻へ変わる。'},
-    LIGHT:{no:'04',title:'光',label:'LIGHT / 光',film:'art-assets/light-mandala.mp4',text:'指先に残る光が、手と球体をめぐる空間へ広がる。試着は見ることから、光で描くことへ逸脱する。'},
-    HAND:{no:'05',title:'手',label:'HAND / 手',film:'art-assets/hand-drawing.mp4',text:'自分の手を入口に、祈り、思惟、労働、ケアの身振りへ入る。手は形であると同時に記憶でもある。'},
-    TRACE:{no:'06',title:'痕跡',label:'TRACE / 痕跡',film:'art-assets/trace-dust.mp4',text:'動いたあとに残る粒子と影。完成した形ではなく、触れた時間と消えていく過程を見る。'}
+    COLOR:{
+      no:'01',title:'色',tryTitle:'色彩',label:'COLOR / 色',film:'art-assets/color-pattern.mp4',
+      text:'色を選ぶ行為から、身体の表面に模様が増殖する作品へ。爪の小さな面が、手全体の色彩へひらく。',
+      preset:{looks:['flower','dot','nuance','aurora','flash'],colors:['#d14f78','#e0b936','#477d6c','#795a9f','#c55d3d'],tune:{gloss:72,opacity:98,nailSize:102,sculptLen:142,sculptShape:'natural'},vars:{flower:.42,dot:.34,aurora:.68,flash:.44},trail:{on:false,intensity:0,hue:null}}
+    },
+    SURFACE:{
+      no:'02',title:'表面',tryTitle:'表面',label:'SURFACE / 表面',film:'art-assets/surface-gold.mp4',
+      text:'艶、膜、液体、反射。触れられない画面のなかで、素材の重さと皮膚の距離を想像する。',
+      preset:{looks:['chrome','nuance','marble','pearl','shell'],colors:['#8a5d25','#c18d3f','#6f4827','#d2aa63','#a97737'],tune:{gloss:100,opacity:100,nailSize:108,sculptLen:150,sculptShape:'round2'},vars:{marble:.7},trail:{on:false,intensity:0,hue:null}}
+    },
+    SCULPT:{
+      no:'03',title:'形',tryTitle:'形',label:'SCULPT / 形',film:'art-assets/sculpt-wire.mp4',
+      text:'爪先を伸ばす操作から、線だけで立ち上がる手の構造へ。装飾は小さな彫刻へ変わる。',
+      preset:{looks:['line','line','frenchmirror','line','line'],colors:['#e8ddd0','#d4c4b3','#f0e7dd','#cabaa7','#e5d6c5'],tune:{gloss:38,opacity:86,nailSize:108,sculptLen:196,sculptShape:'coffin'},vars:{line:.78,frenchmirror:.26},trail:{on:false,intensity:0,hue:null}}
+    },
+    LIGHT:{
+      no:'04',title:'光',tryTitle:'光',label:'LIGHT / 光',film:'art-assets/light-mandala.mp4',
+      text:'指先に残る光が、手と球体をめぐる空間へ広がる。試着は見ることから、光で描くことへ逸脱する。',
+      preset:{looks:['mizuhikari','stardust','aurora','flash','mizuhikari'],colors:['#173f4d','#2b6870','#447c86','#9c6681','#26535d'],tune:{gloss:100,opacity:96,nailSize:106,sculptLen:158,sculptShape:'almond'},vars:{mizuhikari:.64,stardust:.82,aurora:.72,flash:.66},trail:{on:true,intensity:88,hue:'#b9e8df'}}
+    },
+    HAND:{
+      no:'05',title:'手',tryTitle:'手の記憶',label:'HAND / 手',film:'art-assets/hand-drawing.mp4',
+      text:'自分の手を入口に、祈り、思惟、労働、ケアの身振りへ入る。手は形であると同時に記憶でもある。',
+      preset:{looks:['line','french','sheer','line','milk'],colors:['#b89c91','#e7d8cb','#cab8ad','#8e7770','#ded0c4'],tune:{gloss:30,opacity:78,nailSize:100,sculptLen:146,sculptShape:'natural'},vars:{line:.24,french:.18,sheer:.42,milk:.46},trail:{on:false,intensity:0,hue:null}}
+    },
+    TRACE:{
+      no:'06',title:'痕跡',tryTitle:'痕跡',label:'TRACE / 痕跡',film:'art-assets/trace-dust.mp4',
+      text:'動いたあとに残る粒子と影。完成した形ではなく、触れた時間と消えていく過程を見る。',
+      preset:{looks:['matte','stardust','sheer','flash','matte'],colors:['#313236','#5d6065','#b9b8b2','#777a80','#202126'],tune:{gloss:12,opacity:84,nailSize:104,sculptLen:154,sculptShape:'round2'},vars:{stardust:.46,sheer:.24,flash:.3},trail:{on:true,intensity:42,hue:'#d8d6cf'}}
+    }
   };
   const order=Object.keys(works);
   const tabMap={looks:'COLOR',colors:'COLOR',tune:'SURFACE',sculpt:'SCULPT',hikari:'LIGHT'};
@@ -2179,6 +2255,10 @@ updateCmpBadge();
   const layer=document.getElementById('workLayer');
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
+  const params=new URLSearchParams(location.search);
+  const artKey=(params.get('work')||'').toUpperCase();
+  const tryKey=(params.get('try')||'').toUpperCase();
+  const customMode=params.get('mode')==='custom';
   let current='COLOR';
 
   order.forEach(key=>{
@@ -2199,6 +2279,10 @@ updateCmpBadge();
 
   function openWork(key){
     setCurrent(key); const work=works[key];
+    if(document.body.classList.contains('art-page')){
+      history.replaceState(null,'','?work='+key);
+      document.title='艶 II — '+work.title;
+    }
     document.getElementById('workCode').textContent=work.no+' / '+key;
     document.getElementById('workTitle').textContent=work.title;
     document.getElementById('workText').textContent=work.text;
@@ -2208,6 +2292,7 @@ updateCmpBadge();
     workFilm.play().catch(()=>{});
   }
   function closeWork(){
+    if(document.body.classList.contains('art-page')){ location.href='./'; return; }
     workFilm.pause(); layer.classList.remove('open'); layer.setAttribute('aria-hidden','true');
     if(document.body.classList.contains('camera-started')) signalFilm.play().catch(()=>{});
   }
@@ -2216,16 +2301,71 @@ updateCmpBadge();
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&layer.classList.contains('open'))closeWork();});
 
   const started=new MutationObserver(()=>{
-    if(overlay.style.display==='none'){
+    if(overlay.style.display==='none' && mode==='live'){
       document.body.classList.add('camera-started');
       overlay.querySelectorAll('video').forEach(video=>video.pause());
       setCurrent(current); started.disconnect();
     }
   });
   started.observe(overlay,{attributes:true,attributeFilter:['style']});
+
+  function applyArtworkPreset(key){
+    const work=works[key]; if(!work) return;
+    targetFinger=-1;
+    applySet(work.preset);
+    trailOn=work.preset.trail.on;
+    trailIntensity=work.preset.trail.intensity;
+    trailHue=work.preset.trail.hue;
+    document.getElementById('trailSwitch').classList.toggle('on',trailOn);
+    document.getElementById('trailIntensity').value=trailIntensity;
+    buildTrailSwatches();
+  }
+
+  function showArtworkPage(key){
+    document.body.classList.add('art-page');
+    document.getElementById('workClose').textContent='作品一覧へ';
+    openWork(key);
+  }
+
+  function prepareFixedTryOn(key){
+    const work=works[key];
+    document.body.classList.add('work-tryon');
+    document.title='艶 II — '+work.tryTitle+'を手にのせる';
+    setCurrent(key); applyArtworkPreset(key);
+    document.querySelector('.opening-mark').innerHTML=work.no+' / '+work.label+'<br>ARTWORK TRY ON';
+    document.querySelector('#startOverlay .invite').innerHTML=work.tryTitle+'を、<br>手にのせる。';
+    document.getElementById('startBtn').textContent='カメラをひらく';
+    document.getElementById('tryIdentityText').textContent=work.no+' / '+work.label;
+    document.getElementById('tryWorkBack').href='?work='+key;
+    const hero=document.querySelector('.opening-film.a');
+    hero.src=work.film; hero.load();
+  }
+
+  function prepareCustomPage(){
+    document.body.classList.add('custom-mode');
+    document.title='艶 II — 自分で作る';
+    document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
+    document.querySelector('#startOverlay .invite').innerHTML='自分でつくる。<br>自分の手で。';
+    document.getElementById('startBtn').textContent='カメラをひらく';
+    const link=document.querySelector('.make-link'); link.textContent='作品から選ぶ'; link.href='./';
+  }
+
+  document.querySelectorAll('[data-opening-work]').forEach(button=>{
+    button.addEventListener('click',()=>{ location.href='?work='+button.dataset.openingWork; });
+  });
+  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href='?try='+current; });
+
   setCurrent('COLOR');
-  const previewKey=new URLSearchParams(location.search).get('work');
-  if(works[previewKey]){overlay.style.display='none'; openWork(previewKey);}
+  if(works[artKey]){
+    showArtworkPage(artKey);
+  }else if(works[tryKey]){
+    prepareFixedTryOn(tryKey);
+  }else if(customMode){
+    prepareCustomPage();
+  }else{
+    document.body.classList.add('hub-mode');
+    document.getElementById('startBtn').onclick=()=>{ location.href='?work=COLOR'; };
+  }
 })();
 </script>
 </body>
