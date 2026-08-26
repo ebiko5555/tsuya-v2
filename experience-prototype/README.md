@@ -56,7 +56,8 @@
 - COLOR / SURFACE / SCULPT / LIGHT / HAND / TRACE：全分類で対応する動画参照を確認。
 - 「試着へ戻る」：ページを再読み込みせず試着画面へ復帰。
 - ブラウザの画面エラー：なし。
-- 公開状態：未公開。作品動画5本を公開GitHubへアップロードする前に本人の明示確認が必要。
+- 公開URL：https://ebiko5555.github.io/tsuya-v2/experience-prototype/
+- 公開commit：`8038861`。GitHub Pages、動画5本、390×844の作品レイヤー表示、画面エラーなしを確認。
 
 ## Sources
 
