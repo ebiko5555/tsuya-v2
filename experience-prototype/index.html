@@ -690,6 +690,15 @@
   .work-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em; opacity:.58}
   .work-title{margin:10px 0 9px; font:300 clamp(48px,16vw,82px)/.95 "Times New Roman","Yu Mincho",serif; letter-spacing:.04em}
   .work-text{max-width:28em; font-size:11px; line-height:1.9; letter-spacing:.05em; opacity:.78}
+  .work-layer{--work-accent:#d7b39e}
+  .work-index button.active{border-left-color:var(--work-accent)}
+  .work-code{color:var(--work-accent)}
+  .work-title{position:relative; display:inline-block}
+  .work-title::after{content:""; position:absolute; left:calc(100% + 15px); top:54%; width:42px; height:1px; background:var(--work-accent); opacity:.78}
+  .work-nails{display:flex; align-items:flex-end; gap:7px; height:52px; margin-top:14px}
+  .work-nails canvas{width:21px; height:42px; filter:drop-shadow(0 5px 7px rgba(0,0,0,.26))}
+  .work-nails canvas:nth-child(1),.work-nails canvas:nth-child(5){height:35px}
+  .work-nails canvas:nth-child(2),.work-nails canvas:nth-child(4){height:39px}
   .work-actions{display:flex; align-items:center; gap:18px; margin-top:18px}
   .work-try,.work-custom{
     border:1px solid rgba(255,255,255,.36); padding:12px 18px; color:#fff;
@@ -713,14 +722,28 @@
     position:absolute; z-index:9; display:none; left:18px; top:calc(92px + env(safe-area-inset-top));
     color:#fff; font:500 8px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em;
   }
+  .try-identity .work-nails{height:35px; margin-top:7px; gap:3px}
+  .try-identity .work-nails canvas{width:12px; height:25px}
+  .try-identity .work-nails canvas:nth-child(1),.try-identity .work-nails canvas:nth-child(5){height:20px}
+  .try-identity .work-nails canvas:nth-child(2),.try-identity .work-nails canvas:nth-child(4){height:23px}
   .try-identity a{display:block; margin-top:13px; color:rgba(255,255,255,.62); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
   body.work-tryon.camera-started .try-identity{display:block}
+  body.custom-mode.camera-started .try-identity{display:block}
+  body.custom-mode #tryIdentity .work-nails,body.custom-mode #tryIdentity a:last-child{display:none}
   body.work-tryon .opening-film.a{left:0; top:0; width:100%; height:100%; clip-path:none; opacity:.62}
   body.work-tryon .opening-film.b,body.work-tryon .opening-film.c{display:none}
   body.work-tryon .opening-index,body.custom-mode .opening-index{display:none}
   body.work-tryon #startOverlay .invite{max-width:11em}
   body.work-tryon .art-signal{top:calc(92px + env(safe-area-inset-top))}
   body.art-page header{display:none}
+  body[data-work-key="COLOR"] .work-film{object-position:58% center; filter:saturate(.86) contrast(1.08)}
+  body[data-work-key="SURFACE"] .work-film{object-position:42% center; filter:saturate(.72) sepia(.08) contrast(1.12)}
+  body[data-work-key="SCULPT"] .work-film{object-position:64% center; filter:saturate(.18) contrast(1.16)}
+  body[data-work-key="LIGHT"] .work-film{object-position:50% center; filter:saturate(.72) contrast(1.12)}
+  body[data-work-key="HAND"] .work-film{object-position:60% center; filter:saturate(.12) contrast(1.1)}
+  body[data-work-key="TRACE"] .work-film{object-position:50% center; filter:grayscale(.82) contrast(1.18)}
+  body.custom-mode .panel{border-color:rgba(255,255,255,.2); background:rgba(8,9,12,.92)}
+  body.custom-mode .tab{letter-spacing:.18em}
 
   @media (min-width:640px){
     .art-signal{width:132px; height:206px; right:24px}
@@ -770,6 +793,7 @@
   </button>
   <div class="try-identity" id="tryIdentity">
     <span id="tryIdentityText">01 / COLOR</span>
+    <div class="work-nails" id="tryNails" aria-label="装着する5本のネイル"></div>
     <a href="?work=COLOR" id="tryWorkBack">作品を見る</a>
     <a href="?mode=custom">自分で作る</a>
   </div>
@@ -888,6 +912,7 @@
     <div class="work-code" id="workCode">01 / COLOR</div>
     <h2 class="work-title" id="workTitle">色</h2>
     <p class="work-text" id="workText"></p>
+    <div class="work-nails" id="workNails" aria-label="作品から作った5本のネイル"></div>
     <div class="work-actions">
       <button type="button" class="work-try" id="workTryBtn">この作品を手にのせる</button>
       <a class="work-custom" href="?mode=custom">自分で作る</a>
@@ -2217,34 +2242,34 @@ updateCmpBadge();
 (()=>{
   const works={
     COLOR:{
-      no:'01',title:'色',tryTitle:'色彩',label:'COLOR / 色',film:'art-assets/color-pattern.mp4',
+      no:'01',title:'色',tryTitle:'色彩',label:'COLOR / 色',accent:'#d14f78',film:'art-assets/color-pattern.mp4',
       text:'色を選ぶ行為から、身体の表面に模様が増殖する作品へ。爪の小さな面が、手全体の色彩へひらく。',
-      preset:{looks:['flower','dot','nuance','aurora','flash'],colors:['#d14f78','#e0b936','#477d6c','#795a9f','#c55d3d'],tune:{gloss:72,opacity:98,nailSize:102,sculptLen:142,sculptShape:'natural'},vars:{flower:.42,dot:.34,aurora:.68,flash:.44},trail:{on:false,intensity:0,hue:null}}
+      preset:{looks:['artColor','artColor','artColor','artColor','artColor'],colors:['#d14f78','#e0b936','#477d6c','#795a9f','#c55d3d'],tune:{gloss:72,opacity:98,nailSize:102,sculptLen:142,sculptShape:'natural'},vars:{},trail:{on:false,intensity:0,hue:null}}
     },
     SURFACE:{
-      no:'02',title:'表面',tryTitle:'表面',label:'SURFACE / 表面',film:'art-assets/surface-gold.mp4',
+      no:'02',title:'表面',tryTitle:'表面',label:'SURFACE / 表面',accent:'#c99a45',film:'art-assets/surface-gold.mp4',
       text:'艶、膜、液体、反射。触れられない画面のなかで、素材の重さと皮膚の距離を想像する。',
-      preset:{looks:['chrome','nuance','marble','pearl','shell'],colors:['#8a5d25','#c18d3f','#6f4827','#d2aa63','#a97737'],tune:{gloss:100,opacity:100,nailSize:108,sculptLen:150,sculptShape:'round2'},vars:{marble:.7},trail:{on:false,intensity:0,hue:null}}
+      preset:{looks:['artSurface','artSurface','artSurface','artSurface','artSurface'],colors:['#8a5d25','#c18d3f','#6f4827','#d2aa63','#a97737'],tune:{gloss:100,opacity:100,nailSize:108,sculptLen:150,sculptShape:'round2'},vars:{},trail:{on:false,intensity:0,hue:null}}
     },
     SCULPT:{
-      no:'03',title:'形',tryTitle:'形',label:'SCULPT / 形',film:'art-assets/sculpt-wire.mp4',
+      no:'03',title:'形',tryTitle:'形',label:'SCULPT / 形',accent:'#d8b46a',film:'art-assets/sculpt-wire.mp4',
       text:'爪先を伸ばす操作から、線だけで立ち上がる手の構造へ。装飾は小さな彫刻へ変わる。',
-      preset:{looks:['line','line','frenchmirror','line','line'],colors:['#e8ddd0','#d4c4b3','#f0e7dd','#cabaa7','#e5d6c5'],tune:{gloss:38,opacity:86,nailSize:108,sculptLen:196,sculptShape:'coffin'},vars:{line:.78,frenchmirror:.26},trail:{on:false,intensity:0,hue:null}}
+      preset:{looks:['artSculpt','artSculpt','artSculpt','artSculpt','artSculpt'],colors:['#e8ddd0','#d4c4b3','#f0e7dd','#cabaa7','#e5d6c5'],tune:{gloss:38,opacity:86,nailSize:108,sculptLen:196,sculptShape:'coffin'},vars:{},trail:{on:false,intensity:0,hue:null}}
     },
     LIGHT:{
-      no:'04',title:'光',tryTitle:'光',label:'LIGHT / 光',film:'art-assets/light-mandala.mp4',
+      no:'04',title:'光',tryTitle:'光',label:'LIGHT / 光',accent:'#79c9c3',film:'art-assets/light-mandala.mp4',
       text:'指先に残る光が、手と球体をめぐる空間へ広がる。試着は見ることから、光で描くことへ逸脱する。',
-      preset:{looks:['mizuhikari','stardust','aurora','flash','mizuhikari'],colors:['#173f4d','#2b6870','#447c86','#9c6681','#26535d'],tune:{gloss:100,opacity:96,nailSize:106,sculptLen:158,sculptShape:'almond'},vars:{mizuhikari:.64,stardust:.82,aurora:.72,flash:.66},trail:{on:true,intensity:88,hue:'#b9e8df'}}
+      preset:{looks:['artLight','artLight','artLight','artLight','artLight'],colors:['#173f4d','#2b6870','#447c86','#9c6681','#26535d'],tune:{gloss:100,opacity:96,nailSize:106,sculptLen:158,sculptShape:'almond'},vars:{},trail:{on:true,intensity:88,hue:'#b9e8df'}}
     },
     HAND:{
-      no:'05',title:'手',tryTitle:'手の記憶',label:'HAND / 手',film:'art-assets/hand-drawing.mp4',
+      no:'05',title:'手',tryTitle:'手の記憶',label:'HAND / 手',accent:'#c6aaa0',film:'art-assets/hand-drawing.mp4',
       text:'自分の手を入口に、祈り、思惟、労働、ケアの身振りへ入る。手は形であると同時に記憶でもある。',
-      preset:{looks:['line','french','sheer','line','milk'],colors:['#b89c91','#e7d8cb','#cab8ad','#8e7770','#ded0c4'],tune:{gloss:30,opacity:78,nailSize:100,sculptLen:146,sculptShape:'natural'},vars:{line:.24,french:.18,sheer:.42,milk:.46},trail:{on:false,intensity:0,hue:null}}
+      preset:{looks:['artHand','artHand','artHand','artHand','artHand'],colors:['#b89c91','#e7d8cb','#cab8ad','#8e7770','#ded0c4'],tune:{gloss:30,opacity:78,nailSize:100,sculptLen:146,sculptShape:'natural'},vars:{},trail:{on:false,intensity:0,hue:null}}
     },
     TRACE:{
-      no:'06',title:'痕跡',tryTitle:'痕跡',label:'TRACE / 痕跡',film:'art-assets/trace-dust.mp4',
+      no:'06',title:'痕跡',tryTitle:'痕跡',label:'TRACE / 痕跡',accent:'#d5d4cf',film:'art-assets/trace-dust.mp4',
       text:'動いたあとに残る粒子と影。完成した形ではなく、触れた時間と消えていく過程を見る。',
-      preset:{looks:['matte','stardust','sheer','flash','matte'],colors:['#313236','#5d6065','#b9b8b2','#777a80','#202126'],tune:{gloss:12,opacity:84,nailSize:104,sculptLen:154,sculptShape:'round2'},vars:{stardust:.46,sheer:.24,flash:.3},trail:{on:true,intensity:42,hue:'#d8d6cf'}}
+      preset:{looks:['artTrace','artTrace','artTrace','artTrace','artTrace'],colors:['#313236','#5d6065','#b9b8b2','#777a80','#202126'],tune:{gloss:12,opacity:84,nailSize:104,sculptLen:154,sculptShape:'round2'},vars:{},trail:{on:true,intensity:42,hue:'#d8d6cf'}}
     }
   };
   const order=Object.keys(works);
@@ -2261,6 +2286,89 @@ updateCmpBadge();
   const customMode=params.get('mode')==='custom';
   let current='COLOR';
 
+  function installArtworkLooks(){
+    LOOKS.artColor={name:'作品・色',paint(c,w,h,col,seed){
+      base(c,w,h,'#eeeae4','#c9c8c3');
+      const pal=['#c93869','#e2b832','#277363','#65509a','#d46839','#263749'];
+      const rnd=seeded(700+seed*19); c.lineCap='round';
+      for(let i=0;i<34;i++){
+        const x=(rnd()-.5)*w*1.2, y=(rnd()-.5)*h*1.15;
+        c.strokeStyle=pal[(i+seed)%pal.length]; c.globalAlpha=.58+rnd()*.35; c.lineWidth=w*(.012+rnd()*.026);
+        c.beginPath(); c.moveTo(x-w*.24,y-h*.05); c.bezierCurveTo(x-w*.04,y-h*.18,x+w*.08,y+h*.16,x+w*.28,y-h*.02); c.stroke();
+      }
+      c.globalAlpha=1;
+    }};
+    LOOKS.artSurface={name:'作品・表面',paint(c,w,h,col,seed){
+      const g=c.createLinearGradient(-w*.45,-h*.5,w*.4,h*.5);
+      g.addColorStop(0,'#563619'); g.addColorStop(.35,col); g.addColorStop(.63,'#e0bd70'); g.addColorStop(1,'#70431b');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const rnd=seeded(810+seed*13); c.globalCompositeOperation='screen';
+      for(let i=0;i<9;i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, rx=w*(.13+rnd()*.25), ry=h*(.05+rnd()*.13);
+        c.fillStyle=i%2?'rgba(255,231,166,.2)':'rgba(255,255,255,.12)';
+        c.beginPath(); c.ellipse(x,y,rx,ry,rnd()*Math.PI,0,Math.PI*2); c.fill();
+      }
+      c.globalCompositeOperation='source-over';
+    }};
+    LOOKS.artSculpt={name:'作品・形',paint(c,w,h,col,seed){
+      const g=c.createLinearGradient(0,-h*.5,0,h*.5); g.addColorStop(0,'rgba(250,246,239,.88)'); g.addColorStop(1,hexA(col,.68));
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const rnd=seeded(920+seed*23); c.strokeStyle='#c49a4f'; c.lineWidth=Math.max(1,w*.018); c.globalAlpha=.75;
+      for(let i=0;i<7;i++){
+        const x=(rnd()-.5)*w, turn=(rnd()-.5)*w*.7;
+        c.beginPath(); c.moveTo(x,-h*.58); c.bezierCurveTo(x+turn,-h*.2,x-turn,h*.15,x+turn*.4,h*.58); c.stroke();
+      }
+      c.globalAlpha=1;
+    }};
+    LOOKS.artLight={name:'作品・光',paint(c,w,h,col,seed){
+      base(c,w,h,'#071a25','#102d36');
+      const ox=(seed-2)*w*.07, oy=-h*.08;
+      const glow=c.createRadialGradient(ox,oy,0,ox,oy,w*.52);
+      glow.addColorStop(0,'rgba(235,244,215,.96)'); glow.addColorStop(.16,'rgba(99,212,196,.9)'); glow.addColorStop(.5,hexA(col,.58)); glow.addColorStop(1,'rgba(5,19,28,0)');
+      c.fillStyle=glow; c.fillRect(-w/2,-h/2,w,h);
+      const rnd=seeded(1010+seed*17); c.fillStyle='#e8eee0';
+      for(let i=0;i<20;i++){
+        c.globalAlpha=.18+rnd()*.72; c.beginPath(); c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*(.007+rnd()*.018),0,Math.PI*2); c.fill();
+      }
+      c.globalAlpha=1;
+    }};
+    LOOKS.artHand={name:'作品・手',paint(c,w,h,col,seed){
+      base(c,w,h,'#eee9e2',shade(col,20));
+      const rnd=seeded(1120+seed*11); c.strokeStyle='#5e5050'; c.lineWidth=Math.max(1,w*.012); c.globalAlpha=.54;
+      for(let i=0;i<15;i++){
+        const y=-h*.47+i*h*.067+(rnd()-.5)*h*.035;
+        c.beginPath(); c.moveTo(-w*.58,y); c.bezierCurveTo(-w*.18,y-h*.04,w*.12,y+h*.06,w*.58,y-h*.01); c.stroke();
+      }
+      c.strokeStyle='#a17079'; c.globalAlpha=.42; c.beginPath(); c.ellipse(0,-h*.02,w*.28,h*.18,.4,0,Math.PI*2); c.stroke(); c.globalAlpha=1;
+    }};
+    LOOKS.artTrace={name:'作品・痕跡',flat:true,paint(c,w,h,col,seed){
+      const g=c.createLinearGradient(0,-h*.55,0,h*.55); g.addColorStop(0,'#111216'); g.addColorStop(.55,col); g.addColorStop(1,'rgba(185,184,178,.42)');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const rnd=seeded(1240+seed*29);
+      for(let i=0;i<32;i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.006+rnd()*.025);
+        c.fillStyle=`rgba(235,234,228,${.08+rnd()*.48})`; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+      }
+    }};
+  }
+
+  function nailShape(c,w,h){
+    c.beginPath(); c.moveTo(-w*.5,h*.42); c.lineTo(-w*.5,-h*.2);
+    c.quadraticCurveTo(-w*.46,-h*.5,0,-h*.54); c.quadraticCurveTo(w*.46,-h*.5,w*.5,-h*.2);
+    c.lineTo(w*.5,h*.42); c.quadraticCurveTo(0,h*.55,-w*.5,h*.42); c.closePath();
+  }
+  function renderNailPreview(key,targetId){
+    const box=document.getElementById(targetId); if(!box) return; box.innerHTML='';
+    const p=works[key].preset;
+    p.looks.forEach((look,i)=>{
+      const cv=document.createElement('canvas'); cv.width=44; cv.height=84;
+      const c=cv.getContext('2d'); c.translate(22,42); nailShape(c,28,64); c.clip();
+      paintByKey(c,look,28,64,p.colors[i],i); box.appendChild(cv);
+    });
+  }
+  installArtworkLooks();
+  buildLooks();
+
   order.forEach(key=>{
     const button=document.createElement('button');
     button.type='button'; button.textContent=works[key].no; button.dataset.workKey=key;
@@ -2270,6 +2378,8 @@ updateCmpBadge();
 
   function setCurrent(key){
     current=key; const work=works[key];
+    document.body.dataset.workKey=key;
+    layer.style.setProperty('--work-accent',work.accent);
     document.getElementById('signalNo').textContent=work.no;
     document.getElementById('signalName').textContent=work.label;
     if(signalFilm.getAttribute('src')!==work.film){signalFilm.src=work.film; signalFilm.load();}
@@ -2286,6 +2396,7 @@ updateCmpBadge();
     document.getElementById('workCode').textContent=work.no+' / '+key;
     document.getElementById('workTitle').textContent=work.title;
     document.getElementById('workText').textContent=work.text;
+    renderNailPreview(key,'workNails');
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
     if(workFilm.getAttribute('src')!==work.film){workFilm.src=work.film; workFilm.load();}
     signalFilm.pause(); layer.classList.add('open'); layer.setAttribute('aria-hidden','false');
@@ -2336,6 +2447,7 @@ updateCmpBadge();
     document.querySelector('#startOverlay .invite').innerHTML=work.tryTitle+'を、<br>手にのせる。';
     document.getElementById('startBtn').textContent='カメラをひらく';
     document.getElementById('tryIdentityText').textContent=work.no+' / '+work.label;
+    renderNailPreview(key,'tryNails');
     document.getElementById('tryWorkBack').href='?work='+key;
     const hero=document.querySelector('.opening-film.a');
     hero.src=work.film; hero.load();
@@ -2347,6 +2459,8 @@ updateCmpBadge();
     document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
     document.querySelector('#startOverlay .invite').innerHTML='自分でつくる。<br>自分の手で。';
     document.getElementById('startBtn').textContent='カメラをひらく';
+    document.getElementById('tryIdentityText').textContent='CUSTOM / 自分で作る';
+    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='作品から選ぶ'; workBack.href='./';
     const link=document.querySelector('.make-link'); link.textContent='作品から選ぶ'; link.href='./';
   }
 
