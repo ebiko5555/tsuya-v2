@@ -710,7 +710,7 @@
   .make-link{padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.32); color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.12em; text-decoration:none}
   .opening-index{
     position:absolute; z-index:3; right:18px; bottom:calc(34px + env(safe-area-inset-bottom));
-    display:flex; gap:8px;
+    display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; width:153px;
   }
   .opening-index button{
     width:25px; height:28px; border:0; border-top:1px solid rgba(255,255,255,.2);
@@ -757,7 +757,8 @@
   }
   body.art-page .work-close{position:fixed; background:rgba(8,9,12,.62); border-color:rgba(255,255,255,.5)}
   body.art-page .work-index{
-    z-index:4; left:18px; right:18px; top:calc(56svh + 10px); flex-direction:row; gap:5px;
+    z-index:4; left:18px; right:18px; top:calc(56svh + 10px);
+    display:grid; grid-template-columns:repeat(5,30px); gap:4px;
   }
   body.art-page .work-index button{
     width:34px; height:28px; border-left:0; border-top:1px solid rgba(255,255,255,.18);
@@ -765,7 +766,7 @@
   body.art-page .work-index button.active{border-top-color:var(--work-accent)}
   body.art-page .work-copy{
     position:relative; left:auto; right:auto; bottom:auto; min-height:44svh;
-    padding:52px 20px calc(28px + env(safe-area-inset-bottom)) 62px;
+    padding:82px 20px calc(28px + env(safe-area-inset-bottom)) 62px;
     background:#08090c;
   }
   body.art-page .work-title{font-size:clamp(46px,15vw,70px)}
@@ -787,7 +788,7 @@
   @media (min-width:820px){
     body.art-page .work-film{position:absolute; left:0; top:0; width:64%; height:100svh}
     body.art-page .work-layer::after{width:64%; height:100svh; background:linear-gradient(90deg,transparent 82%,#08090c)}
-    body.art-page .work-index{position:absolute; left:calc(64% + 4vw); right:24px; top:8vh}
+    body.art-page .work-index{position:absolute; left:calc(64% + 4vw); right:24px; top:8vh; grid-template-columns:repeat(5,34px)}
     body.art-page .work-copy{position:absolute; left:64%; right:0; top:0; bottom:0; min-height:0; padding:22vh 4vw 5vh}
   }
 </style>
@@ -823,6 +824,10 @@
       <button type="button" data-opening-work="LIGHT" aria-label="LIGHT 光">04</button>
       <button type="button" data-opening-work="HAND" aria-label="HAND 手">05</button>
       <button type="button" data-opening-work="TRACE" aria-label="TRACE 痕跡">06</button>
+      <button type="button" data-opening-work="SPACE" aria-label="宇宙と手">07</button>
+      <button type="button" data-opening-work="THINKING" aria-label="思惟する手">08</button>
+      <button type="button" data-opening-work="NAILORB" aria-label="Nail White Orb">09</button>
+      <button type="button" data-opening-work="FRAME" aria-label="Frame 0001–0240">10</button>
     </nav>
     <div id="status"></div>
   </div>
@@ -2311,6 +2316,26 @@ updateCmpBadge();
       no:'06',title:'痕跡',tryTitle:'痕跡',label:'TRACE / 痕跡',accent:'#d5d4cf',film:'art-assets/trace-dust.mp4',
       text:'動いたあとに残る粒子と影。完成した形ではなく、触れた時間と消えていく過程を見る。',
       preset:{looks:['artTrace','matte','sheer','artTrace','stardust'],colors:['#313236','#202126','#b9b8b2','#777a80','#d5d4cf'],tune:{gloss:12,opacity:88,nailSize:104,sculptLen:156,sculptShape:'round2'},vars:{sheer:.2,stardust:.42},trail:{on:true,intensity:42,hue:'#d8d6cf'}}
+    },
+    SPACE:{
+      no:'07',title:'宇宙と手',tryTitle:'宇宙と手',label:'SPACE / 宇宙と手',accent:'#d8bd72',film:'art-assets/space-hand.mp4',
+      text:'暗い空間で、手が星や月のような球体へ伸びていく。触れる前の距離と、身体を越えて広がる想像を映す。',
+      preset:{looks:['artSpace','stardust','mizuhikari','artSpace','chrome'],colors:['#0d1934','#c9a54c','#dce8df','#4a335f','#8e743d'],tune:{gloss:96,opacity:96,nailSize:106,sculptLen:174,sculptShape:'almond'},vars:{stardust:.76,mizuhikari:.58},trail:{on:true,intensity:72,hue:'#e5cf89'}}
+    },
+    THINKING:{
+      no:'08',title:'思惟する手',tryTitle:'思惟する手',label:'THINKING / 思惟する手',accent:'#c7a9a6',film:'art-assets/thinking-hand.mp4',
+      text:'回転する手の線と淡い影が、考える時間をゆっくりと重ねる。手は道具ではなく、思考そのものの輪郭になる。',
+      preset:{looks:['artThinking','sheer','line','artThinking','matte'],colors:['#d7c5bf','#e9ddd6','#8c5d67','#b8a09c','#4a4448'],tune:{gloss:24,opacity:84,nailSize:102,sculptLen:152,sculptShape:'natural'},vars:{sheer:.28,line:.36},trail:{on:false,intensity:0,hue:null}}
+    },
+    NAILORB:{
+      no:'09',title:'Nail / White Orb',tryTitle:'白球と赤い爪',label:'NAIL / WHITE ORB',accent:'#d65052',film:'art-assets/nail-white-orb.mp4',
+      text:'白い球体のまわりを、赤いネイルを持つ手が巡る。小さな装飾と大きな形が、互いのスケールを反転させる。',
+      preset:{looks:['artOrb','milk','flash','artOrb','french'],colors:['#c52d35','#f2eee5','#d94f62','#8f1827','#b92734'],tune:{gloss:100,opacity:100,nailSize:108,sculptLen:182,sculptShape:'round2'},vars:{milk:.62,flash:.64,french:.25},trail:{on:false,intensity:0,hue:null}}
+    },
+    FRAME:{
+      no:'10',title:'Frame 0001–0240',tryTitle:'Frame 0001–0240',label:'FRAME / 0001–0240',accent:'#d9b8a8',film:'art-assets/frame-0001-0240.mp4',
+      text:'白い手、淡いピンクの面、金色の線。240のフレームのなかで、皮膚と膜と装飾の境界が組み替わる。',
+      preset:{looks:['artFrame','sheer','frenchmirror','artFrame','aurora'],colors:['#e2b9b2','#ead8cf','#caa75d','#f0cbc6','#d7cabd'],tune:{gloss:82,opacity:90,nailSize:104,sculptLen:164,sculptShape:'coffin'},vars:{sheer:.3,frenchmirror:.16,aurora:.38},trail:{on:true,intensity:34,hue:'#f0d4c8'}}
     }
   };
   const order=Object.keys(works);
@@ -2390,6 +2415,43 @@ updateCmpBadge();
         const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.006+rnd()*.025);
         c.fillStyle=`rgba(235,234,228,${.08+rnd()*.48})`; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
       }
+    }};
+    LOOKS.artSpace={name:'作品・宇宙と手',paint(c,w,h,col,seed){
+      base(c,w,h,'#050914','#152447');
+      const rnd=seeded(1370+seed*31);
+      for(let i=0;i<24;i++){
+        c.fillStyle=`rgba(240,225,174,${.14+rnd()*.72})`; c.beginPath();
+        c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*(.006+rnd()*.018),0,Math.PI*2); c.fill();
+      }
+      const x=(seed-2)*w*.08, y=-h*.12;
+      const orb=c.createRadialGradient(x,y,0,x,y,w*.34);
+      orb.addColorStop(0,'rgba(255,250,220,.98)'); orb.addColorStop(.22,'rgba(222,196,112,.84)'); orb.addColorStop(1,'rgba(210,165,70,0)');
+      c.fillStyle=orb; c.fillRect(-w/2,-h/2,w,h);
+    }};
+    LOOKS.artThinking={name:'作品・思惟する手',flat:true,paint(c,w,h,col,seed){
+      base(c,w,h,'#eee7e1',shade(col,8));
+      c.strokeStyle='#6f5960'; c.lineWidth=Math.max(1,w*.014); c.globalAlpha=.62;
+      const rnd=seeded(1480+seed*17);
+      for(let i=0;i<13;i++){
+        const y=-h*.46+i*h*.073;
+        c.beginPath(); c.moveTo(-w*.58,y+(rnd()-.5)*h*.03);
+        c.bezierCurveTo(-w*.18,y-h*.07,w*.18,y+h*.08,w*.58,y-h*.02); c.stroke();
+      }
+      c.strokeStyle='#af7b82'; c.globalAlpha=.4; c.beginPath(); c.ellipse(0,-h*.04,w*.3,h*.2,seed*.2,0,Math.PI*2); c.stroke(); c.globalAlpha=1;
+    }};
+    LOOKS.artOrb={name:'作品・白球と赤い爪',paint(c,w,h,col,seed){
+      base(c,w,h,shade(col,6),shade(col,-22));
+      const x=(seed-2)*w*.09, y=-h*.12;
+      c.shadowColor='rgba(255,245,225,.74)'; c.shadowBlur=w*.18; c.fillStyle='#f7f3e9';
+      c.beginPath(); c.arc(x,y,w*.24,0,Math.PI*2); c.fill(); c.shadowBlur=0;
+      c.strokeStyle='rgba(255,216,206,.58)'; c.lineWidth=w*.022; c.beginPath(); c.arc(x,y,w*.34,0,Math.PI*2); c.stroke();
+    }};
+    LOOKS.artFrame={name:'作品・Frame 0001–0240',paint(c,w,h,col,seed){
+      base(c,w,h,'#f3e9e2',col);
+      c.fillStyle='rgba(217,171,166,.5)'; c.save(); c.rotate((seed-2)*.13); c.fillRect(-w*.7,-h*.14,w*1.4,h*.28); c.restore();
+      c.strokeStyle='#bf9853'; c.lineWidth=Math.max(1,w*.025); c.globalAlpha=.86;
+      c.beginPath(); c.moveTo(-w*.5,h*.28); c.bezierCurveTo(-w*.12,-h*.42,w*.2,h*.4,w*.5,-h*.3); c.stroke();
+      c.strokeStyle='rgba(255,255,255,.8)'; c.lineWidth=w*.06; c.beginPath(); c.moveTo(-w*.48,-h*.26); c.lineTo(w*.44,h*.18); c.stroke(); c.globalAlpha=1;
     }};
   }
 
