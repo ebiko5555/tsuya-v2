@@ -2339,6 +2339,28 @@ updateCmpBadge();
     }
   };
   const order=Object.keys(works);
+  /* 試作9：爪の中の瞬きは残し、指先を追う白い光だけを控えめにする。
+     カメラ・追跡・座標計算には触れず、描画の半径と不透明度だけを弱める。 */
+  drawTrails=function(){
+    if(!trails.length) return;
+    const now=performance.now();
+    const strength=trailIntensity/100;
+    if(strength<=0) return;
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    trails.forEach(pt=>{
+      const age=(now-pt.born)/TRAIL_LIFE;
+      if(age>=1) return;
+      const life=1-age;
+      const r=3+life*13;
+      const g=ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,r);
+      const glow=shade(pt.color,48);
+      g.addColorStop(0,hexA(glow,life*.36*strength));
+      g.addColorStop(.52,hexA(pt.color,life*.18*strength));
+      g.addColorStop(1,hexA(pt.color,0));
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(pt.x,pt.y,r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.restore();
+  };
   const tabMap={looks:'COLOR',colors:'COLOR',tune:'SURFACE',sculpt:'SCULPT',hikari:'LIGHT'};
   const overlay=document.getElementById('startOverlay');
   const signal=document.getElementById('artSignal');
@@ -2452,6 +2474,93 @@ updateCmpBadge();
       c.strokeStyle='#bf9853'; c.lineWidth=Math.max(1,w*.025); c.globalAlpha=.86;
       c.beginPath(); c.moveTo(-w*.5,h*.28); c.bezierCurveTo(-w*.12,-h*.42,w*.2,h*.4,w*.5,-h*.3); c.stroke();
       c.strokeStyle='rgba(255,255,255,.8)'; c.lineWidth=w*.06; c.beginPath(); c.moveTo(-w*.48,-h*.26); c.lineTo(w*.44,h*.18); c.stroke(); c.globalAlpha=1;
+    }};
+    LOOKS.artInkFlow={name:'ART・墨流し',varLabel:'にじみの量',paint(c,w,h,col,seed,v){
+      base(c,w,h,'#f5f0e9','#e9ddd5');
+      const rnd=seeded(1610+seed*37), pal=[col,shade(col,-35),'#345b62','#c46578','#d8a84f'];
+      c.lineCap='round';
+      for(let i=0;i<8+Math.round(v*9);i++){
+        const y=(rnd()-.5)*h, bend=(rnd()-.5)*h*.55;
+        c.strokeStyle=hexA(pal[i%pal.length],.2+rnd()*.42); c.lineWidth=w*(.045+rnd()*.16);
+        c.beginPath(); c.moveTo(-w*.75,y); c.bezierCurveTo(-w*.22,y+bend,w*.18,y-bend,w*.75,y+bend*.2); c.stroke();
+      }
+      c.strokeStyle='rgba(255,255,255,.48)'; c.lineWidth=w*.025;
+      c.beginPath(); c.moveTo(-w*.6,h*.18); c.bezierCurveTo(-w*.15,-h*.35,w*.2,h*.4,w*.62,-h*.12); c.stroke();
+    }};
+    LOOKS.artKintsugi={name:'ART・金継ぎ',varLabel:'金線の量',paint(c,w,h,col,seed,v){
+      base(c,w,h,shade(col,-52),'#17171b');
+      const rnd=seeded(1740+seed*23), keep=c.globalAlpha;
+      c.lineCap='round'; c.lineJoin='round';
+      for(let i=0;i<2+Math.round(v*5);i++){
+        let x=(rnd()-.5)*w, y=-h*.62;
+        c.strokeStyle=i%2?'rgba(255,231,153,.58)':'rgba(219,173,74,.96)'; c.lineWidth=w*(i%2?.012:.025);
+        c.beginPath(); c.moveTo(x,y);
+        for(let k=0;k<7;k++){x+=(rnd()-.5)*w*.42; y+=h*.18; c.lineTo(x,y);} c.stroke();
+      }
+      for(let i=0;i<6;i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, fl=sparkle(rnd()*6.283,1.4+rnd()*2), L=w*(.018+fl*.055);
+        c.globalAlpha=keep*(.34+fl*.66); c.strokeStyle='rgba(255,242,194,.95)'; c.lineWidth=Math.max(.6,w*.01);
+        c.beginPath(); c.moveTo(x-L,y); c.lineTo(x+L,y); c.moveTo(x,y-L); c.lineTo(x,y+L); c.stroke();
+      }
+      c.globalAlpha=keep;
+    }};
+    LOOKS.artMembrane={name:'ART・膜',varLabel:'膜の重なり',paint(c,w,h,col,seed,v){
+      nudeBase(c,w,h,.46);
+      const rnd=seeded(1870+seed*19), keep=c.globalAlpha;
+      const pal=[hexA(col,.3),'rgba(240,169,187,.28)','rgba(149,197,211,.28)','rgba(236,211,146,.25)'];
+      for(let i=0;i<5+Math.round(v*7);i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, rx=w*(.25+rnd()*.45), ry=h*(.08+rnd()*.2);
+        c.fillStyle=pal[i%pal.length]; c.strokeStyle='rgba(255,255,255,.32)'; c.lineWidth=Math.max(.7,w*.012);
+        c.beginPath(); c.ellipse(x,y,rx,ry,(rnd()-.5)*1.8,0,Math.PI*2); c.fill(); c.stroke();
+      }
+      c.globalAlpha=keep;
+    }};
+    LOOKS.artParticles={name:'ART・粒子',varLabel:'粒子の密度',paint(c,w,h,col,seed,v){
+      base(c,w,h,shade(col,-42),'#11131a');
+      const rnd=seeded(1990+seed*41), keep=c.globalAlpha, n=28+Math.round(v*90);
+      for(let i=0;i<n;i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.004+rnd()*.022), fl=sparkle(rnd()*6.283,1+rnd()*3.2);
+        c.globalAlpha=keep*(.18+rnd()*.48+fl*.34); c.fillStyle=i%4?'rgba(235,232,222,.9)':hexA(shade(col,75),.92);
+        c.beginPath(); c.arc(x,y,r*(1+fl*.8),0,Math.PI*2); c.fill();
+        if(fl>.7){const L=r*(2+fl*3);c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=Math.max(.5,r*.28);c.beginPath();c.moveTo(x-L,y);c.lineTo(x+L,y);c.moveTo(x,y-L);c.lineTo(x,y+L);c.stroke();}
+      }
+      c.globalAlpha=keep;
+    }};
+    LOOKS.artCells={name:'ART・細胞',varLabel:'細胞の大きさ',paint(c,w,h,col,seed,v){
+      base(c,w,h,shade(col,65),shade(col,25));
+      const rnd=seeded(2110+seed*29), n=12+Math.round((1-v)*11), keep=c.globalAlpha;
+      for(let i=0;i<n;i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.08+rnd()*.18)*(0.65+v*.7);
+        c.fillStyle=hexA(i%3?shade(col,45):'#d7e1c5',.18); c.strokeStyle=hexA(shade(col,-28),.35+rnd()*.35); c.lineWidth=Math.max(.8,w*.012);
+        c.beginPath(); c.ellipse(x,y,r,r*(.55+rnd()*.5),rnd()*Math.PI,0,Math.PI*2); c.fill(); c.stroke();
+        c.fillStyle=hexA(shade(col,-45),.35); c.beginPath(); c.arc(x+r*.12,y-r*.08,r*.18,0,Math.PI*2); c.fill();
+      }
+      c.globalAlpha=keep;
+    }};
+    LOOKS.artGesture={name:'ART・身振りの線',varLabel:'線の勢い',paint(c,w,h,col,seed,v){
+      base(c,w,h,'#f4efe8','#ded7d1');
+      const rnd=seeded(2230+seed*31), pal=[col,'#1f2933','#bf6a55','#c39a4b'];
+      c.lineCap='round';
+      for(let i=0;i<5+Math.round(v*6);i++){
+        const y=(rnd()-.5)*h, sweep=(rnd()-.5)*h*.8;
+        c.strokeStyle=hexA(pal[i%pal.length],.48+rnd()*.42); c.lineWidth=w*(.012+rnd()*.065);
+        c.beginPath(); c.moveTo(-w*.72,y); c.bezierCurveTo(-w*.2,y-sweep,w*.15,y+sweep,w*.72,y-sweep*.18); c.stroke();
+      }
+      const fl=sparkle(seed*.7,1.7); c.fillStyle=`rgba(231,190,92,${.55+fl*.4})`; c.beginPath(); c.arc(w*.22,-h*.22,w*(.035+fl*.018),0,Math.PI*2); c.fill();
+    }};
+    LOOKS.artPrism={name:'ART・プリズム',varLabel:'光の分割',paint(c,w,h,col,seed,v){
+      base(c,w,h,shade(col,-38),'#101521');
+      const rnd=seeded(2370+seed*43), keep=c.globalAlpha;
+      const pal=['rgba(249,183,207,.38)','rgba(137,211,224,.38)','rgba(214,197,113,.35)','rgba(178,159,227,.35)'];
+      for(let i=0;i<7+Math.round(v*8);i++){
+        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.18+rnd()*.34);
+        c.fillStyle=pal[i%pal.length]; c.beginPath(); c.moveTo(x,y-r); c.lineTo(x+r*.75,y+r*.6); c.lineTo(x-r*.8,y+r*.35); c.closePath(); c.fill();
+      }
+      for(let i=0;i<9;i++){
+        const x=(rnd()-.5)*w,y=(rnd()-.5)*h,fl=sparkle(rnd()*6.283,1.3+rnd()*2.8),L=w*(.012+fl*.07);
+        c.globalAlpha=keep*(.25+fl*.75);c.strokeStyle='rgba(255,255,255,.96)';c.lineWidth=Math.max(.55,w*.008);c.beginPath();c.moveTo(x-L,y);c.lineTo(x+L,y);c.moveTo(x,y-L);c.lineTo(x,y+L);c.stroke();
+      }
+      c.globalAlpha=keep;
     }};
   }
 
