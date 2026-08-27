@@ -844,6 +844,47 @@
     .opening-steps{margin-top:10px}
     body.hub-mode .bigbtn,body.hub-mode .make-link{min-height:42px}
   }
+
+  /* 試作11：説明する入口ではなく、作品映像から直接作品へ入る */
+  .opening-enter,.hub-custom-link,.opening-work-meta{display:none}
+  body.hub-mode #startOverlay{padding:0; justify-content:flex-end; background:#08090c}
+  body.hub-mode .opening-films::after{
+    z-index:2; background:
+      linear-gradient(180deg,rgba(8,9,12,.12),rgba(8,9,12,.02) 44%,rgba(8,9,12,.82) 88%,#08090c),
+      radial-gradient(circle at 50% 42%,transparent 20%,rgba(8,9,12,.24) 92%);
+  }
+  body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{
+    inset:0; width:100%; height:100%; border-radius:0; clip-path:none; object-fit:cover;
+    opacity:0; filter:saturate(.72) contrast(1.08); transition:opacity 1.8s cubic-bezier(.4,0,.2,1);
+  }
+  body.hub-mode .opening-film.is-hub-active{opacity:.82}
+  body.hub-mode .opening-film.c{display:none}
+  body.hub-mode .opening-mark,body.hub-mode #startOverlay .invite,
+  body.hub-mode .opening-guide,body.hub-mode .opening-actions,
+  body.hub-mode .opening-steps,body.hub-mode .opening-index{display:none}
+  body.hub-mode .opening-enter{position:absolute; z-index:3; display:block; inset:0}
+  body.hub-mode .hub-custom-link{
+    position:absolute; z-index:5; display:block; right:16px; top:calc(16px + env(safe-area-inset-top));
+    padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.34);
+    color:rgba(255,255,255,.75); text-decoration:none;
+    font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em;
+  }
+  body.hub-mode .opening-work-meta{
+    position:absolute; z-index:4; display:block; left:22px; right:22px;
+    bottom:calc(38px + env(safe-area-inset-bottom)); pointer-events:none;
+  }
+  .opening-work-code{color:rgba(255,255,255,.58); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
+  .opening-work-title{margin-top:10px; color:#fff; font:300 clamp(34px,11vw,58px)/1.06 "Times New Roman","Yu Mincho",serif; letter-spacing:.06em}
+  .opening-work-cue{display:flex; align-items:center; justify-content:space-between; margin-top:20px; padding-top:13px; border-top:1px solid rgba(255,255,255,.28); color:rgba(255,255,255,.76); font-size:9px; letter-spacing:.13em}
+  .opening-work-cue::after{content:"→"; font-size:17px; font-weight:300}
+  .opening-progress{height:1px; margin-top:13px; overflow:hidden; background:rgba(255,255,255,.18)}
+  .opening-progress::after{content:""; display:block; width:100%; height:100%; background:#d7b39e; transform-origin:left; animation:hubProgress 5.2s linear both}
+  .opening-progress.restart::after{animation:none}
+  @keyframes hubProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @media (prefers-reduced-motion:reduce){
+    body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{transition-duration:.2s}
+    .opening-progress::after{animation:none; transform:scaleX(1)}
+  }
 </style>
 </head>
 <body>
@@ -870,14 +911,22 @@
       <video class="opening-film c" src="art-assets/hand-drawing.mp4" muted loop autoplay playsinline preload="metadata"></video>
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
-    <p class="invite">自分の手から、<br>作品へ。</p>
-    <p class="opening-guide" id="openingGuide">作品を選び、その作品から生まれたネイルを自分の手にのせます。</p>
+    <p class="invite"></p>
+    <p class="opening-guide" id="openingGuide"></p>
     <div class="opening-actions">
       <button class="bigbtn" id="startBtn">作品ネイルを選ぶ</button>
       <a class="make-link" href="?mode=custom">自由にデザインする</a>
     </div>
     <div class="opening-steps" aria-label="試着までの流れ">
       <span><b>01</b>作品を選ぶ</span><span><b>02</b>ネイルを見る</span><span><b>03</b>カメラで試着</span>
+    </div>
+    <a class="opening-enter" id="openingEnter" href="?work=COLOR" aria-label="現在表示中の作品へ入る"></a>
+    <a class="hub-custom-link" href="?mode=custom">自分でつくる</a>
+    <div class="opening-work-meta" aria-live="polite">
+      <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
+      <div class="opening-work-title" id="openingWorkTitle">色</div>
+      <div class="opening-work-cue">触れて作品へ</div>
+      <div class="opening-progress" id="openingProgress"></div>
     </div>
     <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
       <button type="button" data-opening-work="COLOR" aria-label="COLOR 色">01</button>
@@ -2747,6 +2796,48 @@ updateCmpBadge();
     document.getElementById('globalBackText').textContent='作品一覧';
   }
 
+  function prepareHub(){
+    document.body.classList.add('hub-mode');
+    const films=[...document.querySelectorAll('.opening-film')].slice(0,2);
+    const enter=document.getElementById('openingEnter');
+    const code=document.getElementById('openingWorkCode');
+    const title=document.getElementById('openingWorkTitle');
+    const progress=document.getElementById('openingProgress');
+    let hubIndex=0, activeFilm=0, timer=null;
+
+    function restartProgress(){
+      progress.classList.add('restart');
+      void progress.offsetWidth;
+      progress.classList.remove('restart');
+    }
+    function showHubWork(index,first=false){
+      hubIndex=(index+order.length)%order.length;
+      const key=order[hubIndex], work=works[key];
+      const nextFilm=first?0:1-activeFilm, video=films[nextFilm], previous=films[activeFilm];
+      const reveal=()=>{
+        films.forEach((film,i)=>film.classList.toggle('is-hub-active',i===nextFilm));
+        if(!first&&previous!==video) setTimeout(()=>previous.pause(),1900);
+        activeFilm=nextFilm;
+      };
+      if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
+      video.play().catch(()=>{});
+      if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
+      code.textContent=work.no+' / '+key;
+      title.textContent=work.title;
+      enter.href='?work='+key;
+      enter.setAttribute('aria-label',work.title+'の作品ページへ入る');
+      restartProgress();
+    }
+    showHubWork(0,true);
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      timer=setInterval(()=>showHubWork(hubIndex+1),5200);
+      document.addEventListener('visibilitychange',()=>{
+        if(document.hidden){clearInterval(timer);timer=null;}
+        else if(!timer){timer=setInterval(()=>showHubWork(hubIndex+1),5200);}
+      });
+    }
+  }
+
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
     button.addEventListener('click',()=>{ location.href='?work='+button.dataset.openingWork; });
   });
@@ -2760,8 +2851,7 @@ updateCmpBadge();
   }else if(customMode){
     prepareCustomPage();
   }else{
-    document.body.classList.add('hub-mode');
-    document.getElementById('startBtn').onclick=()=>{ location.href='?work=COLOR'; };
+    prepareHub();
   }
 })();
 </script>
