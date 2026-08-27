@@ -791,6 +791,59 @@
     body.art-page .work-index{position:absolute; left:calc(64% + 4vw); right:24px; top:8vh; grid-template-columns:repeat(5,34px)}
     body.art-page .work-copy{position:absolute; left:64%; right:0; top:0; bottom:0; min-height:0; padding:22vh 4vw 5vh}
   }
+
+  /* 試作10：入口と戻り方を一目で分かるようにする */
+  .global-back{
+    position:fixed; z-index:92; display:none; align-items:center; gap:9px;
+    left:14px; top:calc(13px + env(safe-area-inset-top)); min-height:40px; padding:0 12px;
+    border:1px solid rgba(255,255,255,.26); color:#fff; background:rgba(8,9,12,.58);
+    text-decoration:none; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.14em; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .global-back svg,.work-close svg{width:15px; height:15px; flex:none}
+  body.custom-mode .global-back,body.work-tryon .global-back{display:flex}
+  body.custom-mode header .overline,body.work-tryon header .overline{display:none}
+  .opening-guide{
+    position:relative; z-index:2; width:min(100%,340px); margin:-8px 0 18px;
+    color:rgba(242,241,237,.68); font-size:11px; line-height:1.8; letter-spacing:.05em;
+  }
+  .opening-steps{
+    position:relative; z-index:2; display:grid; grid-template-columns:repeat(3,1fr);
+    width:min(100%,340px); margin-top:16px; border-top:1px solid rgba(255,255,255,.16);
+  }
+  .opening-steps span{padding:10px 4px 0; color:rgba(255,255,255,.48); font:500 7px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
+  .opening-steps b{display:block; margin-bottom:4px; color:#d7b39e; font-weight:500}
+  body.hub-mode #startOverlay{padding-bottom:calc(38px + env(safe-area-inset-bottom))}
+  body.hub-mode .opening-index{display:none}
+  body.hub-mode #startOverlay .invite{margin-bottom:12px; font-size:clamp(28px,8.6vw,40px); line-height:1.35}
+  body.hub-mode .opening-actions{width:min(100%,340px); flex-direction:column; align-items:stretch; gap:9px}
+  body.hub-mode .bigbtn,body.hub-mode .make-link{
+    box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;
+    width:100%; min-height:48px; padding:0 17px; border:1px solid rgba(255,255,255,.3);
+    color:#fff; background:rgba(8,9,12,.5); font-size:9px; letter-spacing:.12em; text-decoration:none;
+  }
+  body.hub-mode .bigbtn::after,body.hub-mode .make-link::after{content:"→"; font-size:15px; font-weight:300}
+  body.hub-mode .make-link{border-color:rgba(255,255,255,.16); color:rgba(255,255,255,.76)}
+  body.custom-mode #startOverlay{padding-bottom:calc(54px + env(safe-area-inset-bottom))}
+  body.custom-mode .opening-actions{width:min(100%,340px); flex-direction:column; align-items:stretch; gap:9px}
+  body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
+  body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
+  body.work-tryon .opening-steps,body.custom-mode .opening-steps{display:none}
+  body.work-tryon .opening-guide,body.custom-mode .opening-guide{margin-bottom:17px}
+  .work-close{
+    display:flex; align-items:center; gap:8px; left:14px!important; right:auto!important;
+    min-height:40px; padding:0 12px!important; font-size:8px!important;
+  }
+  body.art-page .work-index{grid-template-columns:repeat(5,38px); gap:5px}
+  body.art-page .work-index button{width:38px; height:32px; font-size:9px}
+  body.art-page .work-index button.active{color:#08090c; background:var(--work-accent); border-top-color:var(--work-accent)}
+  @media (max-height:720px){
+    body.hub-mode #startOverlay{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+    body.hub-mode #startOverlay .invite{font-size:27px; margin-bottom:7px}
+    .opening-guide{margin-bottom:10px; font-size:10px}
+    .opening-steps{margin-top:10px}
+    body.hub-mode .bigbtn,body.hub-mode .make-link{min-height:42px}
+  }
 </style>
 </head>
 <body>
@@ -799,6 +852,11 @@
   <h1>艶</h1>
   <div class="rule"></div>
 </header>
+
+<a class="global-back" id="globalBack" href="./" aria-label="前の画面へ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
+  <span id="globalBackText">作品一覧</span>
+</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -813,9 +871,13 @@
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite">自分の手から、<br>作品へ。</p>
+    <p class="opening-guide" id="openingGuide">作品を選び、その作品から生まれたネイルを自分の手にのせます。</p>
     <div class="opening-actions">
-      <button class="bigbtn" id="startBtn">作品を見る</button>
-      <a class="make-link" href="?mode=custom">自分で作る</a>
+      <button class="bigbtn" id="startBtn">作品ネイルを選ぶ</button>
+      <a class="make-link" href="?mode=custom">自由にデザインする</a>
+    </div>
+    <div class="opening-steps" aria-label="試着までの流れ">
+      <span><b>01</b>作品を選ぶ</span><span><b>02</b>ネイルを見る</span><span><b>03</b>カメラで試着</span>
     </div>
     <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
       <button type="button" data-opening-work="COLOR" aria-label="COLOR 色">01</button>
@@ -952,7 +1014,7 @@
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
   <video class="work-film" id="workFilm" muted loop playsinline preload="metadata"></video>
-  <button type="button" class="work-close" id="workClose">試着へ戻る</button>
+  <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>試着へ戻る</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
     <div class="work-code" id="workCode">01 / COLOR</div>
@@ -2648,7 +2710,7 @@ updateCmpBadge();
 
   function showArtworkPage(key){
     document.body.classList.add('art-page');
-    document.getElementById('workClose').textContent='作品一覧へ';
+    document.querySelector('#workClose span').textContent='作品一覧';
     openWork(key);
   }
 
@@ -2659,10 +2721,13 @@ updateCmpBadge();
     setCurrent(key); applyArtworkPreset(key);
     document.querySelector('.opening-mark').innerHTML=work.no+' / '+work.label+'<br>ARTWORK TRY ON';
     document.querySelector('#startOverlay .invite').innerHTML=work.tryTitle+'を、<br>手にのせる。';
+    document.getElementById('openingGuide').textContent='カメラを開くと、この作品から作った5本のネイルが自動で装着されます。';
     document.getElementById('startBtn').textContent='カメラをひらく';
     document.getElementById('tryIdentityText').textContent=work.no+' / '+work.label;
     renderNailPreview(key,'tryNails');
     document.getElementById('tryWorkBack').href='?work='+key;
+    document.getElementById('globalBack').href='?work='+key;
+    document.getElementById('globalBackText').textContent='作品へ戻る';
     const hero=document.querySelector('.opening-film.a');
     hero.src=work.film; hero.load();
   }
@@ -2673,10 +2738,13 @@ updateCmpBadge();
     Object.assign(tuneVals,{nailSize:95,sculptLen:130,sculptShape:'natural'});
     document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
     document.querySelector('#startOverlay .invite').innerHTML='自分でつくる。<br>自分の手で。';
+    document.getElementById('openingGuide').textContent='カメラを開いたあと、色・柄・長さ・光を自由に選べます。';
     document.getElementById('startBtn').textContent='カメラをひらく';
     document.getElementById('tryIdentityText').textContent='CUSTOM / 自分で作る';
     const workBack=document.getElementById('tryWorkBack'); workBack.textContent='作品から選ぶ'; workBack.href='./';
-    const link=document.querySelector('.make-link'); link.textContent='作品から選ぶ'; link.href='./';
+    const link=document.querySelector('.make-link'); link.textContent='作品ネイルから選ぶ'; link.href='./';
+    document.getElementById('globalBack').href='./';
+    document.getElementById('globalBackText').textContent='作品一覧';
   }
 
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
