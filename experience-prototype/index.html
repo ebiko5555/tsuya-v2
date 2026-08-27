@@ -937,7 +937,7 @@
       <button type="button" data-opening-work="TRACE" aria-label="TRACE 痕跡">06</button>
       <button type="button" data-opening-work="SPACE" aria-label="宇宙と手">07</button>
       <button type="button" data-opening-work="THINKING" aria-label="思惟する手">08</button>
-      <button type="button" data-opening-work="NAILORB" aria-label="Nail White Orb">09</button>
+      <button type="button" data-opening-work="ORB" aria-label="White Orb">09</button>
       <button type="button" data-opening-work="FRAME" aria-label="Frame 0001–0240">10</button>
     </nav>
     <div id="status"></div>
@@ -2438,8 +2438,8 @@ updateCmpBadge();
       text:'回転する手の線と淡い影が、考える時間をゆっくりと重ねる。手は道具ではなく、思考そのものの輪郭になる。',
       preset:{looks:['artThinking','sheer','line','artThinking','matte'],colors:['#d7c5bf','#e9ddd6','#8c5d67','#b8a09c','#4a4448'],tune:{gloss:24,opacity:84,nailSize:96,sculptLen:120,sculptShape:'natural'},vars:{sheer:.28,line:.36},trail:{on:false,intensity:0,hue:null}}
     },
-    NAILORB:{
-      no:'09',title:'Nail / White Orb',tryTitle:'白球と赤い爪',label:'NAIL / WHITE ORB',accent:'#d65052',film:'art-assets/nail-white-orb.mp4',
+    ORB:{
+      no:'09',title:'White Orb',tryTitle:'White Orb',label:'WHITE ORB',accent:'#d65052',film:'art-assets/nail-white-orb.mp4',
       text:'白い球体のまわりを、赤いネイルを持つ手が巡る。小さな装飾と大きな形が、互いのスケールを反転させる。',
       preset:{looks:['artOrb','milk','flash','artOrb','french'],colors:['#c52d35','#f2eee5','#d94f62','#8f1827','#b92734'],tune:{gloss:100,opacity:100,nailSize:104,sculptLen:166,sculptShape:'round2'},vars:{milk:.62,flash:.64,french:.25},trail:{on:false,intensity:0,hue:null}}
     },
@@ -2480,8 +2480,9 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const artKey=(params.get('work')||'').toUpperCase();
-  const tryKey=(params.get('try')||'').toUpperCase();
+  const normalizeWorkKey=key=>key==='NAILORB'?'ORB':key;
+  const artKey=normalizeWorkKey((params.get('work')||'').toUpperCase());
+  const tryKey=normalizeWorkKey((params.get('try')||'').toUpperCase());
   const customMode=params.get('mode')==='custom';
   let current='COLOR';
 
