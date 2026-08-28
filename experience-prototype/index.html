@@ -2608,11 +2608,21 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
+  const BUILD_VERSION='mobile24';
+  const route=(name,value)=>{
+    const query=new URLSearchParams();
+    if(name&&value) query.set(name,value);
+    query.set('v',BUILD_VERSION);
+    return '?'+query.toString();
+  };
+  const homeRoute=()=>route(null,null);
   const normalizeWorkKey=key=>key==='NAILORB'?'ORB':key;
   const artKey=normalizeWorkKey((params.get('work')||'').toUpperCase());
   const tryKey=normalizeWorkKey((params.get('try')||'').toUpperCase());
   const customMode=params.get('mode')==='custom';
   let current='COLOR';
+
+  document.querySelectorAll('a[href="?mode=custom"]').forEach(link=>{link.href=route('mode','custom');});
 
   function playSilently(video){
     if(!video) return;
@@ -2864,7 +2874,7 @@ updateCmpBadge();
   function openWork(key){
     setCurrent(key); const work=works[key];
     if(document.body.classList.contains('art-page')){
-      history.replaceState(null,'','?work='+key);
+      history.replaceState(null,'',route('work',key));
       document.title='艶 II — '+work.title;
     }
     document.getElementById('workCode').textContent=work.no+' / '+key;
@@ -2881,7 +2891,7 @@ updateCmpBadge();
     playSilently(workFilm);
   }
   function closeWork(){
-    if(document.body.classList.contains('art-page')){ location.href='./'; return; }
+    if(document.body.classList.contains('art-page')){ location.href=homeRoute(); return; }
     workFilm.pause(); layer.classList.remove('open'); layer.setAttribute('aria-hidden','true');
     if(document.body.classList.contains('camera-started')) signalFilm.play().catch(()=>{});
   }
@@ -2927,8 +2937,8 @@ updateCmpBadge();
     document.getElementById('startBtn').textContent='カメラをひらく';
     document.getElementById('tryIdentityText').textContent=work.no+' / '+work.label;
     renderNailPreview(key,'tryNails');
-    document.getElementById('tryWorkBack').href='?work='+key;
-    document.getElementById('globalBack').href='?work='+key;
+    document.getElementById('tryWorkBack').href=route('work',key);
+    document.getElementById('globalBack').href=route('work',key);
     document.getElementById('globalBackText').textContent='作品へ戻る';
     const hero=document.querySelector('.opening-film.a');
     hero.src=work.film; hero.load(); playSilently(hero);
@@ -2943,9 +2953,9 @@ updateCmpBadge();
     document.getElementById('openingGuide').textContent='カメラを開いたあと、色・柄・長さ・光を自由に選べます。';
     document.getElementById('startBtn').textContent='カメラをひらく';
     document.getElementById('tryIdentityText').textContent='CUSTOM / 自分で作る';
-    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='作品から選ぶ'; workBack.href='./';
-    const link=document.querySelector('.make-link'); link.textContent='作品ネイルから選ぶ'; link.href='./';
-    document.getElementById('globalBack').href='./';
+    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='作品から選ぶ'; workBack.href=homeRoute();
+    const link=document.querySelector('.make-link'); link.textContent='作品ネイルから選ぶ'; link.href=homeRoute();
+    document.getElementById('globalBack').href=homeRoute();
     document.getElementById('globalBackText').textContent='作品一覧';
   }
 
@@ -2977,7 +2987,7 @@ updateCmpBadge();
       if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
-      enter.href='?work='+key;
+      enter.href=route('work',key);
       enter.setAttribute('aria-label',work.title+'の作品ページへ入る');
       restartProgress();
     }
@@ -2992,9 +3002,9 @@ updateCmpBadge();
   }
 
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
-    button.addEventListener('click',()=>{ location.href='?work='+button.dataset.openingWork; });
+    button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
-  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href='?try='+current; });
+  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=route('try',current); });
 
   setCurrent('COLOR');
   if(works[artKey]){
