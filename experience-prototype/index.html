@@ -938,7 +938,7 @@
       <button type="button" data-opening-work="SPACE" aria-label="宇宙と手">07</button>
       <button type="button" data-opening-work="THINKING" aria-label="思惟する手">08</button>
       <button type="button" data-opening-work="ORB" aria-label="White Orb">09</button>
-      <button type="button" data-opening-work="FRAME" aria-label="Frame 0001–0240">10</button>
+      <button type="button" data-opening-work="FRAME" aria-label="二つの手の輪舞曲">10</button>
     </nav>
     <div id="status"></div>
   </div>
@@ -2444,7 +2444,7 @@ updateCmpBadge();
       preset:{looks:['artOrb','milk','flash','artOrb','french'],colors:['#c52d35','#f2eee5','#d94f62','#8f1827','#b92734'],tune:{gloss:100,opacity:100,nailSize:104,sculptLen:166,sculptShape:'round2'},vars:{milk:.62,flash:.64,french:.25},trail:{on:false,intensity:0,hue:null}}
     },
     FRAME:{
-      no:'10',title:'Frame 0001–0240',tryTitle:'Frame 0001–0240',label:'FRAME / 0001–0240',accent:'#d9b8a8',film:'art-assets/frame-0001-0240.mp4',
+      no:'10',title:'二つの手の輪舞曲',tryTitle:'二つの手の輪舞曲',label:'FRAME / 二つの手の輪舞曲',accent:'#d9b8a8',film:'art-assets/frame-0001-0240.mp4',
       text:'白い手、淡いピンクの面、金色の線。240のフレームのなかで、皮膚と膜と装飾の境界が組み替わる。',
       preset:{looks:['artFrame','sheer','frenchmirror','artFrame','aurora'],colors:['#e2b9b2','#ead8cf','#caa75d','#f0cbc6','#d7cabd'],tune:{gloss:82,opacity:90,nailSize:100,sculptLen:148,sculptShape:'coffin'},vars:{sheer:.3,frenchmirror:.16,aurora:.38},trail:{on:true,intensity:34,hue:'#f0d4c8'}}
     }
@@ -2580,7 +2580,7 @@ updateCmpBadge();
       c.beginPath(); c.arc(x,y,w*.24,0,Math.PI*2); c.fill(); c.shadowBlur=0;
       c.strokeStyle='rgba(255,216,206,.58)'; c.lineWidth=w*.022; c.beginPath(); c.arc(x,y,w*.34,0,Math.PI*2); c.stroke();
     }};
-    LOOKS.artFrame={name:'作品・Frame 0001–0240',paint(c,w,h,col,seed){
+    LOOKS.artFrame={name:'作品・二つの手の輪舞曲',paint(c,w,h,col,seed){
       base(c,w,h,'#f3e9e2',col);
       c.fillStyle='rgba(217,171,166,.5)'; c.save(); c.rotate((seed-2)*.13); c.fillRect(-w*.7,-h*.14,w*1.4,h*.28); c.restore();
       c.strokeStyle='#bf9853'; c.lineWidth=Math.max(1,w*.025); c.globalAlpha=.86;
