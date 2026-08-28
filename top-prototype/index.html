@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>艶 II — Hand &amp; Light Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&text=%E8%89%B6&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#2a2522; --sub:#8f8378; --faint:#b5a99d; --accent:#a4735c; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    background:radial-gradient(125% 85% at 50% 40%, #fcf9f6 0%, #f4efe9 58%, #ece3da 100%);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+  }
+  #stage{
+    position:fixed; inset:0; width:100%; height:100%; border:0; padding:0;
+    background:transparent; color:inherit; cursor:pointer; font:inherit;
+  }
+  #stage:focus-visible{outline:1px solid rgba(42,37,34,.32); outline-offset:-10px}
+  #glyph{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+  .over{
+    position:absolute; top:calc(30px + env(safe-area-inset-top)); left:0; right:0;
+    text-align:center; font-size:8.5px; letter-spacing:.58em; text-indent:.58em;
+    color:var(--faint); text-transform:uppercase; pointer-events:none;
+  }
+  .rule{
+    position:absolute; left:50%; bottom:calc(112px + env(safe-area-inset-bottom));
+    width:0; height:1px; background:var(--ink); opacity:.3;
+    transform:translateX(-50%); pointer-events:none;
+  }
+  .sub{
+    position:absolute; left:0; right:0; bottom:calc(84px + env(safe-area-inset-bottom));
+    text-align:center; font-size:9.5px; letter-spacing:.38em; text-indent:.38em;
+    color:var(--sub); pointer-events:none; opacity:0;
+  }
+
+  #veil{
+    position:fixed; inset:0; background:#f4efe9; opacity:0; pointer-events:none;
+    transition:opacity .45s ease; z-index:9;
+  }
+</style>
+</head>
+<body>
+<button id="stage" type="button" aria-label="触れて作品へ">
+  <canvas id="glyph"></canvas>
+  <div class="over" id="over">HAND &amp; LIGHT / 2026</div>
+  <div class="rule" id="rule"></div>
+  <div class="sub" id="sub">触れて、作品へ</div>
+</button>
+<div id="veil"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const cv = $('glyph'), ctx = cv.getContext('2d');
+const FONT = '"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif';
+
+let W=0, H=0, DPR=1, GS=0, GX=0, GY=0;      // 字の大きさと中心
+let mask=null, buf=null, mctx=null, bctx=null;
+let variant = 0, t0 = 0, exitAt = -1, leaving = false;
+let parts = [];
+
+const ease = t => 1 - Math.pow(1-t, 3);          // ぬるりと減速
+const easeIn = t => t*t*t;
+
+/* ---------- 字をマスクとして持つ ---------- */
+function layout(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  W = cv.width  = Math.round(innerWidth *DPR);
+  H = cv.height = Math.round(innerHeight*DPR);
+  GS = Math.round(Math.min(W*0.70, H*0.44));
+  GX = W/2; GY = Math.round(H*0.455);
+
+  mask = document.createElement('canvas'); mask.width=GS; mask.height=GS;
+  mctx = mask.getContext('2d', {willReadFrequently:true});
+  mctx.fillStyle='#000'; mctx.textAlign='center'; mctx.textBaseline='middle';
+  mctx.font = `500 ${Math.round(GS*0.90)}px ${FONT}`;
+  mctx.fillText('艶', GS/2, GS/2);
+
+  buf = document.createElement('canvas'); buf.width=GS; buf.height=GS;
+  bctx = buf.getContext('2d');
+
+  buildParts();
+}
+
+/* 字の中身を描いてから、字の形で切り抜く */
+function stamp(drawInside, alpha, dx, dy, scale){
+  bctx.setTransform(1,0,0,1,0,0);
+  bctx.clearRect(0,0,GS,GS);
+  drawInside(bctx);
+  bctx.globalCompositeOperation='destination-in';
+  bctx.drawImage(mask,0,0);
+  bctx.globalCompositeOperation='source-over';
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(GX+dx, GY+dy);
+  ctx.scale(scale, scale);
+  ctx.drawImage(buf, -GS/2, -GS/2);
+  ctx.restore();
+}
+function bronze(c){
+  const g = c.createLinearGradient(0,0,GS,GS);
+  g.addColorStop(0,'#8a5a45'); g.addColorStop(.42,'#d4a887');
+  g.addColorStop(.62,'#b98263'); g.addColorStop(1,'#7d4f3c');
+  c.fillStyle=g; c.fillRect(0,0,GS,GS);
+}
+function sheen(c, pos, width, strength){
+  const bx = pos*GS;
+  const g = c.createLinearGradient(bx-GS*width, -GS*0.25, bx+GS*width, GS*1.1);
+  g.addColorStop(0,'rgba(255,255,255,0)');
+  g.addColorStop(.46,`rgba(255,246,232,${0.62*strength})`);
+  g.addColorStop(.52,`rgba(255,252,246,${0.42*strength})`);
+  g.addColorStop(1,'rgba(255,255,255,0)');
+  c.save(); c.globalCompositeOperation='lighter';
+  c.fillStyle=g; c.fillRect(0,0,GS,GS); c.restore();
+}
+
+/* ---------- 案3：粒 ---------- */
+function buildParts(){
+  parts = [];
+  const d = mctx.getImageData(0,0,GS,GS).data;
+  const step = Math.max(2, Math.round(GS/150));
+  for(let y=0;y<GS;y+=step) for(let x=0;x<GS;x+=step){
+    if(d[(y*GS+x)*4+3] > 130){
+      const a = Math.random()*Math.PI*2, r = GS*(0.5+Math.random()*0.9);
+      parts.push({
+        hx:x+(Math.random()-.5)*step*.7, hy:y+(Math.random()-.5)*step*.7,
+        sx:GS/2+Math.cos(a)*r, sy:GS/2+Math.sin(a)*r,
+        x:0, y:0, vx:0, vy:0,
+        ph:Math.random()*6.283, s:step*(0.7+Math.random()*0.6),
+        tone:(x/GS)
+      });
+    }
+  }
+}
+
+/* ---------- 各案の描画 ---------- */
+function drawVariant(t, ex){
+  /* t: 登場からの秒数, ex: 退場の進み 0〜1 */
+  const inT = Math.min(1, t/1.15);
+  const e = ease(inT);
+
+  if(variant === 0){
+    /* 光沢 ─ 下からぬるりと上がってきて、光が横切り続ける */
+    const dy = (1-e)*GS*0.16;
+    const sc = (0.965 + 0.035*e) * (1 + ex*0.16);
+    const pos = ((t*0.30) % 1.7) - 0.32;
+    const boost = ex>0 ? 1 + ex*2.4 : 1;
+    stamp(c=>{
+      bronze(c);
+      sheen(c, pos, 0.11, 0.55*boost);
+      if(ex>0) sheen(c, 0.5, 0.9, ex*1.5);
+    }, e*(1-ex*ex), 0, dy, sc);
+
+  }else if(variant === 1){
+    /* 立ち上がり ─ 下から順に姿が現れる（境目はぼかす） */
+    const reveal = e;
+    const sc = 1 + ex*0.16;
+    stamp(c=>{
+      bronze(c);
+      sheen(c, ((t*0.24)%1.7)-0.32, 0.12, 0.5);
+      /* 下から上へ、ふちを柔らかく削る */
+      const edge = GS*(1.06 - reveal*1.42);
+      const g = c.createLinearGradient(0, edge-GS*0.26, 0, edge);
+      g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,1)');
+      c.globalCompositeOperation='destination-in';
+      c.fillStyle=g; c.fillRect(0,0,GS,GS);
+      c.globalCompositeOperation='source-over';
+    }, 1-ex*ex, 0, (1-e)*GS*0.06, sc);
+
+  }else{
+    /* 粒 ─ 散らばった粒が集まって字になり、触れるとまた離れる */
+    ctx.save();
+    ctx.translate(GX-GS/2, GY-GS/2);
+    const gather = ease(Math.min(1, t/1.35));
+    for(let i=0;i<parts.length;i++){
+      const p = parts[i];
+      let x, y, a=1, s=p.s;
+      if(ex>0){
+        p.x += p.vx*0.016; p.y += p.vy*0.016;
+        p.vx*=0.975; p.vy*=0.975;
+        x=p.x; y=p.y; a=Math.max(0,1-ex*ex*1.2); s=p.s*(1+ex*0.5);
+      }else{
+        x = p.sx + (p.hx-p.sx)*gather + Math.sin(t*0.9+p.ph)*0.5;
+        y = p.sy + (p.hy-p.sy)*gather + Math.cos(t*0.7+p.ph)*0.5;
+        p.x=x; p.y=y;
+        a = gather;
+      }
+      const band = ((t*0.30)%1.7-0.32)*GS;
+      const gl = Math.exp(-Math.pow((x-band)/(GS*0.16),2));
+      const k = Math.min(1, gl*0.9 + (ex>0?Math.max(0,1-ex*3.2):0));
+      const base = p.tone<.5 ? [138,90,69] : [212,168,135];
+      const r = base[0]+(255-base[0])*k, g2 = base[1]+(255-base[1])*k, b = base[2]+(255-base[2])*k;
+      ctx.globalAlpha=a;
+      ctx.fillStyle=`rgb(${r|0},${g2|0},${b|0})`;
+      const s2=s*(1+k*0.45);
+      ctx.fillRect(x-s2/2, y-s2/2, s2, s2);
+    }
+    ctx.restore();
+    ctx.globalAlpha=1;
+  }
+}
+
+/* ---------- 周りの要素（少し遅れて出す） ---------- */
+function chrome(t, ex){
+  const fade = 1-ex;
+  const o = Math.min(1, Math.max(0, (t-0.15)/0.9));
+  $('over').style.opacity = (o*fade).toFixed(3);
+  $('over').style.transform = `translateY(${(1-ease(o))*8}px)`;
+  const r = Math.min(1, Math.max(0, (t-1.05)/0.9));
+  $('rule').style.width = (ease(r)*38*(1-ex)).toFixed(1)+'px';
+  const sv = Math.min(1, Math.max(0, (t-1.5)/1.0));
+  $('sub').style.opacity = (sv*0.85*fade*(0.72+0.28*Math.sin(t*1.6))).toFixed(3);
+}
+
+/* ---------- ループ ---------- */
+function frame(now){
+  requestAnimationFrame(frame);
+  const t = (now-t0)/1000;
+  let ex = 0;
+  if(exitAt>=0) ex = Math.min(1, (now-exitAt)/900);
+  ctx.clearRect(0,0,W,H);
+  drawVariant(t, ex);
+  chrome(t, ex);
+  if(ex>=1 && !leaving){
+    leaving = true;
+    location.href = '../experience-prototype/';
+  }
+}
+
+/* ---------- 触れる ---------- */
+function go(){
+  if(exitAt>=0) return;
+  exitAt = performance.now();
+  if(variant===2){
+    for(const p of parts){
+      const dx=p.x-GS/2, dy=p.y-GS/2, l=Math.hypot(dx,dy)||1;
+      const sp=140+Math.random()*320;
+      p.vx=dx/l*sp+(Math.random()-.5)*90;
+      p.vy=dy/l*sp*0.8+(Math.random()-.5)*90-70;
+    }
+  }
+  setTimeout(()=>{ $('veil').style.opacity=1; }, 420);
+}
+$('stage').addEventListener('click', go);
+
+addEventListener('resize', ()=>{ layout(); });
+layout();
+t0 = performance.now();
+requestAnimationFrame(frame);
+if(document.fonts && document.fonts.load){
+  document.fonts.load(`500 100px "Zen Old Mincho"`, '艶').then(()=>{ layout(); t0=performance.now(); }).catch(()=>{});
+}
+</script>
+</body>
+</html>
