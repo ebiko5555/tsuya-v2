@@ -926,6 +926,89 @@
     body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{transition-duration:.2s}
     .opening-progress::after{animation:none; transform:scaleX(1)}
   }
+
+  /* 試作23：作品ページだけをスマホの展示アプリとして再構成する。 */
+  @media (max-width:819px){
+    body.art-page .work-layer{overflow:hidden; overscroll-behavior:none}
+    body.art-page .work-film{
+      position:absolute; inset:0 0 auto; width:100%; height:42svh;
+      object-fit:contain; object-position:center; background:#050608;
+    }
+    body.art-page .work-layer::after{
+      top:0; bottom:auto; width:100%; height:42svh;
+      background:linear-gradient(180deg,rgba(5,6,8,.16),transparent 70%,rgba(5,6,8,.72));
+    }
+    body.art-page .work-close{
+      position:fixed; z-index:30; left:12px!important; top:calc(12px + env(safe-area-inset-top));
+      min-height:38px; padding:0 12px!important; border-color:rgba(255,255,255,.3);
+      border-radius:999px; background:rgba(5,6,8,.58);
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+    }
+    body.art-page .work-index{
+      position:absolute; z-index:8; left:0; right:0; top:calc(42svh + 2px); width:auto; height:70px;
+      box-sizing:border-box; display:flex; flex-direction:row; grid-template-columns:none; gap:7px;
+      padding:22px 16px 5px; overflow-x:auto; overflow-y:hidden;
+      scroll-snap-type:x proximity; scrollbar-width:none;
+      background:linear-gradient(180deg,#08090c 74%,rgba(8,9,12,.9));
+    }
+    body.art-page .work-index::-webkit-scrollbar{display:none}
+    body.art-page .work-index::before{
+      content:"WORKS / 作品を切り替える　　SWIPE →"; position:absolute; left:16px; top:5px;
+      margin:0; color:rgba(255,255,255,.54);
+      font:500 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em;
+      white-space:nowrap;
+    }
+    body.art-page .work-index button{
+      flex:0 0 76px; scroll-snap-align:start; box-sizing:border-box;
+      display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:6px;
+      width:76px; height:40px; padding:0 9px; border:1px solid rgba(255,255,255,.16);
+      border-radius:3px; background:rgba(255,255,255,.025); text-align:left;
+    }
+    body.art-page .work-index .work-nav-no{font-size:9px; line-height:1}
+    body.art-page .work-index .work-nav-title{
+      display:block; width:auto; margin:0; overflow:hidden; color:currentColor;
+      font-size:6px; line-height:1; letter-spacing:.06em; text-overflow:ellipsis; white-space:nowrap;
+      opacity:.7;
+    }
+    body.art-page .work-index button.active{
+      color:#08090c; background:var(--work-accent); border-color:var(--work-accent);
+      box-shadow:0 7px 20px rgba(0,0,0,.2);
+    }
+    body.art-page .work-copy{
+      position:absolute; z-index:5; left:0; right:0; top:calc(42svh + 72px); bottom:0;
+      min-height:0; box-sizing:border-box; overflow-y:auto; overscroll-behavior:contain;
+      padding:20px 18px calc(112px + env(safe-area-inset-bottom));
+      border-top:1px solid rgba(255,255,255,.08); background:#08090c;
+      scrollbar-width:none;
+    }
+    body.art-page .work-copy::-webkit-scrollbar{display:none}
+    body.art-page .work-code{font-size:7px; letter-spacing:.16em}
+    body.art-page .work-title{
+      margin:8px 0 10px; font-size:clamp(38px,12vw,52px); line-height:1; letter-spacing:.035em;
+    }
+    body.art-page .work-title::after{width:32px; left:calc(100% + 12px)}
+    body.art-page .work-text{
+      max-width:none; margin:0; color:rgba(242,241,237,.78);
+      font-size:12px; line-height:1.75; letter-spacing:.04em;
+    }
+    body.art-page #workNails{height:58px; gap:7px; margin-top:25px}
+    body.art-page #workNails canvas{width:24px; height:48px}
+    body.art-page #workNails canvas:nth-child(1),body.art-page #workNails canvas:nth-child(5){height:40px}
+    body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:44px}
+    body.art-page .work-actions{
+      position:fixed; z-index:32; left:10px; right:10px; bottom:calc(9px + env(safe-area-inset-bottom));
+      box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr) 74px; align-items:stretch; gap:7px;
+      max-width:none; margin:0; padding:7px; border:1px solid rgba(255,255,255,.14);
+      border-radius:4px; background:rgba(8,9,12,.9); box-shadow:0 14px 40px rgba(0,0,0,.36);
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    }
+    body.art-page .work-try{min-width:0; min-height:58px; padding:10px 14px 11px; box-shadow:none}
+    body.art-page .work-custom{
+      display:flex; align-items:center; justify-content:center; box-sizing:border-box;
+      margin:0; padding:0 6px; border:1px solid rgba(255,255,255,.2);
+      color:rgba(255,255,255,.76); text-align:center; line-height:1.45;
+    }
+  }
 </style>
 </head>
 <body>
@@ -2789,8 +2872,12 @@ updateCmpBadge();
     document.getElementById('workText').textContent=work.text;
     renderNailPreview(key,'workNails');
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
+    const activeButton=index.querySelector('button.active');
     if(workFilm.getAttribute('src')!==work.film){workFilm.src=work.film; workFilm.load();}
     signalFilm.pause(); layer.classList.add('open'); layer.setAttribute('aria-hidden','false');
+    if(activeButton&&matchMedia('(max-width:819px)').matches){
+      requestAnimationFrame(()=>index.scrollTo({left:Math.max(0,activeButton.offsetLeft-(index.clientWidth-activeButton.offsetWidth)/2),behavior:'smooth'}));
+    }
     playSilently(workFilm);
   }
   function closeWork(){
