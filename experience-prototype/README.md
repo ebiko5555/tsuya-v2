@@ -30,6 +30,12 @@
 
 - 試作公開先: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/`
 - 自分で作る: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?mode=custom`
+
+## 試作20（2026-08-29）
+
+- iPhoneの動画再生ボタンを廃止し、作品表示を自動で動くWebPへ変更。
+- 作品ページの入口を `TRY ON / カメラでネイルを試す →` に変更。
+- 詳細は `試作20_自動映像と試着UI.md` を参照。
 - 通常の艶 II: `https://ebiko5555.github.io/tsuya-v2/`
 
 ## Sources
