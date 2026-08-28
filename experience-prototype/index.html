@@ -885,9 +885,26 @@
     body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{transition-duration:.2s}
     .opening-progress::after{animation:none; transform:scaleX(1)}
   }
+  .video-unlock{
+    display:none; position:fixed; inset:0; z-index:220; width:100%; height:100%;
+    border:0; padding:0; align-items:center; justify-content:center;
+    background:rgba(248,246,242,.2); color:#211f1d; font:inherit; cursor:pointer;
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+  }
+  body.needs-video-unlock .video-unlock{display:flex}
+  .video-unlock span{
+    display:inline-flex; min-width:152px; min-height:48px; padding:14px 22px;
+    align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.7);
+    border-radius:999px; background:rgba(255,255,255,.92);
+    box-shadow:0 10px 34px rgba(0,0,0,.16); font-size:11px;
+    letter-spacing:.18em; text-indent:.18em;
+  }
 </style>
 </head>
 <body>
+<button type="button" class="video-unlock" id="videoUnlock" aria-label="作品映像を再生する">
+  <span>映像をはじめる</span>
+</button>
 <header>
   <div class="overline">Hand &amp; Light Atelier</div>
   <h1>艶</h1>
@@ -2485,6 +2502,54 @@ updateCmpBadge();
   const tryKey=normalizeWorkKey((params.get('try')||'').toUpperCase());
   const customMode=params.get('mode')==='custom';
   let current='COLOR';
+  const videoUnlock=document.getElementById('videoUnlock');
+
+  function mediaForCurrentView(){
+    if(document.body.classList.contains('art-page')) return [workFilm];
+    if(document.body.classList.contains('hub-mode')) return [...document.querySelectorAll('.opening-film')].slice(0,2);
+    return [];
+  }
+  function activeMedia(){
+    if(document.body.classList.contains('art-page')) return workFilm;
+    if(document.body.classList.contains('hub-mode')) return document.querySelector('.opening-film.is-hub-active')||document.querySelector('.opening-film');
+    return null;
+  }
+  function prepareInlineVideo(video){
+    if(!video) return;
+    video.muted=true; video.defaultMuted=true; video.playsInline=true;
+    video.setAttribute('muted',''); video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
+    video.controls=false; video.disablePictureInPicture=true;
+    if(!video.dataset.unlockWatch){
+      video.dataset.unlockWatch='1';
+      video.addEventListener('playing',()=>setTimeout(verifyVideoPlayback,0));
+      video.addEventListener('canplay',()=>setTimeout(verifyVideoPlayback,80));
+    }
+  }
+  function showVideoUnlock(){
+    if(mediaForCurrentView().length) document.body.classList.add('needs-video-unlock');
+  }
+  function verifyVideoPlayback(){
+    const video=activeMedia();
+    if(!video){document.body.classList.remove('needs-video-unlock');return;}
+    document.body.classList.toggle('needs-video-unlock',video.paused||video.readyState<2);
+  }
+  function playArtworkVideo(video){
+    prepareInlineVideo(video);
+    try{
+      const attempt=video.play();
+      if(attempt&&typeof attempt.catch==='function') attempt.catch(showVideoUnlock);
+    }catch(_error){showVideoUnlock();}
+    setTimeout(verifyVideoPlayback,700);
+  }
+  videoUnlock.addEventListener('click',event=>{
+    event.preventDefault(); event.stopPropagation();
+    const videos=mediaForCurrentView();
+    videos.forEach(video=>{
+      prepareInlineVideo(video);
+      try{video.play();}catch(_error){}
+    });
+    setTimeout(verifyVideoPlayback,180);
+  });
 
   function installArtworkLooks(){
     LOOKS.artColor={name:'作品・色',paint(c,w,h,col,seed){
@@ -2726,7 +2791,7 @@ updateCmpBadge();
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
     if(workFilm.getAttribute('src')!==work.film){workFilm.src=work.film; workFilm.load();}
     signalFilm.pause(); layer.classList.add('open'); layer.setAttribute('aria-hidden','false');
-    workFilm.play().catch(()=>{});
+    playArtworkVideo(workFilm);
   }
   function closeWork(){
     if(document.body.classList.contains('art-page')){ location.href='./'; return; }
@@ -2821,7 +2886,7 @@ updateCmpBadge();
         activeFilm=nextFilm;
       };
       if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
-      video.play().catch(()=>{});
+      playArtworkVideo(video);
       if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
@@ -2854,6 +2919,7 @@ updateCmpBadge();
   }else{
     prepareHub();
   }
+  setTimeout(verifyVideoPlayback,900);
 })();
 </script>
 </body>
