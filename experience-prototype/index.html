@@ -785,6 +785,18 @@
   body.art-page #workNails canvas:nth-child(1),body.art-page #workNails canvas:nth-child(5){height:47px}
   body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:52px}
 
+  @media (max-width:819px){
+    body.art-page .work-copy{padding-bottom:130px}
+    body.art-page .work-actions{
+      position:fixed; z-index:24; left:62px; right:18px; bottom:calc(12px + env(safe-area-inset-bottom));
+      display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:12px;
+      max-width:none; margin:0; padding-top:24px;
+      background:linear-gradient(180deg,transparent,rgba(8,9,12,.88) 38%);
+    }
+    body.art-page .work-try{min-width:0; min-height:58px; padding:10px 14px 11px}
+    body.art-page .work-custom{white-space:nowrap; margin-bottom:5px}
+  }
+
   @media (min-width:640px){
     .art-signal{width:132px; height:206px; right:24px}
     .opening-film.a{width:48%}.opening-film.b{width:50%}.opening-film.c{left:24%; width:58%}
@@ -910,9 +922,9 @@
 
   <div id="startOverlay">
     <div class="opening-films" aria-hidden="true">
-      <img class="opening-film a" src="art-assets/color-pattern.webp" alt="">
-      <img class="opening-film b" src="art-assets/surface-gold.webp" alt="">
-      <img class="opening-film c" src="art-assets/hand-drawing.webp" alt="">
+      <video class="opening-film a" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline preload="auto"></video>
+      <video class="opening-film b" src="art-assets/surface-gold.mp4" muted loop autoplay playsinline preload="auto"></video>
+      <video class="opening-film c" src="art-assets/hand-drawing.mp4" muted loop autoplay playsinline preload="metadata"></video>
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite"></p>
@@ -1066,7 +1078,7 @@
 </div>
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
-  <img class="work-film" id="workFilm" alt="">
+  <video class="work-film" id="workFilm" muted loop autoplay playsinline preload="auto"></video>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>試着へ戻る</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
@@ -2494,6 +2506,17 @@ updateCmpBadge();
   const customMode=params.get('mode')==='custom';
   let current='COLOR';
 
+  function playSilently(video){
+    if(!video) return;
+    video.muted=true;
+    video.defaultMuted=true;
+    video.playsInline=true;
+    video.setAttribute('muted','');
+    video.setAttribute('playsinline','');
+    const attempt=video.play();
+    if(attempt&&typeof attempt.catch==='function') attempt.catch(()=>{});
+  }
+
   function installArtworkLooks(){
     LOOKS.artColor={name:'作品・色',paint(c,w,h,col,seed){
       base(c,w,h,'#eeeae4','#c9c8c3');
@@ -2734,12 +2757,13 @@ updateCmpBadge();
     document.getElementById('workText').textContent=work.text;
     renderNailPreview(key,'workNails');
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
-    if(workFilm.getAttribute('src')!==work.motion) workFilm.src=work.motion;
+    if(workFilm.getAttribute('src')!==work.film){workFilm.src=work.film; workFilm.load();}
     signalFilm.pause(); layer.classList.add('open'); layer.setAttribute('aria-hidden','false');
+    playSilently(workFilm);
   }
   function closeWork(){
     if(document.body.classList.contains('art-page')){ location.href='./'; return; }
-    layer.classList.remove('open'); layer.setAttribute('aria-hidden','true');
+    workFilm.pause(); layer.classList.remove('open'); layer.setAttribute('aria-hidden','true');
     if(document.body.classList.contains('camera-started')) signalFilm.play().catch(()=>{});
   }
   signal.addEventListener('click',()=>openWork(current));
@@ -2788,7 +2812,7 @@ updateCmpBadge();
     document.getElementById('globalBack').href='?work='+key;
     document.getElementById('globalBackText').textContent='作品へ戻る';
     const hero=document.querySelector('.opening-film.a');
-    hero.src=work.motion;
+    hero.src=work.film; hero.load(); playSilently(hero);
   }
 
   function prepareCustomPage(){
@@ -2823,15 +2847,15 @@ updateCmpBadge();
     function showHubWork(index,first=false){
       hubIndex=(index+order.length)%order.length;
       const key=order[hubIndex], work=works[key];
-      const nextFilm=first?0:1-activeFilm, image=films[nextFilm];
+      const nextFilm=first?0:1-activeFilm, video=films[nextFilm], previous=films[activeFilm];
       const reveal=()=>{
         films.forEach((film,i)=>film.classList.toggle('is-hub-active',i===nextFilm));
+        if(!first&&previous!==video) setTimeout(()=>previous.pause(),1900);
         activeFilm=nextFilm;
       };
-      if(image.getAttribute('src')!==work.motion){
-        image.addEventListener('load',reveal,{once:true});
-        image.src=work.motion;
-      }else reveal();
+      if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
+      playSilently(video);
+      if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
       enter.href='?work='+key;
