@@ -685,6 +685,7 @@
     color:rgba(255,255,255,.42); background:none;
     font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
   }
+  .work-nav-title{display:none}
   .work-index button.active{color:#fff; border-left-color:#d7b39e}
   .work-copy{position:absolute; z-index:3; left:62px; right:20px; bottom:calc(34px + env(safe-area-inset-bottom))}
   .work-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em; opacity:.58}
@@ -853,6 +854,30 @@
   body.art-page .work-index{grid-template-columns:repeat(5,38px); gap:5px}
   body.art-page .work-index button{width:38px; height:32px; font-size:9px}
   body.art-page .work-index button.active{color:#08090c; background:var(--work-accent); border-top-color:var(--work-accent)}
+  @media (max-width:819px){
+    body.art-page .work-index{
+      left:18px; right:18px; top:calc(56svh + 12px); width:auto;
+      grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px 6px;
+    }
+    body.art-page .work-index::before{
+      content:"WORKS / 作品を切り替える"; grid-column:1/-1; margin-bottom:3px;
+      color:rgba(255,255,255,.62); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em;
+    }
+    body.art-page .work-index button{
+      box-sizing:border-box; display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+      width:100%; height:46px; padding:0 6px; border-top:1px solid rgba(255,255,255,.2);
+      text-align:left;
+    }
+    body.art-page .work-index .work-nav-no{font-size:9px; line-height:1}
+    body.art-page .work-index .work-nav-title{
+      display:block; width:100%; margin-top:7px; overflow:hidden; color:currentColor;
+      font-size:6px; line-height:1; letter-spacing:.08em; text-overflow:ellipsis; white-space:nowrap;
+      opacity:.72;
+    }
+    body.art-page .work-index button.active .work-nav-title{opacity:.82}
+    body.art-page .work-copy{padding-top:148px}
+  }
   @media (max-height:720px){
     body.hub-mode #startOverlay{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
     body.hub-mode #startOverlay .invite{font-size:27px; margin-bottom:7px}
@@ -2728,7 +2753,14 @@ updateCmpBadge();
 
   order.forEach(key=>{
     const button=document.createElement('button');
-    button.type='button'; button.textContent=works[key].no; button.dataset.workKey=key;
+    const number=document.createElement('span');
+    const title=document.createElement('span');
+    button.type='button'; button.dataset.workKey=key;
+    button.setAttribute('aria-label',works[key].no+' '+works[key].title+'へ切り替える');
+    number.className='work-nav-no'; number.textContent=works[key].no;
+    title.className='work-nav-title';
+    title.textContent={SCULPT:'FORM',THINKING:'THINK',FRAME:'RONDO'}[key]||key;
+    button.append(number,title);
     button.addEventListener('click',()=>openWork(key));
     index.appendChild(button);
   });
