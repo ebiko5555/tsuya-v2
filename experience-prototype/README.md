@@ -66,6 +66,12 @@
 - 操作説明の日本語を減らし、`WORKS`、`SWIPE`、`TRY ON`、`CREATE`へ統一。
 - 試着入口を `TRY ON → START CAMERA` の流れに簡素化。
 - 詳細は `試作25_UI言語の簡素化.md` を参照。
+
+## 試作26（2026-08-30）
+
+- `TRY ON`の矢印を削除。
+- 右下を幅のある`じぶんでつくる`ボタンへ変更。
+- 詳細は `試作26_試着と自由制作の二択UI.md` を参照。
 - 通常の艶 II: `https://ebiko5555.github.io/tsuya-v2/`
 
 ## Sources

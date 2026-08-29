@@ -702,14 +702,13 @@
   .work-nails canvas:nth-child(2),.work-nails canvas:nth-child(4){height:39px}
   .work-actions{display:grid; gap:10px; margin-top:18px; max-width:310px}
   .work-try{
-    display:grid; grid-template-columns:1fr auto; grid-template-rows:1fr; column-gap:16px;
+    display:grid; grid-template-columns:1fr; grid-template-rows:1fr;
     width:100%; min-height:62px; border:0; padding:12px 15px 13px; color:#171717;
     background:rgba(255,255,255,.94); text-align:left; box-shadow:0 12px 34px rgba(0,0,0,.2);
     backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   }
   .work-try-label{align-self:center; font:600 18px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; opacity:1}
   .work-try strong{align-self:end; font-size:11px; font-weight:500; letter-spacing:.08em}
-  .work-try-arrow{grid-column:2; grid-row:1; align-self:center; font:300 26px/1 Georgia,serif}
   .work-custom{justify-self:start; border:0; border-bottom:1px solid rgba(255,255,255,.3); padding:8px 2px; color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.1em; text-decoration:none}
   .opening-actions{position:relative; z-index:2; display:flex; align-items:center; gap:20px}
   .make-link{padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.32); color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.12em; text-decoration:none}
@@ -997,7 +996,7 @@
     body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:44px}
     body.art-page .work-actions{
       position:fixed; z-index:32; left:10px; right:10px; bottom:calc(9px + env(safe-area-inset-bottom));
-      box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr) 74px; align-items:stretch; gap:7px;
+      box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr) 104px; align-items:stretch; gap:7px;
       max-width:none; margin:0; padding:7px; border:1px solid rgba(255,255,255,.14);
       border-radius:4px; background:rgba(8,9,12,.9); box-shadow:0 14px 40px rgba(0,0,0,.36);
       backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
@@ -1006,8 +1005,9 @@
     body.art-page .work-try-label{font-size:19px; letter-spacing:.13em}
     body.art-page .work-custom{
       display:flex; align-items:center; justify-content:center; box-sizing:border-box;
-      margin:0; padding:0 6px; border:1px solid rgba(255,255,255,.2);
-      color:rgba(255,255,255,.76); text-align:center; line-height:1.45;
+      justify-self:stretch; margin:0; padding:0 7px; border:1px solid rgba(255,255,255,.32);
+      color:rgba(255,255,255,.9); background:rgba(255,255,255,.045);
+      font-size:11px; font-weight:500; letter-spacing:.025em; text-align:center; line-height:1.45;
     }
   }
 </style>
@@ -1198,9 +1198,8 @@
     <div class="work-actions">
       <button type="button" class="work-try" id="workTryBtn">
         <span class="work-try-label">TRY ON</span>
-        <span class="work-try-arrow" aria-hidden="true">→</span>
       </button>
-      <a class="work-custom" href="?mode=custom">CREATE</a>
+      <a class="work-custom" href="?mode=custom">じぶんでつくる</a>
     </div>
   </div>
 </section>
@@ -2608,7 +2607,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile25';
+  const BUILD_VERSION='mobile26';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
