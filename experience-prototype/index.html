@@ -255,10 +255,6 @@
     background:var(--ink); color:#fffdfa; font-size:10px; line-height:16px;
     pointer-events:none; box-shadow:0 1px 4px rgba(0,0,0,.25);
   }
-  .pickcap{
-    display:block; margin-top:5px; font-size:8.5px; letter-spacing:.02em;
-    color:var(--sub); white-space:nowrap; pointer-events:none;
-  }
   /* 濃淡 */
   .tonewrap{display:flex; align-items:center; gap:10px; margin-top:7px}
   .tonelabel{flex:none; font-size:10px; letter-spacing:.15em; color:var(--sub)}
@@ -818,6 +814,13 @@
   }
   .global-back svg,.work-close svg{width:15px; height:15px; flex:none}
   body.custom-mode .global-back,body.work-tryon .global-back{display:flex}
+  .site-home{
+    position:fixed; z-index:112; display:flex; align-items:center; justify-content:center;
+    right:14px; top:calc(13px + env(safe-area-inset-top)); min-height:40px; padding:0 13px;
+    border:1px solid rgba(255,255,255,.26); color:#fff; background:rgba(8,9,12,.58);
+    text-decoration:none; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.14em; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
   body.custom-mode header .overline,body.work-tryon header .overline{display:none}
   .opening-guide{
     position:relative; z-index:2; width:min(100%,340px); margin:-8px 0 18px;
@@ -845,6 +848,7 @@
   body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
   body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
   body.work-tryon .opening-steps,body.custom-mode .opening-steps{display:none}
+  body.work-tryon .make-link{display:none}
   body.work-tryon .opening-guide,body.custom-mode .opening-guide{margin-bottom:17px}
   .work-close{
     display:flex; align-items:center; gap:8px; left:14px!important; right:auto!important;
@@ -886,7 +890,7 @@
   }
 
   /* 試作11：説明する入口ではなく、作品映像から直接作品へ入る */
-  .opening-enter,.hub-custom-link,.opening-work-meta{display:none}
+  .opening-enter,.opening-work-meta{display:none}
   body.hub-mode #startOverlay{padding:0; justify-content:flex-end; background:#08090c}
   body.hub-mode .opening-films::after{
     z-index:2; background:
@@ -903,12 +907,6 @@
   body.hub-mode .opening-guide,body.hub-mode .opening-actions,
   body.hub-mode .opening-steps,body.hub-mode .opening-index{display:none}
   body.hub-mode .opening-enter{position:absolute; z-index:3; display:block; inset:0}
-  body.hub-mode .hub-custom-link{
-    position:absolute; z-index:5; display:block; right:16px; top:calc(16px + env(safe-area-inset-top));
-    padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.34);
-    color:rgba(255,255,255,.75); text-decoration:none;
-    font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em;
-  }
   body.hub-mode .opening-work-meta{
     position:absolute; z-index:4; display:block; left:22px; right:22px;
     bottom:calc(38px + env(safe-area-inset-bottom)); pointer-events:none;
@@ -1023,6 +1021,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=nav27" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1046,7 +1045,6 @@
       <span><b>01</b>作品を選ぶ</span><span><b>02</b>ネイルを見る</span><span><b>03</b>カメラで試着</span>
     </div>
     <a class="opening-enter" id="openingEnter" href="?work=COLOR" aria-label="現在表示中の作品へ入る"></a>
-    <a class="hub-custom-link" href="?mode=custom">CREATE</a>
     <div class="opening-work-meta" aria-live="polite">
       <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
       <div class="opening-work-title" id="openingWorkTitle">色</div>
@@ -1077,7 +1075,6 @@
     <span id="tryIdentityText">01 / COLOR</span>
     <div class="work-nails" id="tryNails" aria-label="装着する5本のネイル"></div>
     <a href="?work=COLOR" id="tryWorkBack">WORK</a>
-    <a href="?mode=custom">CREATE</a>
   </div>
 
   <div class="stagebtns" id="liveBtns" style="display:none">
@@ -2320,8 +2317,7 @@ function renderChips(pal){
     pick.classList.add('active');
   });
   const plus=document.createElement('div'); plus.className='pickplus'; plus.textContent='＋';
-  const cap=document.createElement('span'); cap.className='pickcap'; cap.textContent='CREATE';
-  wrap.appendChild(pick); wrap.appendChild(plus); wrap.appendChild(cap);
+  wrap.appendChild(pick); wrap.appendChild(plus);
   box.appendChild(wrap);
   /* 起動時と写真から配色したときは、従来どおり全部の指に1色目を入れる */
   if(pal.length){ nailColors.fill(pal[0]); currentColor = pal[0]; }
@@ -2607,7 +2603,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile26';
+  const BUILD_VERSION='mobile27';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -2948,7 +2944,7 @@ updateCmpBadge();
     document.title='艶 II — 自分で作る';
     Object.assign(tuneVals,{nailSize:95,sculptLen:130,sculptShape:'natural'});
     document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
-    document.querySelector('#startOverlay .invite').textContent='CREATE';
+    document.querySelector('#startOverlay .invite').textContent='CUSTOM';
     document.getElementById('openingGuide').textContent='COLOR / SURFACE / FORM / LIGHT';
     document.getElementById('startBtn').textContent='START CAMERA';
     document.getElementById('tryIdentityText').textContent='CUSTOM';
