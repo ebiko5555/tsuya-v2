@@ -702,14 +702,14 @@
   .work-nails canvas:nth-child(2),.work-nails canvas:nth-child(4){height:39px}
   .work-actions{display:grid; gap:10px; margin-top:18px; max-width:310px}
   .work-try{
-    display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto; column-gap:16px;
+    display:grid; grid-template-columns:1fr auto; grid-template-rows:1fr; column-gap:16px;
     width:100%; min-height:62px; border:0; padding:12px 15px 13px; color:#171717;
     background:rgba(255,255,255,.94); text-align:left; box-shadow:0 12px 34px rgba(0,0,0,.2);
     backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   }
-  .work-try-label{font:600 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; opacity:.48}
+  .work-try-label{align-self:center; font:600 18px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; opacity:1}
   .work-try strong{align-self:end; font-size:11px; font-weight:500; letter-spacing:.08em}
-  .work-try-arrow{grid-column:2; grid-row:1/3; align-self:center; font:300 24px/1 Georgia,serif}
+  .work-try-arrow{grid-column:2; grid-row:1; align-self:center; font:300 26px/1 Georgia,serif}
   .work-custom{justify-self:start; border:0; border-bottom:1px solid rgba(255,255,255,.3); padding:8px 2px; color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.1em; text-decoration:none}
   .opening-actions{position:relative; z-index:2; display:flex; align-items:center; gap:20px}
   .make-link{padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.32); color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.12em; text-decoration:none}
@@ -860,7 +860,7 @@
       grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px 6px;
     }
     body.art-page .work-index::before{
-      content:"WORKS / 作品を切り替える"; grid-column:1/-1; margin-bottom:3px;
+      content:"WORKS　　SWIPE →"; grid-column:1/-1; margin-bottom:3px;
       color:rgba(255,255,255,.62); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.16em;
     }
@@ -953,7 +953,7 @@
     }
     body.art-page .work-index::-webkit-scrollbar{display:none}
     body.art-page .work-index::before{
-      content:"WORKS / 作品を切り替える　　SWIPE →"; position:absolute; left:16px; top:5px;
+      content:"WORKS　—　SWIPE →"; position:absolute; left:16px; top:5px;
       margin:0; color:rgba(255,255,255,.54);
       font:500 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em;
       white-space:nowrap;
@@ -1003,6 +1003,7 @@
       backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
     }
     body.art-page .work-try{min-width:0; min-height:58px; padding:10px 14px 11px; box-shadow:none}
+    body.art-page .work-try-label{font-size:19px; letter-spacing:.13em}
     body.art-page .work-custom{
       display:flex; align-items:center; justify-content:center; box-sizing:border-box;
       margin:0; padding:0 6px; border:1px solid rgba(255,255,255,.2);
@@ -1020,7 +1021,7 @@
 
 <a class="global-back" id="globalBack" href="./" aria-label="前の画面へ戻る">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
-  <span id="globalBackText">作品一覧</span>
+  <span id="globalBackText">WORKS</span>
 </a>
 
 <div class="stage">
@@ -1045,11 +1046,11 @@
       <span><b>01</b>作品を選ぶ</span><span><b>02</b>ネイルを見る</span><span><b>03</b>カメラで試着</span>
     </div>
     <a class="opening-enter" id="openingEnter" href="?work=COLOR" aria-label="現在表示中の作品へ入る"></a>
-    <a class="hub-custom-link" href="?mode=custom">自分でつくる</a>
+    <a class="hub-custom-link" href="?mode=custom">CREATE</a>
     <div class="opening-work-meta" aria-live="polite">
       <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
       <div class="opening-work-title" id="openingWorkTitle">色</div>
-      <div class="opening-work-cue">触れて作品へ</div>
+      <div class="opening-work-cue">ENTER</div>
       <div class="opening-progress" id="openingProgress"></div>
     </div>
     <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
@@ -1075,8 +1076,8 @@
   <div class="try-identity" id="tryIdentity">
     <span id="tryIdentityText">01 / COLOR</span>
     <div class="work-nails" id="tryNails" aria-label="装着する5本のネイル"></div>
-    <a href="?work=COLOR" id="tryWorkBack">作品を見る</a>
-    <a href="?mode=custom">自分で作る</a>
+    <a href="?work=COLOR" id="tryWorkBack">WORK</a>
+    <a href="?mode=custom">CREATE</a>
   </div>
 
   <div class="stagebtns" id="liveBtns" style="display:none">
@@ -1197,10 +1198,9 @@
     <div class="work-actions">
       <button type="button" class="work-try" id="workTryBtn">
         <span class="work-try-label">TRY ON</span>
-        <strong>カメラでネイルを試す</strong>
         <span class="work-try-arrow" aria-hidden="true">→</span>
       </button>
-      <a class="work-custom" href="?mode=custom">自分で作る</a>
+      <a class="work-custom" href="?mode=custom">CREATE</a>
     </div>
   </div>
 </section>
@@ -2321,7 +2321,7 @@ function renderChips(pal){
     pick.classList.add('active');
   });
   const plus=document.createElement('div'); plus.className='pickplus'; plus.textContent='＋';
-  const cap=document.createElement('span'); cap.className='pickcap'; cap.textContent='自分でつくる';
+  const cap=document.createElement('span'); cap.className='pickcap'; cap.textContent='CREATE';
   wrap.appendChild(pick); wrap.appendChild(plus); wrap.appendChild(cap);
   box.appendChild(wrap);
   /* 起動時と写真から配色したときは、従来どおり全部の指に1色目を入れる */
@@ -2608,7 +2608,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile24';
+  const BUILD_VERSION='mobile25';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -2863,7 +2863,7 @@ updateCmpBadge();
     document.body.dataset.workKey=key;
     layer.style.setProperty('--work-accent',work.accent);
     document.getElementById('signalNo').textContent=work.no;
-    document.getElementById('signalName').textContent=work.label;
+    document.getElementById('signalName').textContent=key;
     if(document.body.classList.contains('camera-started')){
       if(signalFilm.getAttribute('src')!==work.film){signalFilm.src=work.film; signalFilm.load();}
       signalFilm.play().catch(()=>{});
@@ -2922,7 +2922,7 @@ updateCmpBadge();
 
   function showArtworkPage(key){
     document.body.classList.add('art-page');
-    document.querySelector('#workClose span').textContent='作品一覧';
+    document.querySelector('#workClose span').textContent='WORKS';
     openWork(key);
   }
 
@@ -2931,15 +2931,15 @@ updateCmpBadge();
     document.body.classList.add('work-tryon');
     document.title='艶 II — '+work.tryTitle+'のネイルを試す';
     setCurrent(key); applyArtworkPreset(key);
-    document.querySelector('.opening-mark').innerHTML=work.no+' / '+work.label+'<br>ARTWORK TRY ON';
-    document.querySelector('#startOverlay .invite').innerHTML=work.tryTitle+'のネイルを、<br>カメラで試す。';
-    document.getElementById('openingGuide').textContent='カメラを開くと、この作品から作った5本のネイルが自動で装着されます。';
-    document.getElementById('startBtn').textContent='カメラをひらく';
-    document.getElementById('tryIdentityText').textContent=work.no+' / '+work.label;
+    document.querySelector('.opening-mark').innerHTML=work.no+' / '+key+'<br>ARTWORK TRY ON';
+    document.querySelector('#startOverlay .invite').textContent='TRY ON';
+    document.getElementById('openingGuide').textContent=key;
+    document.getElementById('startBtn').textContent='START CAMERA';
+    document.getElementById('tryIdentityText').textContent=work.no+' / '+key;
     renderNailPreview(key,'tryNails');
     document.getElementById('tryWorkBack').href=route('work',key);
     document.getElementById('globalBack').href=route('work',key);
-    document.getElementById('globalBackText').textContent='作品へ戻る';
+    document.getElementById('globalBackText').textContent='WORK';
     const hero=document.querySelector('.opening-film.a');
     hero.src=work.film; hero.load(); playSilently(hero);
   }
@@ -2949,14 +2949,14 @@ updateCmpBadge();
     document.title='艶 II — 自分で作る';
     Object.assign(tuneVals,{nailSize:95,sculptLen:130,sculptShape:'natural'});
     document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
-    document.querySelector('#startOverlay .invite').innerHTML='自分でつくる。<br>自分の手で。';
-    document.getElementById('openingGuide').textContent='カメラを開いたあと、色・柄・長さ・光を自由に選べます。';
-    document.getElementById('startBtn').textContent='カメラをひらく';
-    document.getElementById('tryIdentityText').textContent='CUSTOM / 自分で作る';
-    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='作品から選ぶ'; workBack.href=homeRoute();
-    const link=document.querySelector('.make-link'); link.textContent='作品ネイルから選ぶ'; link.href=homeRoute();
+    document.querySelector('#startOverlay .invite').textContent='CREATE';
+    document.getElementById('openingGuide').textContent='COLOR / SURFACE / FORM / LIGHT';
+    document.getElementById('startBtn').textContent='START CAMERA';
+    document.getElementById('tryIdentityText').textContent='CUSTOM';
+    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='WORKS'; workBack.href=homeRoute();
+    const link=document.querySelector('.make-link'); link.textContent='WORKS'; link.href=homeRoute();
     document.getElementById('globalBack').href=homeRoute();
-    document.getElementById('globalBackText').textContent='作品一覧';
+    document.getElementById('globalBackText').textContent='WORKS';
   }
 
   function prepareHub(){
