@@ -17,6 +17,31 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
   html,body{height:100%; overscroll-behavior:none}
+  .tap-mark{
+    position:fixed; z-index:9999; left:0; top:0;
+    width:38px; height:38px; border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.96);
+    box-shadow:0 0 0 1px rgba(35,29,25,.16),0 2px 10px rgba(35,29,25,.16);
+    pointer-events:none;
+    transform:translate(-50%,-50%) scale(.34);
+    opacity:0;
+    animation:tap-mark-out .42s cubic-bezier(.2,.72,.25,1) forwards;
+  }
+  .tap-mark::after{
+    content:""; position:absolute; left:50%; top:50%;
+    width:5px; height:5px; border-radius:50%;
+    background:#d4a748;
+    box-shadow:0 0 0 1px rgba(255,255,255,.55);
+    transform:translate(-50%,-50%);
+  }
+  @keyframes tap-mark-out{
+    0%{opacity:.96;transform:translate(-50%,-50%) scale(.34)}
+    54%{opacity:.82}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.16)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .tap-mark{animation-duration:.28s}
+  }
   body{
     font-family:"Hiragino Sans","Yu Gothic",sans-serif;
     background:
@@ -3337,6 +3362,18 @@ updateCmpBadge();
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
   document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=route('try',current); });
+
+  // スマホ操作と画面収録で、触れた位置を静かに可視化する。
+  document.addEventListener('pointerdown',event=>{
+    if(event.isPrimary===false) return;
+    const mark=document.createElement('span');
+    mark.className='tap-mark';
+    mark.style.left=event.clientX+'px';
+    mark.style.top=event.clientY+'px';
+    document.body.appendChild(mark);
+    mark.addEventListener('animationend',()=>mark.remove(),{once:true});
+    setTimeout(()=>mark.remove(),700);
+  },{capture:true,passive:true});
 
   setCurrent('COLOR');
   if(works[artKey]){
