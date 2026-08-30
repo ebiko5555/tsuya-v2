@@ -786,7 +786,7 @@
   body.custom-mode #tray-source.source-only.active{display:block!important}
   body.custom-mode.source-planning #startOverlay{display:none!important}
   body.custom-mode.source-planning .panel{display:block!important; max-height:70svh}
-  body.custom-mode.source-planning #tray-source{max-height:56svh; padding-bottom:2px}
+  body.custom-mode.source-planning #tray-source{max-height:56svh; padding-bottom:84px}
   .source-intro{margin:1px 0 11px; color:rgba(255,255,255,.68); font-size:10px; line-height:1.65; letter-spacing:.05em}
   .source-origin{display:none; grid-template-columns:1fr auto; align-items:end; gap:8px; margin:0 0 11px; padding:9px 10px; border-left:2px solid var(--work-accent,#d1a58d); background:rgba(255,255,255,.055)}
   body.custom-from-work .source-origin{display:grid}
@@ -818,9 +818,11 @@
   .source-try.ready{display:flex}
   .source-try::after{content:"→"; font-size:17px; font-weight:300}
   body.custom-mode.source-planning .source-try.ready{
-    position:sticky; z-index:6; bottom:0; min-height:58px; margin-top:12px;
+    position:fixed; z-index:40; left:50%; bottom:calc(12px + env(safe-area-inset-bottom));
+    width:min(calc(100% - 28px),680px); min-height:64px; margin:0;
+    transform:translateX(-50%);
     border:1px solid rgba(255,255,255,.9);
-    box-shadow:0 -16px 26px rgba(8,9,12,.92);
+    box-shadow:0 -18px 34px rgba(8,9,12,.92),0 8px 24px rgba(0,0,0,.28);
   }
   body.route-leaving{opacity:0; transition:opacity .28s ease}
 
@@ -2642,9 +2644,13 @@ function renderSourceSets(){
 }
 function ingestSource(input,label){
   const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
-  const preview=$('sourcePreview'), pc=preview.getContext('2d'); pc.clearRect(0,0,preview.width,preview.height); pc.drawImage(sampled,0,0,preview.width,preview.height);
   const ow=input.videoWidth||input.naturalWidth||input.width||sampled.width;
   const oh=input.videoHeight||input.naturalHeight||input.height||sampled.height;
+  const preview=$('sourcePreview'), pc=preview.getContext('2d');
+  pc.fillStyle='#09090b'; pc.fillRect(0,0,preview.width,preview.height);
+  const previewScale=Math.min(preview.width/ow,preview.height/oh);
+  const previewW=ow*previewScale, previewH=oh*previewScale;
+  pc.drawImage(input,(preview.width-previewW)/2,(preview.height-previewH)/2,previewW,previewH);
   const display=document.createElement('canvas'), maxSide=640, ratio=Math.min(1,maxSide/Math.max(ow,oh));
   display.width=Math.max(1,Math.round(ow*ratio)); display.height=Math.max(1,Math.round(oh*ratio));
   display.getContext('2d').drawImage(input,0,0,display.width,display.height);
@@ -2661,9 +2667,11 @@ function ingestSource(input,label){
     document.body.classList.add('source-planning'); activateSourceTab();
     const dpr=Math.min(2,devicePixelRatio||1), W=Math.round(innerWidth*dpr), H=Math.round(innerHeight*dpr);
     canvas.width=W; canvas.height=H;
-    const sc=Math.max(W/sampled.width,H/sampled.height), dw=sampled.width*sc, dh=sampled.height*sc;
-    ctx.drawImage(sampled,(W-dw)/2,(H-dh)/2,dw,dh);
-    ctx.fillStyle='rgba(8,9,12,.32)'; ctx.fillRect(0,0,W,H);
+    const visibleH=Math.round(H*.30);
+    const sc=Math.min(W/ow,visibleH/oh), dw=ow*sc, dh=oh*sc;
+    ctx.fillStyle='#08090c'; ctx.fillRect(0,0,W,H);
+    ctx.drawImage(input,(W-dw)/2,(visibleH-dh)/2,dw,dh);
+    ctx.fillStyle='rgba(8,9,12,.12)'; ctx.fillRect(0,0,W,visibleH);
   }
   renderChips(sourceProfile.palette); buildLooks(); renderSourceSets();
 }
