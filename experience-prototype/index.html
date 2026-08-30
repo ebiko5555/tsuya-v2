@@ -2551,18 +2551,72 @@ function sourceCanvasFrom(input){
   const sc=Math.max(out.width/ow,out.height/oh), sw=out.width/sc, sh=out.height/sc;
   const sx=(ow-sw)/2, sy=(oh-sh)/2;
   out.getContext('2d').drawImage(input,sx,sy,sw,sh,0,0,out.width,out.height);
+  applyAutomaticSubjectMask(out);
   return out;
+}
+/* 写真の外周に多い色を背景候補とみなし、中央のまとまりを優先する。
+   完全な切り抜きではなく、背景をデザイン分析へ混ぜないための重み付きマスク。 */
+function applyAutomaticSubjectMask(canvas){
+  const cx=canvas.getContext('2d',{willReadFrequently:true});
+  const w=canvas.width,h=canvas.height,img=cx.getImageData(0,0,w,h),d=img.data;
+  const ring=Math.max(8,Math.round(Math.min(w,h)*.09)), buckets={};
+  for(let y=0;y<h;y+=2){ for(let x=0;x<w;x+=2){
+    if(x>=ring&&x<w-ring&&y>=ring&&y<h-ring) continue;
+    const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2],k=`${r>>4}_${g>>4}_${b>>4}`;
+    if(!buckets[k]) buckets[k]={r:0,g:0,b:0,n:0};
+    const q=buckets[k]; q.r+=r;q.g+=g;q.b+=b;q.n++;
+  }}
+  const bg=Object.values(buckets).sort((a,b)=>b.n-a.n).slice(0,8)
+    .map(q=>[q.r/q.n,q.g/q.n,q.b/q.n]);
+  const raw=new Float32Array(w*h);
+  for(let y=0;y<h;y++){ for(let x=0;x<w;x++){
+    const p=y*w+x,i=p*4,r=d[i],g=d[i+1],b=d[i+2];
+    let colorDistance=255;
+    for(const q of bg){
+      const dr=r-q[0],dg=g-q[1],db=b-q[2];
+      colorDistance=Math.min(colorDistance,Math.sqrt(dr*dr*.30+dg*dg*.59+db*db*.11));
+    }
+    const nx=(x/(w-1)-.5)/.5,ny=(y/(h-1)-.5)/.5;
+    const center=Math.max(0,1-Math.sqrt(nx*nx*.72+ny*ny));
+    const edge=Math.min(x,y,w-1-x,h-1-y)/ring;
+    const edgePenalty=Math.max(0,1-edge);
+    raw[p]=Math.max(0,Math.min(1,(colorDistance-16)/58+center*.52-edgePenalty*.58));
+  }}
+  /* 小さな隙間を平均化し、被写体の中を一つのまとまりとして扱う。 */
+  const smooth=new Float32Array(w*h);
+  for(let y=0;y<h;y++){ for(let x=0;x<w;x++){
+    let total=0,count=0;
+    for(let oy=-2;oy<=2;oy++){ const yy=y+oy;if(yy<0||yy>=h)continue;
+      for(let ox=-2;ox<=2;ox++){ const xx=x+ox;if(xx<0||xx>=w)continue;total+=raw[yy*w+xx];count++; }
+    }
+    smooth[y*w+x]=total/count;
+  }}
+  let kept=0;
+  for(let p=0;p<w*h;p++){
+    const weight=Math.max(0,Math.min(1,(smooth[p]-.16)/.58));
+    const alpha=Math.round(255*(weight*weight*(3-2*weight)));
+    d[p*4+3]=alpha; if(alpha>48) kept++;
+  }
+  /* 単色写真などで判定対象が極端に減った場合だけ、安全に中央域を残す。 */
+  if(kept<w*h*.12){
+    for(let y=0;y<h;y++){ for(let x=0;x<w;x++){
+      const nx=(x/(w-1)-.5)/.5,ny=(y/(h-1)-.5)/.5;
+      d[(y*w+x)*4+3]=Math.round(255*Math.max(0,Math.min(1,1.32-Math.sqrt(nx*nx+ny*ny))));
+    }}
+  }
+  cx.putImageData(img,0,0);
 }
 function extractSourcePalette(source,n){
   const c=document.createElement('canvas'),s=96;c.width=s;c.height=s;
   const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(source,0,0,s,s);
   const d=cx.getImageData(0,0,s,s).data,buckets={};
   for(let i=0;i<d.length;i+=4){
+    const alpha=d[i+3]/255; if(alpha<.18) continue;
     const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b),sat=mx?((mx-mn)/mx):0,light=(mx+mn)/510;
     if((sat<.08&&(light>.84||light<.14))||light>.97) continue;
     const k=`${r>>4}_${g>>4}_${b>>4}`;
     if(!buckets[k]) buckets[k]={r:0,g:0,b:0,c:0,s:0};
-    const x=buckets[k];x.r+=r;x.g+=g;x.b+=b;x.c++;x.s+=sat;
+    const x=buckets[k];x.r+=r*alpha;x.g+=g*alpha;x.b+=b*alpha;x.c+=alpha;x.s+=sat*alpha;
   }
   const candidates=Object.values(buckets).map(x=>{
     const r=x.r/x.c,g=x.g/x.c,b=x.b/x.c,sat=x.s/x.c;
@@ -2580,22 +2634,25 @@ function extractSourcePalette(source,n){
 function analyzeSource(source){
   const c=document.createElement('canvas'), s=96; c.width=s; c.height=s;
   const cx=c.getContext('2d',{willReadFrequently:true}); cx.drawImage(source,0,0,s,s);
-  const data=cx.getImageData(0,0,s,s).data, lum=new Float32Array(s*s);
-  let sum=0,sum2=0,satSum=0,bright=0;
+  const data=cx.getImageData(0,0,s,s).data, lum=new Float32Array(s*s), alpha=new Float32Array(s*s);
+  let sum=0,sum2=0,satSum=0,bright=0,totalWeight=0;
   for(let i=0,p=0;i<data.length;i+=4,p++){
+    const weight=data[i+3]/255; alpha[p]=weight; if(weight<.12) continue;
     const r=data[i],g=data[i+1],b=data[i+2], mx=Math.max(r,g,b),mn=Math.min(r,g,b);
-    const l=.2126*r+.7152*g+.0722*b; lum[p]=l; sum+=l; sum2+=l*l; satSum+=mx?((mx-mn)/mx):0;
-    if(l>205) bright++;
+    const l=.2126*r+.7152*g+.0722*b; lum[p]=l; sum+=l*weight; sum2+=l*l*weight; satSum+=(mx?((mx-mn)/mx):0)*weight; totalWeight+=weight;
+    if(l>205) bright+=weight;
   }
   const points=[]; let edge=0,ex=0,ey=0,count=0;
   for(let y=2;y<s-2;y+=2){ for(let x=2;x<s-2;x+=2){
+    const weight=Math.min(alpha[y*s+x],alpha[y*s+x-1],alpha[y*s+x+1],alpha[(y-1)*s+x],alpha[(y+1)*s+x]);
+    if(weight<.16) continue;
     const gx=lum[y*s+x+1]-lum[y*s+x-1], gy=lum[(y+1)*s+x]-lum[(y-1)*s+x];
-    const m=Math.hypot(gx,gy), a=Math.atan2(gy,gx); edge+=m; count++;
+    const m=Math.hypot(gx,gy)*weight, a=Math.atan2(gy,gx); edge+=m; count+=weight;
     ex+=Math.cos(a*2)*m; ey+=Math.sin(a*2)*m;
     if(m>34) points.push({x:x/(s-1),y:y/(s-1),m:Math.min(1,m/180)});
   }}
   points.sort((a,b)=>b.m-a.m);
-  const avg=sum/(s*s), variance=Math.max(0,sum2/(s*s)-avg*avg);
+  const used=Math.max(1,totalWeight),avg=sum/used, variance=Math.max(0,sum2/used-avg*avg);
   const fallback=['#d8c4b8','#806c65','#ece7df','#384047','#b9977d','#f7f4ef'];
   const palette=extractSourcePalette(source,8);
   fallback.forEach(col=>{ if(palette.length<8&&!palette.includes(col)) palette.push(col); });
@@ -2603,7 +2660,7 @@ function analyzeSource(source){
     palette:palette.slice(0,8), points:points.slice(0,42),
     angle:.5*Math.atan2(ey,ex), density:Math.max(.08,Math.min(1,(edge/Math.max(1,count))/62)),
     contrast:Math.max(.05,Math.min(1,Math.sqrt(variance)/70)),
-    light:Math.max(.04,Math.min(1,bright/(s*s)*3.4)), saturation:Math.max(.04,Math.min(1,satSum/(s*s)*1.45))
+    light:Math.max(.04,Math.min(1,bright/used*3.4)), saturation:Math.max(.04,Math.min(1,satSum/used*1.45))
   };
 }
 function sourceRecipes(mode){
