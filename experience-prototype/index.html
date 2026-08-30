@@ -752,6 +752,11 @@
   body.custom-mode.source-planning .panel{display:block!important; max-height:70svh}
   body.custom-mode.source-planning #tray-source{max-height:56svh}
   .source-intro{margin:1px 0 11px; color:rgba(255,255,255,.68); font-size:10px; line-height:1.65; letter-spacing:.05em}
+  .source-origin{display:none; grid-template-columns:1fr auto; align-items:end; gap:8px; margin:0 0 11px; padding:9px 10px; border-left:2px solid var(--work-accent,#d1a58d); background:rgba(255,255,255,.055)}
+  body.custom-from-work .source-origin{display:grid}
+  .source-origin span{display:block; margin-bottom:4px; color:rgba(255,255,255,.42); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em}
+  .source-origin strong{display:block; color:#fff; font:500 10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
+  .source-origin button{padding:7px 0; border:0; border-bottom:1px solid rgba(255,255,255,.34); color:rgba(255,255,255,.8); background:none; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.07em}
   .source-actions{display:grid; grid-template-columns:1fr 1fr; gap:8px}
   .source-action{
     min-height:42px; padding:0 10px; border:1px solid rgba(255,255,255,.24);
@@ -776,6 +781,7 @@
   .source-try{display:none; align-items:center; justify-content:space-between; width:100%; min-height:46px; margin-top:10px; padding:0 14px; border:0; color:#08090c; background:#fff; font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .source-try.ready{display:flex}
   .source-try::after{content:"→"; font-size:17px; font-weight:300}
+  body.route-leaving{opacity:0; transition:opacity .28s ease}
 
   /* 試作6：作品ページでは映像を背景にせず、鑑賞領域と情報領域を分ける。 */
   body.art-page .work-layer{overflow-y:auto; background:#08090c}
@@ -1136,6 +1142,10 @@
   </div>
 
   <div class="tray source-only" id="tray-source">
+    <div class="source-origin" id="sourceOrigin">
+      <div><span>FROM ARTWORK</span><strong id="sourceOriginTitle">01 / COLOR / 色</strong></div>
+      <button type="button" id="sourceOriginReset">作品ネイル</button>
+    </div>
     <p class="source-intro">身のまわりの色・線・光を採集して、5本のネイルへ組み替える。</p>
     <div class="source-actions">
       <button type="button" class="source-action" id="sourcePhoto">写真を選ぶ</button>
@@ -2891,7 +2901,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile28';
+  const BUILD_VERSION='mobile29';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -2899,13 +2909,19 @@ updateCmpBadge();
     return '?'+query.toString();
   };
   const homeRoute=()=>route(null,null);
+  const customRoute=from=>{
+    const query=new URLSearchParams(); query.set('mode','custom');
+    if(from) query.set('from',from);
+    query.set('v',BUILD_VERSION); return '?'+query.toString();
+  };
   const normalizeWorkKey=key=>key==='NAILORB'?'ORB':key;
   const artKey=normalizeWorkKey((params.get('work')||'').toUpperCase());
   const tryKey=normalizeWorkKey((params.get('try')||'').toUpperCase());
   const customMode=params.get('mode')==='custom';
+  const fromKey=normalizeWorkKey((params.get('from')||'').toUpperCase());
   let current='COLOR';
 
-  document.querySelectorAll('a[href="?mode=custom"]').forEach(link=>{link.href=route('mode','custom');});
+  document.querySelectorAll('a[href="?mode=custom"]').forEach(link=>{link.href=customRoute();});
 
   function playSilently(video){
     if(!video) return;
@@ -3164,6 +3180,12 @@ updateCmpBadge();
     document.getElementById('workTitle').textContent=work.title;
     document.getElementById('workText').textContent=work.text;
     renderNailPreview(key,'workNails');
+    const customLink=document.querySelector('.work-custom');
+    const customHref=customRoute(key); customLink.href=customHref;
+    customLink.onclick=event=>{
+      event.preventDefault(); document.body.classList.add('route-leaving');
+      setTimeout(()=>{location.href=customHref;},260);
+    };
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
     const activeButton=index.querySelector('button.active');
     if(workFilm.getAttribute('src')!==work.film){workFilm.src=work.film; workFilm.load();}
@@ -3231,17 +3253,32 @@ updateCmpBadge();
     document.body.classList.add('custom-mode');
     document.title='艶 II — 自分で作る';
     Object.assign(tuneVals,{nailSize:95,sculptLen:130,sculptShape:'natural'});
-    document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
+    const origin=works[fromKey]||null;
+    if(origin){
+      document.body.classList.add('custom-from-work');
+      setCurrent(fromKey); applyArtworkPreset(fromKey);
+      document.body.style.setProperty('--work-accent',origin.accent);
+      document.getElementById('sourceOriginTitle').textContent=origin.no+' / '+fromKey+' / '+origin.title;
+      document.getElementById('sourceOriginReset').onclick=()=>{
+        applyArtworkPreset(fromKey);
+        document.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active'));
+      };
+      document.querySelector('.opening-mark').innerHTML='FROM '+origin.no+' / '+fromKey+'<br>ARTWORK → SOURCE → HAND';
+      const hero=document.querySelector('.opening-film.a'); hero.src=origin.film; hero.load(); playSilently(hero);
+    }else{
+      document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
+    }
     document.querySelector('#startOverlay .invite').textContent='CUSTOM';
-    document.getElementById('openingGuide').textContent='COLOR / SURFACE / FORM / LIGHT';
+    document.getElementById('openingGuide').textContent=origin?(origin.title+' / 身のまわりから採集する'):'身のまわりから採集する';
     document.getElementById('startBtn').textContent='カメラから作る';
-    document.getElementById('tryIdentityText').textContent='CUSTOM';
-    const workBack=document.getElementById('tryWorkBack'); workBack.textContent='WORKS'; workBack.href=homeRoute();
+    document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';
+    const backHref=origin?route('work',fromKey):homeRoute();
+    const workBack=document.getElementById('tryWorkBack'); workBack.textContent=origin?'WORK':'WORKS'; workBack.href=backHref;
     const link=document.querySelector('.make-link');
     link.textContent='写真から作る'; link.href='#';
     link.onclick=ev=>{ev.preventDefault(); document.getElementById('sourceInput').click();};
-    document.getElementById('globalBack').href=homeRoute();
-    document.getElementById('globalBackText').textContent='WORKS';
+    document.getElementById('globalBack').href=backHref;
+    document.getElementById('globalBackText').textContent=origin?'WORK':'WORKS';
   }
 
   function prepareHub(){
