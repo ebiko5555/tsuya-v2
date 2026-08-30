@@ -732,6 +732,14 @@
   body.custom-mode #tryIdentity .work-nails,body.custom-mode #tryIdentity a:last-child{display:none}
   body.work-tryon .opening-film.a{left:0; top:0; width:100%; height:100%; clip-path:none; opacity:.62}
   body.work-tryon .opening-film.b,body.work-tryon .opening-film.c{display:none}
+  body.custom-mode .opening-film.a{
+    left:0; top:0; width:100%; height:100%; clip-path:none;
+    opacity:.82; filter:saturate(.88) contrast(1.04);
+  }
+  body.custom-mode .opening-film.b,body.custom-mode .opening-film.c{display:none}
+  body.custom-mode .opening-films::after{
+    background:linear-gradient(180deg,rgba(8,9,12,.08),rgba(8,9,12,.06) 50%,rgba(8,9,12,.86) 92%);
+  }
   body.work-tryon .opening-index,body.custom-mode .opening-index{display:none}
   body.work-tryon #startOverlay .invite{max-width:11em}
   body.work-tryon .art-signal{top:calc(92px + env(safe-area-inset-top))}
@@ -3252,6 +3260,9 @@ updateCmpBadge();
   function prepareCustomPage(){
     document.body.classList.add('custom-mode');
     document.title='艶 II — 自分で作る';
+    const sourceHero=document.querySelector('.opening-film.a');
+    sourceHero.src='source-assets/source-process-loop-v1.mp4';
+    sourceHero.load(); playSilently(sourceHero);
     Object.assign(tuneVals,{nailSize:95,sculptLen:130,sculptShape:'natural'});
     const origin=works[fromKey]||null;
     if(origin){
@@ -3264,7 +3275,6 @@ updateCmpBadge();
         document.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active'));
       };
       document.querySelector('.opening-mark').innerHTML='FROM '+origin.no+' / '+fromKey+'<br>ARTWORK → SOURCE → HAND';
-      const hero=document.querySelector('.opening-film.a'); hero.src=origin.film; hero.load(); playSilently(hero);
     }else{
       document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
     }
