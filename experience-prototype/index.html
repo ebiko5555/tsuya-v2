@@ -669,6 +669,23 @@
   .ghostlink{color:#d7b39e}
   input[type="range"]{accent-color:#d7b39e}
 
+  /* 試着中は手を主役にし、操作は必要なときだけ下から開く。 */
+  body.custom-mode.camera-started .panel.collapsed{
+    left:50%; bottom:calc(12px + env(safe-area-inset-bottom));
+    width:190px; max-height:48px; padding:0;
+    border:1px solid rgba(255,255,255,.34); border-radius:0;
+    background:rgba(8,9,12,.76); overflow:hidden;
+  }
+  body.custom-mode.camera-started .panel.collapsed .tabs{display:none}
+  body.custom-mode.camera-started .panel.collapsed .sheet-handle{
+    height:46px; margin:0; color:#fff; font-size:10px; letter-spacing:.22em;
+  }
+  body.custom-mode.camera-started .panel.collapsed .sheet-handle::before{display:none}
+  body.custom-mode.camera-started .panel.collapsed .sheet-handle span{opacity:1}
+  body.custom-mode.camera-started.controls-collapsed .stagebtns{
+    bottom:calc(74px + env(safe-area-inset-bottom));
+  }
+
   .art-signal{
     position:absolute; z-index:8; display:none; right:12px; top:calc(92px + env(safe-area-inset-top));
     width:96px; height:154px; overflow:hidden; padding:0; cursor:pointer;
@@ -2641,6 +2658,9 @@ function renderSourceSets(){
     btn.append(code,cv,name);
     btn.onclick=()=>{
       box.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); applySet(set);
+      if(mode==='live'&&window.setControlPanelCollapsed){
+        setTimeout(()=>window.setControlPanelCollapsed(true),180);
+      }
     };
     box.appendChild(btn);
   });
@@ -2696,10 +2716,12 @@ $('sourceCamera').onclick=()=>{
 };
 $('sourceTry').onclick=()=>{
   if(mode==='live'){
-    $('controlPanel').classList.add('collapsed');
-    $('sheetHandle').setAttribute('aria-expanded','false');
-    $('sheetHandle').querySelector('span').textContent='操作をひらく';
-  }else startCamera();
+    if(window.setControlPanelCollapsed) window.setControlPanelCollapsed(true);
+  }else{
+    startCamera().then(()=>{
+      if(mode==='live'&&window.setControlPanelCollapsed) window.setControlPanelCollapsed(true);
+    });
+  }
 };
 document.querySelectorAll('[data-source-mode]').forEach(btn=>btn.onclick=()=>{
   sourceMode=btn.dataset.sourceMode;
@@ -2860,9 +2882,11 @@ updateCmpBadge();
   const label=handle.querySelector('span');
   const setCollapsed=collapsed=>{
     panel.classList.toggle('collapsed',collapsed);
+    document.body.classList.toggle('controls-collapsed',collapsed);
     handle.setAttribute('aria-expanded',String(!collapsed));
-    label.textContent=collapsed?'操作をひらく':'操作をしまう';
+    label.textContent=collapsed?'DESIGN':'CLOSE';
   };
+  window.setControlPanelCollapsed=setCollapsed;
   handle.addEventListener('click',()=>setCollapsed(!panel.classList.contains('collapsed')));
   document.querySelectorAll('.tab').forEach(tab=>{
     tab.addEventListener('click',()=>setCollapsed(false));
@@ -2871,7 +2895,7 @@ updateCmpBadge();
   const observer=new MutationObserver(()=>{
     if(overlay.style.display==='none'){
       const custom=document.body.classList.contains('custom-mode');
-      setCollapsed(!custom);
+      setCollapsed(true);
       if(custom&&typeof activateSourceTab==='function') activateSourceTab();
       observer.disconnect();
     }
@@ -3350,7 +3374,7 @@ updateCmpBadge();
     link.textContent='写真から作る'; link.href='#';
     link.onclick=ev=>{ev.preventDefault(); document.getElementById('sourceInput').click();};
     document.getElementById('globalBack').href=backHref;
-    document.getElementById('globalBackText').textContent=origin?'WORK':'WORKS';
+    document.getElementById('globalBackText').textContent='BACK';
   }
 
   function prepareHub(){
@@ -3399,6 +3423,20 @@ updateCmpBadge();
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
   document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=route('try',current); });
+
+  const globalBack=document.getElementById('globalBack');
+  globalBack.addEventListener('click',event=>{
+    if(!document.body.classList.contains('custom-mode')) return;
+    event.preventDefault();
+    const fallback=globalBack.href;
+    let sameSiteHistory=false;
+    try{ sameSiteHistory=Boolean(document.referrer)&&new URL(document.referrer).origin===location.origin; }catch(e){}
+    if(sameSiteHistory&&history.length>1){
+      history.back();
+    }else{
+      location.href=fallback;
+    }
+  });
 
   // スマホ操作と画面収録で、触れた位置を静かに可視化する。
   document.addEventListener('pointerdown',event=>{
