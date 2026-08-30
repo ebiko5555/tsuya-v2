@@ -682,6 +682,12 @@
   }
   body.custom-mode.camera-started .panel.collapsed .sheet-handle::before{display:none}
   body.custom-mode.camera-started .panel.collapsed .sheet-handle span{opacity:1}
+  body.custom-mode.camera-started .panel:not(.collapsed) .sheet-handle{
+    position:sticky; z-index:30; top:0; height:44px; margin:0 0 4px;
+    color:#fff; background:rgba(8,9,12,.96); font-size:9px; letter-spacing:.18em;
+  }
+  body.custom-mode.camera-started .panel:not(.collapsed) .sheet-handle::before{display:none}
+  body.custom-mode.camera-started .panel:not(.collapsed) .sheet-handle span{opacity:1}
   body.custom-mode.camera-started.controls-collapsed .stagebtns{
     bottom:calc(74px + env(safe-area-inset-bottom));
   }
@@ -2884,7 +2890,8 @@ updateCmpBadge();
     panel.classList.toggle('collapsed',collapsed);
     document.body.classList.toggle('controls-collapsed',collapsed);
     handle.setAttribute('aria-expanded',String(!collapsed));
-    label.textContent=collapsed?'DESIGN':'CLOSE';
+    label.textContent=collapsed?'DESIGN':'← TRY ON';
+    if(!collapsed) panel.scrollTop=0;
   };
   window.setControlPanelCollapsed=setCollapsed;
   handle.addEventListener('click',()=>setCollapsed(!panel.classList.contains('collapsed')));
@@ -3428,14 +3435,7 @@ updateCmpBadge();
   globalBack.addEventListener('click',event=>{
     if(!document.body.classList.contains('custom-mode')) return;
     event.preventDefault();
-    const fallback=globalBack.href;
-    let sameSiteHistory=false;
-    try{ sameSiteHistory=Boolean(document.referrer)&&new URL(document.referrer).origin===location.origin; }catch(e){}
-    if(sameSiteHistory&&history.length>1){
-      history.back();
-    }else{
-      location.href=fallback;
-    }
+    location.href=globalBack.href;
   });
 
   // スマホ操作と画面収録で、触れた位置を静かに可視化する。
