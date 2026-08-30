@@ -677,6 +677,9 @@
   body.camera-started .art-signal{display:block; animation:signalIn .7s ease both}
   @keyframes signalIn{from{opacity:0; transform:translateX(14px)}to{opacity:1; transform:none}}
   .art-signal video{width:100%; height:100%; object-fit:cover; opacity:.68; filter:saturate(.45) contrast(1.2)}
+  .art-signal img{display:none; width:100%; height:100%; object-fit:contain; background:#09090b}
+  body.custom-mode.source-selected .art-signal video{display:none}
+  body.custom-mode.source-selected .art-signal img{display:block}
   .art-signal::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 35%,rgba(8,9,12,.9))}
   .signal-no,.signal-name{position:absolute; z-index:2; left:9px; font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .signal-no{top:9px}.signal-name{bottom:10px}
@@ -783,7 +786,7 @@
   body.custom-mode #tray-source.source-only.active{display:block!important}
   body.custom-mode.source-planning #startOverlay{display:none!important}
   body.custom-mode.source-planning .panel{display:block!important; max-height:70svh}
-  body.custom-mode.source-planning #tray-source{max-height:56svh}
+  body.custom-mode.source-planning #tray-source{max-height:56svh; padding-bottom:2px}
   .source-intro{margin:1px 0 11px; color:rgba(255,255,255,.68); font-size:10px; line-height:1.65; letter-spacing:.05em}
   .source-origin{display:none; grid-template-columns:1fr auto; align-items:end; gap:8px; margin:0 0 11px; padding:9px 10px; border-left:2px solid var(--work-accent,#d1a58d); background:rgba(255,255,255,.055)}
   body.custom-from-work .source-origin{display:grid}
@@ -814,6 +817,11 @@
   .source-try{display:none; align-items:center; justify-content:space-between; width:100%; min-height:46px; margin-top:10px; padding:0 14px; border:0; color:#08090c; background:#fff; font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .source-try.ready{display:flex}
   .source-try::after{content:"→"; font-size:17px; font-weight:300}
+  body.custom-mode.source-planning .source-try.ready{
+    position:sticky; z-index:6; bottom:0; min-height:58px; margin-top:12px;
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 -16px 26px rgba(8,9,12,.92);
+  }
   body.route-leaving{opacity:0; transition:opacity .28s ease}
 
   /* 試作6：作品ページでは映像を背景にせず、鑑賞領域と情報領域を分ける。 */
@@ -1139,6 +1147,7 @@
 
   <button type="button" class="art-signal" id="artSignal" aria-label="現在の操作に連なる作品を開く">
     <video id="signalFilm" muted loop playsinline preload="metadata"></video>
+    <img id="sourceSignalImage" alt="選択した画像のプレビュー">
     <span class="signal-no" id="signalNo">01</span>
     <span class="signal-name" id="signalName">COLOR / 色</span>
   </button>
@@ -2634,6 +2643,16 @@ function renderSourceSets(){
 function ingestSource(input,label){
   const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
   const preview=$('sourcePreview'), pc=preview.getContext('2d'); pc.clearRect(0,0,preview.width,preview.height); pc.drawImage(sampled,0,0,preview.width,preview.height);
+  const ow=input.videoWidth||input.naturalWidth||input.width||sampled.width;
+  const oh=input.videoHeight||input.naturalHeight||input.height||sampled.height;
+  const display=document.createElement('canvas'), maxSide=640, ratio=Math.min(1,maxSide/Math.max(ow,oh));
+  display.width=Math.max(1,Math.round(ow*ratio)); display.height=Math.max(1,Math.round(oh*ratio));
+  display.getContext('2d').drawImage(input,0,0,display.width,display.height);
+  $('sourceSignalImage').src=display.toDataURL('image/jpeg',.86);
+  document.body.classList.add('source-selected');
+  signalFilm.pause();
+  $('signalNo').textContent='SOURCE'; $('signalName').textContent='SELECTED';
+  $('artSignal').setAttribute('aria-label','選択した画像のプレビュー');
   $('sourceName').textContent=label||'FOUND MATERIAL';
   const deg=Math.round(sourceProfile.angle*180/Math.PI);
   $('sourceReading').textContent=`${sourceProfile.palette.length} COLORS / LINE ${Math.round(sourceProfile.density*100)} / LIGHT ${Math.round(sourceProfile.light*100)} / ${deg}°`;
@@ -3194,9 +3213,12 @@ updateCmpBadge();
     current=key; const work=works[key];
     document.body.dataset.workKey=key;
     layer.style.setProperty('--work-accent',work.accent);
-    document.getElementById('signalNo').textContent=work.no;
-    document.getElementById('signalName').textContent=key;
-    if(document.body.classList.contains('camera-started')){
+    const showingSource=document.body.classList.contains('custom-mode')&&document.body.classList.contains('source-selected');
+    if(!showingSource){
+      document.getElementById('signalNo').textContent=work.no;
+      document.getElementById('signalName').textContent=key;
+    }
+    if(document.body.classList.contains('camera-started')&&!showingSource){
       if(signalFilm.getAttribute('src')!==work.film){signalFilm.src=work.film; signalFilm.load();}
       signalFilm.play().catch(()=>{});
     }
@@ -3233,7 +3255,10 @@ updateCmpBadge();
     workFilm.pause(); layer.classList.remove('open'); layer.setAttribute('aria-hidden','true');
     if(document.body.classList.contains('camera-started')) signalFilm.play().catch(()=>{});
   }
-  signal.addEventListener('click',()=>openWork(current));
+  signal.addEventListener('click',()=>{
+    if(document.body.classList.contains('custom-mode')&&document.body.classList.contains('source-selected')) return;
+    openWork(current);
+  });
   document.getElementById('workClose').addEventListener('click',closeWork);
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&layer.classList.contains('open'))closeWork();});
 
