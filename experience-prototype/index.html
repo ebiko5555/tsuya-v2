@@ -744,6 +744,38 @@
   body[data-work-key="TRACE"] .work-film{object-position:50% center; filter:grayscale(.82) contrast(1.18)}
   body.custom-mode .panel{border-color:rgba(255,255,255,.2); background:rgba(8,9,12,.92)}
   body.custom-mode .tab{letter-spacing:.18em}
+  .source-only{display:none!important}
+  body.custom-mode .source-only{display:flex!important}
+  body.custom-mode #tray-source.source-only{display:none!important}
+  body.custom-mode #tray-source.source-only.active{display:block!important}
+  body.custom-mode.source-planning #startOverlay{display:none!important}
+  body.custom-mode.source-planning .panel{display:block!important; max-height:70svh}
+  body.custom-mode.source-planning #tray-source{max-height:56svh}
+  .source-intro{margin:1px 0 11px; color:rgba(255,255,255,.68); font-size:10px; line-height:1.65; letter-spacing:.05em}
+  .source-actions{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .source-action{
+    min-height:42px; padding:0 10px; border:1px solid rgba(255,255,255,.24);
+    color:#fff; background:rgba(255,255,255,.04); font:500 9px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.08em;
+  }
+  .source-frame{display:none; grid-template-columns:70px 1fr; gap:11px; align-items:center; margin-top:10px}
+  .source-frame.ready{display:grid}
+  #sourcePreview{width:70px; height:70px; object-fit:cover; background:#17181b}
+  .source-meta{min-width:0; color:rgba(255,255,255,.52); font:500 8px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
+  .source-meta strong{display:block; overflow:hidden; margin-bottom:2px; color:#fff; font-size:10px; font-weight:500; text-overflow:ellipsis; white-space:nowrap}
+  .source-modes{display:none; gap:5px; margin-top:12px; overflow-x:auto; scrollbar-width:none}
+  .source-modes.ready{display:flex}
+  .source-mode{flex:1; min-width:64px; min-height:32px; padding:0 7px; border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.48); background:none; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
+  .source-mode.active{border-color:#fff; color:#08090c; background:#fff}
+  .source-sets{display:grid; gap:7px; margin-top:10px}
+  .source-set{display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:8px; width:100%; min-height:48px; padding:6px 8px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:left}
+  .source-set.active{border-color:rgba(255,255,255,.7); background:rgba(255,255,255,.08)}
+  .source-set-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em; color:rgba(255,255,255,.52)}
+  .source-set canvas{width:92px; height:38px}
+  .source-set-name{font-size:9px; letter-spacing:.08em; color:rgba(255,255,255,.72); white-space:nowrap}
+  .source-try{display:none; align-items:center; justify-content:space-between; width:100%; min-height:46px; margin-top:10px; padding:0 14px; border:0; color:#08090c; background:#fff; font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
+  .source-try.ready{display:flex}
+  .source-try::after{content:"→"; font-size:17px; font-weight:300}
 
   /* 試作6：作品ページでは映像を背景にせず、鑑賞領域と情報領域を分ける。 */
   body.art-page .work-layer{overflow-y:auto; background:#08090c}
@@ -1095,11 +1127,32 @@
     <span>操作をしまう</span>
   </button>
   <div class="tabs">
+    <div class="tab source-only" data-t="source">SOURCE</div>
     <div class="tab active" data-t="looks">デザイン</div>
     <div class="tab" data-t="colors">カラー</div>
     <div class="tab" data-t="tune">質感</div>
     <div class="tab" data-t="sculpt">スカルプ</div>
     <div class="tab" data-t="hikari">光</div>
+  </div>
+
+  <div class="tray source-only" id="tray-source">
+    <p class="source-intro">身のまわりの色・線・光を採集して、5本のネイルへ組み替える。</p>
+    <div class="source-actions">
+      <button type="button" class="source-action" id="sourcePhoto">写真を選ぶ</button>
+      <button type="button" class="source-action" id="sourceCamera">いま映っているもの</button>
+    </div>
+    <div class="source-frame" id="sourceFrame">
+      <canvas id="sourcePreview" width="160" height="160"></canvas>
+      <div class="source-meta"><strong id="sourceName">SOURCE</strong><span id="sourceReading">色・線・光を読み取ります</span></div>
+    </div>
+    <div class="source-modes" id="sourceModes">
+      <button type="button" class="source-mode" data-source-mode="COLOR">COLOR</button>
+      <button type="button" class="source-mode" data-source-mode="PATTERN">PATTERN</button>
+      <button type="button" class="source-mode" data-source-mode="LIGHT">LIGHT</button>
+      <button type="button" class="source-mode active" data-source-mode="MIX">MIX</button>
+    </div>
+    <div class="source-sets" id="sourceSets"></div>
+    <button type="button" class="source-try" id="sourceTry">TRY ON</button>
   </div>
 
   <div class="tray active" id="tray-looks">
@@ -1216,6 +1269,7 @@
 </div>
 <input type="file" id="inspoInput" accept="image/*">
 <input type="file" id="designInput" accept="image/*">
+<input type="file" id="sourceInput" accept="image/*">
 <video id="video" playsinline style="display:none"></video>
 
 <!-- お絵かきエディタ -->
@@ -1338,6 +1392,7 @@ async function startCamera(){
     });
     video.srcObject = stream;
     await video.play();
+    document.body.classList.remove('source-planning');
     canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     mode = 'live';
     smoothed = [];
@@ -1721,6 +1776,8 @@ function seeded(seed){ let s=seed*9301+49297; return ()=>{ s=(s*9301+49297)%2332
 /* ラメの瞬き。柄は毎フレーム描き直されているので、時間の項を足すだけで光る。
    本物のラメは角度が合った一瞬だけ強く光るので、なだらかな明滅ではなく鋭い山にする。 */
 let sparkT = 0;
+/* 写真・カメラから採集した特徴。画像は外部へ送らず、このページ内だけで保持する。 */
+let sourceProfile = null;
 function sparkle(ph, sp){
   const u = Math.sin(sparkT*sp + ph);
   if(u <= 0) return 0;
@@ -2023,6 +2080,60 @@ const LOOKS = {
       c.restore();
     }
   }},
+  sourceform:{name:'採集した線', material:true, varLabel:'線の密度', paint(c,w,h,col,seed,v){
+    const p=sourceProfile;
+    if(!p){ base(c,w,h,shade(col,48),shade(col,15)); return; }
+    base(c,w,h,p.palette[4]||shade(col,55),p.palette[1]||shade(col,10));
+    const keep=c.globalAlpha, rnd=seeded(seed+97);
+    c.save(); c.rotate(p.angle);
+    const count=Math.round(4+(p.density*.55+v*.45)*18);
+    c.lineCap='round'; c.lineJoin='round';
+    for(let i=0;i<count;i++){
+      const y=(i/(Math.max(1,count-1))-.5)*h*1.35+(rnd()-.5)*h*.10;
+      c.globalAlpha=keep*(.28+rnd()*.58);
+      c.strokeStyle=p.palette[(i+2)%p.palette.length]||col;
+      c.lineWidth=w*(.008+rnd()*.035);
+      c.beginPath();
+      c.moveTo(-w*.85,y);
+      c.bezierCurveTo(-w*.28,y+(rnd()-.5)*h*.20,w*.18,y+(rnd()-.5)*h*.22,w*.85,y+(rnd()-.5)*h*.08);
+      c.stroke();
+    }
+    c.restore(); c.globalAlpha=keep;
+  }},
+  sourcefield:{name:'採集した形', material:true, varLabel:'形の密度', paint(c,w,h,col,seed,v){
+    const p=sourceProfile;
+    if(!p){ base(c,w,h,shade(col,36),shade(col,4)); return; }
+    base(c,w,h,p.palette[5]||shade(col,65),p.palette[0]||col);
+    const keep=c.globalAlpha, pts=p.points||[], n=Math.min(24,Math.max(7,Math.round(7+v*17)));
+    for(let i=0;i<n;i++){
+      const pt=pts[(i*3+seed)%Math.max(1,pts.length)]||{x:(i%4)/3,y:(i%6)/5,m:.5};
+      const x=(pt.x-.5)*w*1.2, y=(pt.y-.5)*h*1.1;
+      const r=w*(.05+.16*pt.m)*(0.75+v*.6);
+      c.globalAlpha=keep*(.34+pt.m*.52);
+      c.fillStyle=p.palette[(i+seed)%p.palette.length]||col;
+      c.save(); c.translate(x,y); c.rotate(p.angle+(i%3)*.55);
+      c.beginPath();
+      if(i%3===0){ c.moveTo(-r,0); c.lineTo(0,-r*1.5); c.lineTo(r,0); c.lineTo(0,r*1.5); c.closePath(); }
+      else c.ellipse(0,0,r,r*(.38+.42*pt.m),0,0,Math.PI*2);
+      c.fill(); c.restore();
+    }
+    c.globalAlpha=keep;
+  }},
+  sourceglow:{name:'採集した光', material:true, varLabel:'光の量', paint(c,w,h,col,seed,v){
+    const p=sourceProfile;
+    if(!p){ base(c,w,h,shade(col,-6),shade(col,-30)); return; }
+    base(c,w,h,shade(p.palette[0]||col,-18),shade(p.palette[2]||col,-42));
+    const keep=c.globalAlpha, rnd=seeded(seed+151), count=Math.round(5+v*16+p.light*12);
+    for(let i=0;i<count;i++){
+      const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.06+rnd()*.19);
+      const g=c.createRadialGradient(x,y,0,x,y,r);
+      const pc=p.palette[(i+3)%p.palette.length]||'#fff';
+      g.addColorStop(0,hexA(shade(pc,95),.88)); g.addColorStop(.35,hexA(pc,.38)); g.addColorStop(1,hexA(pc,0));
+      c.globalAlpha=keep*(.45+sparkle(rnd()*6.28,1.2+rnd()*2.2)*.55);
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+    }
+    c.globalAlpha=keep;
+  }},
 };
 
 /* ================= マイデザイン（自作を乗せる） ================= */
@@ -2164,7 +2275,7 @@ function buildLooks(){
   const row = $('looksRow');
   row.innerHTML='';
   const entries = [
-    ...Object.entries(LOOKS),
+    ...Object.entries(LOOKS).filter(([,look])=>!look.material || sourceProfile),
     ...customLooks.map((cl,i)=>['custom:'+i, cl]),
   ];
   entries.forEach(([key,look])=>{
@@ -2346,6 +2457,181 @@ function extractPalette(img,n){
   return Object.values(buckets).sort((a,b)=>b.c-a.c).slice(0,n)
     .map(x=>rgb2hex(x.r/x.c,x.g/x.c,x.b/x.c));
 }
+
+/* ================= SOURCE：身のまわりから5本セットをつくる =================
+   画像生成AIは使わない。入力画像を小さなCanvasに写し、色・輪郭・明暗を数値化して
+   筆者が決めた「主役／背景／抜け／光／ポイント」の規則へ割り当てる。 */
+let sourceMode='MIX';
+let sourceSets=[];
+function sourceCanvasFrom(input){
+  const out=document.createElement('canvas'); out.width=160; out.height=160;
+  const ow=input.videoWidth||input.naturalWidth||input.width||160;
+  const oh=input.videoHeight||input.naturalHeight||input.height||160;
+  const sc=Math.max(out.width/ow,out.height/oh), sw=out.width/sc, sh=out.height/sc;
+  const sx=(ow-sw)/2, sy=(oh-sh)/2;
+  out.getContext('2d').drawImage(input,sx,sy,sw,sh,0,0,out.width,out.height);
+  return out;
+}
+function extractSourcePalette(source,n){
+  const c=document.createElement('canvas'),s=96;c.width=s;c.height=s;
+  const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(source,0,0,s,s);
+  const d=cx.getImageData(0,0,s,s).data,buckets={};
+  for(let i=0;i<d.length;i+=4){
+    const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b),sat=mx?((mx-mn)/mx):0,light=(mx+mn)/510;
+    if((sat<.08&&(light>.84||light<.14))||light>.97) continue;
+    const k=`${r>>4}_${g>>4}_${b>>4}`;
+    if(!buckets[k]) buckets[k]={r:0,g:0,b:0,c:0,s:0};
+    const x=buckets[k];x.r+=r;x.g+=g;x.b+=b;x.c++;x.s+=sat;
+  }
+  const candidates=Object.values(buckets).map(x=>{
+    const r=x.r/x.c,g=x.g/x.c,b=x.b/x.c,sat=x.s/x.c;
+    return {r,g,b,score:x.c*(.28+sat*2.8)};
+  }).sort((a,b)=>b.score-a.score);
+  const chosen=[];
+  for(const x of candidates){
+    const far=chosen.every(y=>Math.hypot(x.r-y.r,x.g-y.g,x.b-y.b)>48);
+    if(far) chosen.push(x);
+    if(chosen.length>=n) break;
+  }
+  for(const x of candidates){if(chosen.length>=n)break;if(!chosen.includes(x))chosen.push(x);}
+  return chosen.slice(0,n).map(x=>rgb2hex(x.r,x.g,x.b));
+}
+function analyzeSource(source){
+  const c=document.createElement('canvas'), s=96; c.width=s; c.height=s;
+  const cx=c.getContext('2d',{willReadFrequently:true}); cx.drawImage(source,0,0,s,s);
+  const data=cx.getImageData(0,0,s,s).data, lum=new Float32Array(s*s);
+  let sum=0,sum2=0,satSum=0,bright=0;
+  for(let i=0,p=0;i<data.length;i+=4,p++){
+    const r=data[i],g=data[i+1],b=data[i+2], mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+    const l=.2126*r+.7152*g+.0722*b; lum[p]=l; sum+=l; sum2+=l*l; satSum+=mx?((mx-mn)/mx):0;
+    if(l>205) bright++;
+  }
+  const points=[]; let edge=0,ex=0,ey=0,count=0;
+  for(let y=2;y<s-2;y+=2){ for(let x=2;x<s-2;x+=2){
+    const gx=lum[y*s+x+1]-lum[y*s+x-1], gy=lum[(y+1)*s+x]-lum[(y-1)*s+x];
+    const m=Math.hypot(gx,gy), a=Math.atan2(gy,gx); edge+=m; count++;
+    ex+=Math.cos(a*2)*m; ey+=Math.sin(a*2)*m;
+    if(m>34) points.push({x:x/(s-1),y:y/(s-1),m:Math.min(1,m/180)});
+  }}
+  points.sort((a,b)=>b.m-a.m);
+  const avg=sum/(s*s), variance=Math.max(0,sum2/(s*s)-avg*avg);
+  const fallback=['#d8c4b8','#806c65','#ece7df','#384047','#b9977d','#f7f4ef'];
+  const palette=extractSourcePalette(source,8);
+  fallback.forEach(col=>{ if(palette.length<8&&!palette.includes(col)) palette.push(col); });
+  return {
+    palette:palette.slice(0,8), points:points.slice(0,42),
+    angle:.5*Math.atan2(ey,ex), density:Math.max(.08,Math.min(1,(edge/Math.max(1,count))/62)),
+    contrast:Math.max(.05,Math.min(1,Math.sqrt(variance)/70)),
+    light:Math.max(.04,Math.min(1,bright/(s*s)*3.4)), saturation:Math.max(.04,Math.min(1,satSum/(s*s)*1.45))
+  };
+}
+function sourceRecipes(mode){
+  const recipes={
+    COLOR:[
+      ['CHROMA',['nuance','sheer','grad','pearl','onecolor']],
+      ['TONE',['grad','milk','onecolor','aurora','matte']],
+      ['QUIET',['sheer','onecolor','nuance','pearl','onecolor']],
+    ],
+    PATTERN:[
+      ['FLOW',['sourceform','line','sourcefield','pearl','onecolor']],
+      ['FIELD',['sourcefield','sheer','sourceform','line','matte']],
+      ['TRACE',['sourceform','onecolor','sourcefield','shell','sheer']],
+    ],
+    LIGHT:[
+      ['GLOW',['sourceglow','mizuhikari','stardust','pearl','sheer']],
+      ['HALO',['aurora','pearl','sourceglow','stardust','onecolor']],
+      ['FLASH',['sourceglow','sheer','flash','mizuhikari','matte']],
+    ],
+    MIX:[
+      ['FLOW',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']],
+      ['FIELD',['sourceform','sheer','sourcefield','stardust','onecolor']],
+      ['GLOW',['sourcefield','line','sourceglow','pearl','matte']],
+    ],
+  };
+  return recipes[mode]||recipes.MIX;
+}
+function makeSourceSets(mode){
+  if(!sourceProfile) return [];
+  const p=sourceProfile.palette;
+  return sourceRecipes(mode).map(([name,looks],idx)=>({
+    name, looks,
+    colors:[p[idx%p.length],p[(idx+3)%p.length],p[(idx+1)%p.length],p[(idx+4)%p.length],p[(idx+2)%p.length]],
+    tune:{gloss:mode==='PATTERN'?72:96,opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
+    vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.55+idx*.15,flash:.55+idx*.12}
+  }));
+}
+function drawSourceSetPreview(canvas,set){
+  const c=canvas.getContext('2d'); c.clearRect(0,0,canvas.width,canvas.height);
+  withVars(set.vars,()=>set.looks.forEach((look,i)=>{
+    const heights=[48,58,63,58,50], x=20+i*42;
+    const w=24,h=heights[i],baseY=h*.28;
+    c.save(); c.translate(x,canvas.height/2+3); c.beginPath(); c.moveTo(-w/2,baseY);
+    c.bezierCurveTo(-w/2,-h*.26,-w*.32,-h*.50,0,-h*.50);
+    c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
+    c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
+    c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
+    paintByKey(c,look,24,heights[i],set.colors[i],i+11); c.restore();
+  }));
+}
+function renderSourceSets(){
+  const box=$('sourceSets'); box.innerHTML=''; sourceSets=makeSourceSets(sourceMode);
+  sourceSets.forEach((set,idx)=>{
+    const btn=document.createElement('button'); btn.type='button'; btn.className='source-set'+(idx===0?' active':'');
+    const code=document.createElement('span'); code.className='source-set-code'; code.textContent='0'+(idx+1);
+    const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
+    const name=document.createElement('span'); name.className='source-set-name'; name.textContent=set.name;
+    btn.append(code,cv,name);
+    btn.onclick=()=>{
+      box.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); applySet(set);
+    };
+    box.appendChild(btn);
+  });
+  if(sourceSets[0]) applySet(sourceSets[0]);
+}
+function ingestSource(input,label){
+  const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
+  const preview=$('sourcePreview'), pc=preview.getContext('2d'); pc.clearRect(0,0,preview.width,preview.height); pc.drawImage(sampled,0,0,preview.width,preview.height);
+  $('sourceName').textContent=label||'FOUND MATERIAL';
+  const deg=Math.round(sourceProfile.angle*180/Math.PI);
+  $('sourceReading').textContent=`${sourceProfile.palette.length} COLORS / LINE ${Math.round(sourceProfile.density*100)} / LIGHT ${Math.round(sourceProfile.light*100)} / ${deg}°`;
+  $('sourceFrame').classList.add('ready'); $('sourceModes').classList.add('ready'); $('sourceTry').classList.add('ready');
+  if(document.body.classList.contains('custom-mode')&&mode==='idle'){
+    document.body.classList.add('source-planning'); activateSourceTab();
+    const dpr=Math.min(2,devicePixelRatio||1), W=Math.round(innerWidth*dpr), H=Math.round(innerHeight*dpr);
+    canvas.width=W; canvas.height=H;
+    const sc=Math.max(W/sampled.width,H/sampled.height), dw=sampled.width*sc, dh=sampled.height*sc;
+    ctx.drawImage(sampled,(W-dw)/2,(H-dh)/2,dw,dh);
+    ctx.fillStyle='rgba(8,9,12,.32)'; ctx.fillRect(0,0,W,H);
+  }
+  renderChips(sourceProfile.palette); buildLooks(); renderSourceSets();
+}
+function activateSourceTab(){
+  const tab=document.querySelector('.tab[data-t="source"]'); if(!tab) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tray').forEach(x=>x.classList.remove('active'));
+  tab.classList.add('active'); $('tray-source').classList.add('active');
+}
+$('sourcePhoto').onclick=()=>$('sourceInput').click();
+$('sourceInput').addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const img=await loadImage(file); ingestSource(img,file.name.replace(/\.[^.]+$/,'').slice(0,24)); e.target.value='';
+});
+$('sourceCamera').onclick=()=>{
+  if(mode!=='live'||video.readyState<2){ $('sourceReading').textContent='CAMERA IS NOT READY'; return; }
+  ingestSource(video,'CAMERA / FOUND MATERIAL');
+};
+$('sourceTry').onclick=()=>{
+  if(mode==='live'){
+    $('controlPanel').classList.add('collapsed');
+    $('sheetHandle').setAttribute('aria-expanded','false');
+    $('sheetHandle').querySelector('span').textContent='操作をひらく';
+  }else startCamera();
+};
+document.querySelectorAll('[data-source-mode]').forEach(btn=>btn.onclick=()=>{
+  sourceMode=btn.dataset.sourceMode;
+  document.querySelectorAll('[data-source-mode]').forEach(x=>x.classList.toggle('active',x===btn));
+  renderSourceSets();
+});
 /* ================= ユーティリティ ================= */
 function rgb2hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('')}
 function hex2hsl(hex){
@@ -2510,7 +2796,9 @@ updateCmpBadge();
   const overlay=document.getElementById('startOverlay');
   const observer=new MutationObserver(()=>{
     if(overlay.style.display==='none'){
-      setCollapsed(true);
+      const custom=document.body.classList.contains('custom-mode');
+      setCollapsed(!custom);
+      if(custom&&typeof activateSourceTab==='function') activateSourceTab();
       observer.disconnect();
     }
   });
@@ -2603,7 +2891,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile27';
+  const BUILD_VERSION='mobile28';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -2946,10 +3234,12 @@ updateCmpBadge();
     document.querySelector('.opening-mark').innerHTML='CUSTOM / TRY ON<br>COLOR / SURFACE / FORM / LIGHT';
     document.querySelector('#startOverlay .invite').textContent='CUSTOM';
     document.getElementById('openingGuide').textContent='COLOR / SURFACE / FORM / LIGHT';
-    document.getElementById('startBtn').textContent='START CAMERA';
+    document.getElementById('startBtn').textContent='カメラから作る';
     document.getElementById('tryIdentityText').textContent='CUSTOM';
     const workBack=document.getElementById('tryWorkBack'); workBack.textContent='WORKS'; workBack.href=homeRoute();
-    const link=document.querySelector('.make-link'); link.textContent='WORKS'; link.href=homeRoute();
+    const link=document.querySelector('.make-link');
+    link.textContent='写真から作る'; link.href='#';
+    link.onclick=ev=>{ev.preventDefault(); document.getElementById('sourceInput').click();};
     document.getElementById('globalBack').href=homeRoute();
     document.getElementById('globalBackText').textContent='WORKS';
   }
