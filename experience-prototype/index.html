@@ -1168,15 +1168,15 @@
   }
   .exhibit-controls{
     position:absolute; z-index:3; left:12px; right:12px; bottom:calc(11px + env(safe-area-inset-bottom));
-    display:grid; grid-template-columns:1fr 1fr minmax(112px,1.35fr); gap:6px; padding:6px;
+    display:grid; grid-template-columns:1fr minmax(140px,1.35fr); gap:6px; padding:6px;
     border:1px solid rgba(255,255,255,.14); background:rgba(8,8,10,.76);
     box-shadow:0 18px 50px rgba(0,0,0,.36); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
   }
-  .exhibit-view,.exhibit-save{
+  .exhibit-mode,.exhibit-save{
     min-height:48px; border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.68); background:transparent;
     font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em;
   }
-  .exhibit-view.active{color:#101012; border-color:#e7ddd4; background:#e7ddd4}
+  .exhibit-mode{display:flex; align-items:center; justify-content:center; color:#101012; border-color:#e7ddd4; background:#e7ddd4}
   .exhibit-save{color:#101012; border-color:#d7b39e; background:#d7b39e}
   #saveHint{z-index:190}
   @media (min-width:820px){
@@ -1195,7 +1195,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile32" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile34" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1458,9 +1458,8 @@
     <div><div class="exhibit-kicker">HAND &amp; LIGHT / PERSONAL WORK</div><div class="exhibit-title">MY TRACE</div></div>
     <button type="button" class="exhibit-close" id="exhibitClose">BACK</button>
   </div>
-  <div class="exhibit-controls" aria-label="展示方法を選ぶ">
-    <button type="button" class="exhibit-view active" data-exhibit-view="chips">CHIPS</button>
-    <button type="button" class="exhibit-view" data-exhibit-view="hand">HAND</button>
+  <div class="exhibit-controls" aria-label="作品展示の操作">
+    <div class="exhibit-mode">CHIPS</div>
     <button type="button" class="exhibit-save" id="exhibitSave">画像を保存</button>
   </div>
 </section>
@@ -3041,7 +3040,6 @@ $('saveSetLink').onclick=()=>{
 };
 
 /* ================= 自由制作：作品として見る ================= */
-let exhibitView='chips';
 const exhibit=$('exhibit'), exhibitCanvas=$('exhibitCanvas'), exhibitCtx=exhibitCanvas.getContext('2d');
 
 function exhibitNailPath(c,w,h,shape){
@@ -3100,7 +3098,8 @@ function exhibitBackground(c,w,h,warm){
 }
 function drawChipExhibit(c,w,h){
   exhibitBackground(c,w,h,false);
-  const floorY=h*.79;
+  /* 試作33：画面下へ沈んでいた5本を、余白の中央へ引き上げる。 */
+  const floorY=h*.63;
   const floor=c.createLinearGradient(0,floorY,0,h);floor.addColorStop(0,'rgba(215,179,158,.05)');floor.addColorStop(1,'rgba(0,0,0,.34)');
   c.fillStyle=floor;c.fillRect(0,floorY,w,h-floorY);
   c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=1;c.beginPath();c.moveTo(50,floorY);c.lineTo(w-50,floorY);c.stroke();
@@ -3114,43 +3113,9 @@ function drawChipExhibit(c,w,h){
     paintExhibitNail(c,x,y,nw,nh,0,i);
   });
 }
-function mannequinHandPath(c){
-  c.beginPath();c.moveTo(320,1130);
-  c.bezierCurveTo(310,1030,272,950,250,866);
-  c.bezierCurveTo(224,820,167,791,125,744);
-  c.bezierCurveTo(92,707,101,663,133,643);
-  c.bezierCurveTo(162,624,190,649,221,700);
-  c.lineTo(240,726);c.bezierCurveTo(240,625,241,480,246,379);
-  c.bezierCurveTo(249,319,278,290,311,303);c.bezierCurveTo(338,314,341,346,337,400);c.lineTo(334,610);
-  c.bezierCurveTo(341,493,344,326,356,232);c.bezierCurveTo(364,174,400,148,432,168);c.bezierCurveTo(458,184,458,217,451,278);c.lineTo(431,603);
-  c.bezierCurveTo(449,480,460,351,476,284);c.bezierCurveTo(489,231,525,216,553,239);c.bezierCurveTo(577,259,570,299,560,349);c.lineTo(515,632);
-  c.bezierCurveTo(536,528,550,430,570,385);c.bezierCurveTo(591,338,628,335,650,361);c.bezierCurveTo(670,384,655,425,638,467);c.lineTo(563,717);
-  c.bezierCurveTo(607,756,630,811,620,870);c.bezierCurveTo(610,946,576,1014,570,1130);c.closePath();
-}
-function drawHandExhibit(c,w,h){
-  exhibitBackground(c,w,h,true);
-  c.save();c.translate((w-900)/2,(h-1200)/2);
-  c.save();c.filter='blur(24px)';c.fillStyle='rgba(54,41,35,.28)';c.translate(25,28);mannequinHandPath(c);c.fill();c.restore();
-  const skin=c.createLinearGradient(150,170,650,1050);skin.addColorStop(0,'#fbf8f3');skin.addColorStop(.48,'#e8ddd3');skin.addColorStop(1,'#bfaea2');
-  c.fillStyle=skin;mannequinHandPath(c);c.fill();
-  c.strokeStyle='rgba(91,69,58,.24)';c.lineWidth=3;mannequinHandPath(c);c.stroke();
-  const light=c.createRadialGradient(390,540,20,390,540,300);light.addColorStop(0,'rgba(255,255,255,.58)');light.addColorStop(1,'rgba(255,255,255,0)');
-  c.fillStyle=light;c.save();mannequinHandPath(c);c.clip();c.fillRect(80,130,620,950);c.restore();
-  c.strokeStyle='rgba(120,91,76,.13)';c.lineWidth=5;c.lineCap='round';
-  [[283,454,285,690],[392,330,384,697],[510,380,478,716],[607,478,540,751]].forEach(p=>{c.beginPath();c.moveTo(p[0],p[1]);c.quadraticCurveTo((p[0]+p[2])/2+10,(p[1]+p[3])/2,p[2],p[3]);c.stroke();});
-  const nails=[
-    [154,678,76,142,-.72],
-    [290,348,72,160,-.02],
-    [407,216,76,176,.03],
-    [526,282,71,158,.10],
-    [617,402,64,136,.21]
-  ];
-  nails.forEach((p,i)=>paintExhibitNail(c,p[0],p[1],p[2],p[3],p[4],i));
-  c.restore();
-}
 function renderExhibit(){
   const c=exhibitCtx,w=exhibitCanvas.width,h=exhibitCanvas.height;c.clearRect(0,0,w,h);
-  if(exhibitView==='hand') drawHandExhibit(c,w,h); else drawChipExhibit(c,w,h);
+  drawChipExhibit(c,w,h);
 }
 function openExhibit(){
   exhibit.classList.add('open');exhibit.setAttribute('aria-hidden','false');renderExhibit();
@@ -3158,10 +3123,6 @@ function openExhibit(){
 function closeExhibit(){exhibit.classList.remove('open');exhibit.setAttribute('aria-hidden','true');}
 document.querySelectorAll('.exhibit-open').forEach(btn=>btn.onclick=openExhibit);
 $('exhibitClose').onclick=closeExhibit;
-document.querySelectorAll('[data-exhibit-view]').forEach(btn=>btn.onclick=()=>{
-  exhibitView=btn.dataset.exhibitView;
-  document.querySelectorAll('[data-exhibit-view]').forEach(x=>x.classList.toggle('active',x===btn));renderExhibit();
-});
 $('exhibitSave').onclick=async()=>{
   const blob=await new Promise(resolve=>exhibitCanvas.toBlob(resolve,'image/jpeg',.95));if(!blob)return;
   const file=new File([blob],'tsuya-my-trace.jpg',{type:'image/jpeg'});
@@ -3303,7 +3264,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile32';
+  const BUILD_VERSION='mobile34';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);

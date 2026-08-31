@@ -8,6 +8,8 @@
 
 現行公開版: `試作32 / mobile32`（試作31の保存改善を含む）
 
+現行ローカル改善版: `試作34 / mobile34`（試作33の展示修正＋トップ退場演出接続、未コミット・未公開）
+
 アプリ実装コミット: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)
 ブランチ: `main`
 
@@ -28,7 +30,7 @@
 
 - 「艶」の文字をCanvasで描くトップページ。
 - 画面全体のリンクから `experience-prototype/` へ遷移。
-- 退場アニメーション用の `go()` はコードにあるが、クリックイベントへ接続されていないため現状では動作しない。これは実装済み機能として数えない。
+- 通常タップまたはキーボード操作で `go()` を開始し、約900msの退場アニメーションとveilを経て作品一覧へ遷移。修飾キー付きクリックの別タブ操作はブラウザ標準動作を維持。
 - 作品一覧の背景で作品映像を約5.2秒ごとにクロスフェード。
 - 作品一覧から10作品の各ページへ直接入る構造。
 - 作品ページ内で10作品を横方向のスイッチャーから切替。
@@ -214,12 +216,12 @@
 
 - 2026-08-31時点で、直近のスマホ幅ブラウザ試験ではJavaScript error/warnは再現していない。
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
-- `top-prototype/index.html` の `go()`、退場フェード、variant 1/2は現在イベントへ接続されていない。トップからの遷移自体は全画面リンクで行われる。古い演出案を現行仕様と誤認しない。
+- `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile32`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。ローカルの内部 `BUILD_VERSION` は現在 `mobile34`、公開版は `mobile32`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- `top-prototype/index.html` 内のリンクと退場後URLは `v=mobile32`。アプリ本体の `BUILD_VERSION`、HOMEも `mobile32` に統一して公開済み。
+- ローカルの`top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile34`に統一した。公開版は`mobile32`。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -252,6 +254,8 @@
 - `experience-prototype/試作30_自作ネイル作品展示.md`: 自由制作した5本をCHIPS / HANDで展示する改善。
 - `experience-prototype/試作31_撮影と端末保存状態の明示.md`: 撮影後の保存状態と保存画面の戻る導線を明確化。
 - `experience-prototype/試作32_作品説明文を非表示.md`: 10作品の題名下にあった説明文を画面から外した判断。
+- `experience-prototype/試作33_HAND展示の手形修正.md`: HAND展示を削除し、CHIPSだけへ戻した判断と配置修正の記録。
+- `experience-prototype/試作34_トップ退場演出接続.md`: トップのアンカー即時遷移を止め、既存の退場演出へ接続した修正記録。
 - `index.html`: 旧来の単体試着ページ。現行本体と誤認しない。
 - `top.html`: 旧トップ系ファイル。現行トップと誤認しない。
 - `艶II_ローカルで開く.command`: `localhost:8123`でルートを開く補助。現行統合作品はURL末尾を`top-prototype/`へ移動して確認する。
@@ -259,6 +263,8 @@
 
 ## 9. 公開URLとGitHub情報
 
+- 公開運用: `main`の最新版だけを現行公開版として扱う。過去版を別公開せず、利用者へは最新版の作品トップURLを提示する。
+- URL末尾の`v=コミットID-mobile番号`はキャッシュ回避用であり、別バージョンの公開先ではない。
 - GitHubリポジトリ: https://github.com/ebiko5555/tsuya-v2
 - remote: `origin https://github.com/ebiko5555/tsuya-v2.git`
 - branch: `main`
@@ -269,8 +275,7 @@
 - 作品例: https://ebiko5555.github.io/tsuya-v2/experience-prototype/?work=COLOR
 - 作品別試着例: https://ebiko5555.github.io/tsuya-v2/experience-prototype/?try=COLOR
 - 作品連携SOURCE例: https://ebiko5555.github.io/tsuya-v2/experience-prototype/?mode=custom&from=COLOR
-- 旧版・永久版（README記載、今回未検証）: https://ebiko5555.github.io/tsuya-atelier/ — 要確認
-- 元作品サイト（試作記録の参照先、今回未検証）: https://ebiko5555.github.io/nail-material-test/ — 要確認
+- 旧リポジトリや元作品サイトのURLは歴史資料として文書内に残る場合があるが、現行アプリの公開URLとして利用者へ案内しない。
 
 ## 10. 最後に確認した動作状態
 
@@ -412,3 +417,54 @@
 - COLOR固定試着の5本見本、直接CUSTOM、`端末に保存`、保存画面の2つの戻るボタン、展示入口、BACK、HOMEを確認。
 - 公開版のブラウザコンソールのerror/warnは0件。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?work=COLOR&v=aa4794a-mobile32`
+
+## 16. HAND削除とCHIPS配置修正
+
+2026-08-31、`試作33 / mobile33`として、自由制作の`作品として見る`をCHIPS展示だけへ戻し、チップの位置を修正した。
+
+- 歪みの目立つマネキン手を改善案として残さず、HANDボタンと手のCanvas描画処理を削除した。
+- 展示は5本のネイルチップを見せるCHIPSだけにした。
+- 画面高の約79%にあった床線を63%へ上げ、チップ5本を大きな上部余白の中央へ移した。
+- 現在の5柄・5色、画像保存、BACKは変更していない。
+- 最新版のみを公開する運用方針を維持する。
+
+ローカル確認:
+
+- 390×844で写真からSOURCEを生成し、`作品として見る`を開いた。
+- 展示内にHANDボタンと手の描画がなく、CHIPSだけであることを確認。
+- 5本が題名と下部操作の間の中央付近へ移動したことを画像で確認。
+- BACK、`画像を保存`、現在デザイン5本の反映が残っていることを確認。
+- 作品10点、COLOR作品の5本見本、TRY ON、作品連携CUSTOM、BACK、HOMEが`mobile33`であることを確認。
+- `top-prototype/index.html` 1本、`experience-prototype/index.html` 3本のインラインJavaScript構文検査に成功。
+- `git diff --check`に成功し、ブラウザコンソールの新しいerror/warnは0件。
+
+公開状態:
+
+- 単独の`mobile33`としては公開せず、トップ退場演出修正を加えた`mobile34`へ統合する。
+
+## 17. トップ退場演出の接続
+
+2026-09-01、`試作34 / mobile34`として、トップのアンカー即時遷移を止め、既存の`go()`へ通常クリックとEnterキーを接続した。
+
+- タップ後、約900msの退場アニメーションと約420ms後のveilを経て作品一覧へ遷移する。
+- Command／Control／Shift／Altキー付きクリックは妨げず、ブラウザ標準動作を維持する。
+- 遷移先はアンカーの`href`を参照し、版番号を1か所で管理する。
+- 現行の光沢案`variant = 0`は維持し、未使用の粒子案は有効化していない。
+- 試作33のHAND削除・CHIPS配置修正を含め、内部版を`mobile34`へ統一した。
+
+ローカル確認:
+
+- 390×844で通常タップ後も途中時点ではトップに留まり、veil表示後に`experience-prototype/?v=mobile34`へ遷移した。
+- Enterキーでも同じ演出と遷移を確認した。
+- `#stage`が390×844の画面全体を覆うこと、作品入口10点、HOMEの`mobile34`リンクを確認した。
+- トップ1本、本体4本のインラインJavaScript構文検査に成功した。
+- `git diff --check`に成功し、ブラウザコンソールのerror/warnは0件。
+
+実機要確認:
+
+- iPhone Safariでのタップ感、約900msの待ち時間、動画自動再生。
+- カメラ許可、前後カメラ切替、MediaPipe手追跡、撮影、端末保存。
+
+公開状態:
+
+- ローカル確認済み。commit、push、GitHub Pages公開はこの記録の次段階で行う。
