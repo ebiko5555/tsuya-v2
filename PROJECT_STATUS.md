@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作34）: `b1fa888` (`Publish mobile34 top exit transition`)
+公開中のアプリ実装コミット（試作35）: `9718c24` (`Publish mobile35 Japanese source set names`)
 
-現行公開版: `試作34 / mobile34`（試作33のHAND削除・CHIPS配置修正と、トップ退場演出接続を含む）
+現行公開版: `試作35 / mobile35`（SOURCEの3案名称「流転」「景層」「残光」を含む）
 
-現行ローカル改善版: `試作35 / mobile35`（SOURCEの3案名称を「流転」「景層」「残光」へ変更。公開作業中）
+現行ローカル改善版: `試作35 / mobile35`（公開版と同じ）
 
-アプリ実装コミット: `b1fa888` (`Publish mobile34 top exit transition`)
+アプリ実装コミット: `9718c24` (`Publish mobile35 Japanese source set names`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -503,4 +503,7 @@
 
 公開状態:
 
-- 公開作業中。
+- アプリ実装コミット: `9718c24` (`Publish mobile35 Japanese source set names`)。
+- `origin/main`へのpushに成功した。
+- GitHub Pagesの公開HTMLで、「流転」「景層」「残光」、`BUILD_VERSION='mobile35'`、トップの`mobile35`リンクを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=9718c24-mobile35`
