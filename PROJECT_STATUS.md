@@ -6,7 +6,9 @@
 
 公開基準コミット（試作29）: `4b33ebe` (`Add automatic subject-focused source analysis`)
 
-現行改善版: `試作30 / mobile30`（公開作業中）
+現行改善版: `試作30 / mobile30`
+
+アプリ実装コミット: `c5ec931` (`Add mobile30 personal nail exhibit`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -346,4 +348,9 @@
 
 - `experience-prototype/index.html`、`top-prototype/index.html`、`IMPLEMENTATION_SPEC.md`、`PROJECT_STATUS.md`、`experience-prototype/試作30_自作ネイル作品展示.md` を試作30の対象とする。
 - `BUILD_VERSION`、トップからのリンク、HOMEを `mobile30` に統一。
-- commit、push、GitHub Pages反映結果は公開確認後に本節へ追記する。
+- アプリ実装コミット: `c5ec931`。
+- `origin main` へのpushに成功。
+- GitHub Pagesの `?v=c5ec931-mobile30` 付き公開URLで試作30の反映を確認。
+- 公開版で10作品、COLOR固定試着、直接CUSTOM、SOURCEの8色・4方式・3案、CHIPS / HAND、BACK、HOMEを確認。
+- 公開版のブラウザコンソールのerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?mode=custom&v=c5ec931-mobile30`
