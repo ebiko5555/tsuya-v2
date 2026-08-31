@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作32）: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)
+公開中のアプリ実装コミット（試作34）: `b1fa888` (`Publish mobile34 top exit transition`)
 
-現行公開版: `試作32 / mobile32`（試作31の保存改善を含む）
+現行公開版: `試作34 / mobile34`（試作33のHAND削除・CHIPS配置修正と、トップ退場演出接続を含む）
 
-現行ローカル改善版: `試作34 / mobile34`（試作33の展示修正＋トップ退場演出接続、コミット済み・未公開）
+現行ローカル改善版: `試作34 / mobile34`（公開版と同じ）
 
-アプリ実装コミット: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)
+アプリ実装コミット: `b1fa888` (`Publish mobile34 top exit transition`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -218,10 +218,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。ローカルの内部 `BUILD_VERSION` は現在 `mobile34`、公開版は `mobile32`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile34`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- ローカルの`top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile34`に統一した。公開版は`mobile32`。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile34`に統一して公開済み。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -467,5 +467,9 @@
 
 公開状態:
 
-- ローカル確認後、コミット`b1fa888`を作成した。
-- `origin/main`へのpushとGitHub Pages公開は未実施。利用者の明示的な公開指示を待つ。
+- アプリ実装コミット: `b1fa888` (`Publish mobile34 top exit transition`)。
+- 公開待ち記録コミット: `df49f9d` (`Record mobile34 as awaiting publication`)。
+- `origin/main`へのpushに成功し、GitHub Pagesで`mobile34`の反映を確認した。
+- 390×844の公開版で、タップ後の途中時点ではトップに留まりveilが表示され、その後作品一覧へ遷移した。
+- 公開版で作品入口10点、HOMEの`mobile34`リンク、コンソールerror/warn 0件を確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=df49f9d-mobile34`

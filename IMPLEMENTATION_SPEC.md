@@ -6,7 +6,7 @@
 
 基準コミット: `4b33ebe` (`Add automatic subject-focused source analysis`)
 
-現行ローカル改善版: `試作34 / mobile34`（試作33の展示修正に、トップ退場演出の接続を追加）
+現行公開版: `試作34 / mobile34`（試作33の展示修正に、トップ退場演出の接続を追加）
 
 対象: `tsuya-v2-deploy` の現行統合作品
 
