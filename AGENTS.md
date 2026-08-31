@@ -172,7 +172,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 このリポジトリのアプリ実装に伴うcommit、push、GitHub Pages公開は、利用者が「やって」または「公開して」と指示した時点で明示的に許可されたものとして扱う。「まだ公開しないで」と指示された場合だけローカルで止める。
 
-改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。試作30は `mobile30`。
+改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。現在のローカル改善版は試作32 / `mobile32`。
 
 「完成」と報告できるのは、GitHub Pagesの公開URLで反映を確認した後だけである。最終報告には必ず次を含める。
 
