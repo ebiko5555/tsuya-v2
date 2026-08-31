@@ -4,11 +4,11 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作30）: `c5ec931` (`Add mobile30 personal nail exhibit`)
+公開中のアプリ実装コミット（試作32）: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)
 
-現行ローカル改善版: `試作32 / mobile32`（試作31を含む未コミット・未公開版）
+現行公開版: `試作32 / mobile32`（試作31の保存改善を含む）
 
-アプリ実装コミット: `c5ec931` (`Add mobile30 personal nail exhibit`)
+アプリ実装コミット: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -216,10 +216,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()`、退場フェード、variant 1/2は現在イベントへ接続されていない。トップからの遷移自体は全画面リンクで行われる。古い演出案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。ローカルの内部 `BUILD_VERSION` は現在 `mobile32`、公開版は `mobile30`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile32`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- ローカルの `top-prototype/index.html` 内のリンクと退場後URLは `v=mobile32`。アプリ本体の `BUILD_VERSION`、HOMEも `mobile32` に統一した。公開版は `mobile30`。
+- `top-prototype/index.html` 内のリンクと退場後URLは `v=mobile32`。アプリ本体の `BUILD_VERSION`、HOMEも `mobile32` に統一して公開済み。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -296,10 +296,10 @@
 
 ## 11. Git作業時の現状
 
-- 公開済みアプリ本体の最終変更は `4b33ebe`。ローカル作業ツリーには後述の展示表示を追加済みだが、未コミット・未公開。
-- この引継作成前、追跡対象ファイルに未コミット変更はなかった。
+- 公開済みアプリ本体の最終変更は `aa4794a`。試作31の保存案内と試作32の作品説明文非表示をまとめて公開した。
+- アプリ実装コミット後、公開確認結果を本書と試作記録へ追記した。
 - 未追跡の `._*` AppleDoubleは多数あるが、成果物ではない。追加・削除しない。
-- 引継文書の追加では `AGENTS.md` と `PROJECT_STATUS.md` だけを明示的にステージすること。
+- Git操作では引き続き対象ファイルだけを明示的にステージすること。
 
 ## 12. 再現実装仕様書
 
@@ -308,9 +308,9 @@
 - 基準コミット `4b33ebe` の実装を文章化した。
 - URL別の画面状態、10作品の固定プリセット、手追跡と爪配置、SOURCE解析、撮影・保存、スマホ表示、受け入れ条件を記載した。
 - アプリ本体のHTML、CSS、JavaScript、作品素材は変更していない。
-- 公開GitHubへの送信は行っていない。
+- 2026-08-31の`公開して`という明示指示により、試作32の一部として公開GitHubへ送信した。
 - 文書内容はローカル実装との照合のみ。新しいiPhone実機試験は行っていないため、実機項目は引き続き要確認。
-- 2026-08-31の最終監査時点で、この2文書はローカル作成済みだが未追跡。公開GitHubへの送信は明示承認がないため未実施。公開リポジトリのアプリ基準HEADは `4b33ebe` のまま。
+- `IMPLEMENTATION_SPEC.md`、`AGENTS.md`、`PROJECT_STATUS.md`をアプリ実装と照合し、試作32の公開内容へ更新した。
 
 ## 13. 自由制作デザインの作品展示
 
@@ -379,8 +379,9 @@
 
 公開状態:
 
-- 利用者から今回の公開指示はまだないため、ローカル変更のみ。
-- commit、push、GitHub Pages公開は行っていない。
+- 試作32に含め、アプリ実装コミット `aa4794a` で公開した。
+- `origin main`へのpushとGitHub Pagesへの反映を確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?mode=custom&v=aa4794a-mobile32`
 
 ## 15. 作品説明文の非表示
 
@@ -405,5 +406,9 @@
 
 公開状態:
 
-- 利用者から今回の公開指示はまだないため、ローカル変更のみ。
-- commit、push、GitHub Pages公開は行っていない。
+- アプリ実装コミット: `aa4794a` (`Publish mobile32 save guidance and artwork cleanup`)。
+- `origin main`へのpushに成功。
+- GitHub Pagesの390×844表示で、10作品すべての説明文非表示、題名、5本見本、`TRY ON`を確認。
+- COLOR固定試着の5本見本、直接CUSTOM、`端末に保存`、保存画面の2つの戻るボタン、展示入口、BACK、HOMEを確認。
+- 公開版のブラウザコンソールのerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?work=COLOR&v=aa4794a-mobile32`
