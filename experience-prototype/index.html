@@ -1116,6 +1116,51 @@
       font-size:11px; font-weight:500; letter-spacing:.025em; text-align:center; line-height:1.45;
     }
   }
+
+  /* 自由制作した5本を、操作画面ではなく一つの作品として見る。 */
+  .exhibit-open{
+    display:none; align-items:center; justify-content:center; min-height:36px; padding:0 12px;
+    border:1px solid rgba(215,179,158,.58); color:#e6c6b2; background:rgba(215,179,158,.06);
+    font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em;
+  }
+  body.custom-mode .exhibit-open{display:inline-flex}
+  .source-exhibit{width:100%; margin-top:9px}
+  .set-actions{display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+  #exhibit{
+    position:fixed; z-index:150; inset:0; display:none; overflow:hidden;
+    color:#f4f1ec; background:#0a0a0c;
+  }
+  #exhibit.open{display:block}
+  .exhibit-stage{position:absolute; inset:0; overflow:hidden}
+  #exhibitCanvas{width:100%; height:100%; display:block}
+  .exhibit-head{
+    position:absolute; z-index:3; top:calc(16px + env(safe-area-inset-top)); left:17px; right:17px;
+    display:flex; align-items:flex-start; justify-content:space-between; pointer-events:none;
+  }
+  .exhibit-head>div{display:none}
+  .exhibit-kicker{font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.24em; color:rgba(255,255,255,.56)}
+  .exhibit-title{margin-top:8px; font:300 clamp(25px,8vw,38px)/1 "Times New Roman","Yu Mincho",serif; letter-spacing:.08em}
+  .exhibit-close{
+    pointer-events:auto; min-width:60px; min-height:36px; margin-left:auto; border:1px solid rgba(255,255,255,.3);
+    color:#fff; background:rgba(8,8,10,.38); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.13em; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+  .exhibit-controls{
+    position:absolute; z-index:3; left:12px; right:12px; bottom:calc(11px + env(safe-area-inset-bottom));
+    display:grid; grid-template-columns:1fr 1fr minmax(112px,1.35fr); gap:6px; padding:6px;
+    border:1px solid rgba(255,255,255,.14); background:rgba(8,8,10,.76);
+    box-shadow:0 18px 50px rgba(0,0,0,.36); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  }
+  .exhibit-view,.exhibit-save{
+    min-height:48px; border:1px solid rgba(255,255,255,.18); color:rgba(255,255,255,.68); background:transparent;
+    font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em;
+  }
+  .exhibit-view.active{color:#101012; border-color:#e7ddd4; background:#e7ddd4}
+  .exhibit-save{color:#101012; border-color:#d7b39e; background:#d7b39e}
+  #saveHint{z-index:190}
+  @media (min-width:820px){
+    .exhibit-controls{left:50%; right:auto; width:520px; transform:translateX(-50%)}
+  }
 </style>
 </head>
 <body>
@@ -1129,7 +1174,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=nav27" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile30" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1233,6 +1278,7 @@
       <button type="button" class="source-mode active" data-source-mode="MIX">MIX</button>
     </div>
     <div class="source-sets" id="sourceSets"></div>
+    <button type="button" class="exhibit-open source-exhibit">作品として見る</button>
     <button type="button" class="source-try" id="sourceTry">TRY ON</button>
   </div>
 
@@ -1245,7 +1291,10 @@
     </div>
     <div class="setrow">
       <div class="scroller" id="setsRow"></div>
-      <span class="ghostlink" id="saveSetLink">この組み合わせを保存</span>
+      <div class="set-actions">
+        <span class="ghostlink" id="saveSetLink">この組み合わせを保存</span>
+        <button type="button" class="exhibit-open">作品として見る</button>
+      </div>
     </div>
   </div>
 
@@ -1373,6 +1422,19 @@
     </div>
   </div>
 </div>
+
+<section id="exhibit" aria-hidden="true" aria-label="自分で作ったネイルの作品展示">
+  <div class="exhibit-stage"><canvas id="exhibitCanvas" width="900" height="1200"></canvas></div>
+  <div class="exhibit-head">
+    <div><div class="exhibit-kicker">HAND &amp; LIGHT / PERSONAL WORK</div><div class="exhibit-title">MY TRACE</div></div>
+    <button type="button" class="exhibit-close" id="exhibitClose">BACK</button>
+  </div>
+  <div class="exhibit-controls" aria-label="展示方法を選ぶ">
+    <button type="button" class="exhibit-view active" data-exhibit-view="chips">CHIPS</button>
+    <button type="button" class="exhibit-view" data-exhibit-view="hand">HAND</button>
+    <button type="button" class="exhibit-save" id="exhibitSave">画像を保存</button>
+  </div>
+</section>
 
 <script>
 /* ================= 状態 ================= */
@@ -2923,6 +2985,140 @@ $('saveSetLink').onclick=()=>{
   if(!name) return;
   const a=loadSets(); a.unshift(snapshotSet(name)); storeSets(a.slice(0,20)); buildSetsRow();
 };
+
+/* ================= 自由制作：作品として見る ================= */
+let exhibitView='chips';
+const exhibit=$('exhibit'), exhibitCanvas=$('exhibitCanvas'), exhibitCtx=exhibitCanvas.getContext('2d');
+
+function exhibitNailPath(c,w,h,shape){
+  c.beginPath();
+  const base=h*.28;
+  c.moveTo(-w/2,base);
+  switch(shape){
+    case 'round2':
+      c.bezierCurveTo(-w/2,h*.02,-w*.34,-h*.42,0,-h*.46);
+      c.bezierCurveTo(w*.34,-h*.42,w/2,h*.02,w/2,base); break;
+    case 'almond':
+      c.bezierCurveTo(-w/2,-h*.08,-w*.20,-h*.52,0,-h*.58);
+      c.bezierCurveTo(w*.20,-h*.52,w/2,-h*.08,w/2,base); break;
+    case 'square':
+      c.bezierCurveTo(-w/2,-h*.10,-w/2,-h*.42,-w/2,-h*.50);
+      c.lineTo(w/2,-h*.50); c.bezierCurveTo(w/2,-h*.42,w/2,-h*.10,w/2,base); break;
+    case 'coffin':
+      c.bezierCurveTo(-w/2,-h*.05,-w*.30,-h*.40,-w*.22,-h*.50);
+      c.lineTo(w*.22,-h*.50); c.bezierCurveTo(w*.30,-h*.40,w/2,-h*.05,w/2,base); break;
+    default:
+      c.bezierCurveTo(-w/2,-h*.26,-w*.32,-h*.50,0,-h*.50);
+      c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,base);
+  }
+  c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
+  c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,base); c.closePath();
+}
+function paintExhibitNail(c,x,y,w,h,angle,index){
+  c.save(); c.translate(x,y); c.rotate(angle);
+  c.save(); exhibitNailPath(c,w,h,tuneVals.sculptShape); c.clip();
+  c.globalAlpha=tuneVals.opacity/100;
+  withVars(Object.assign({},lookVar),()=>paintByKey(c,nailLooks[index],w,h,nailColors[index],index+31));
+  const rim=c.createRadialGradient(0,0,Math.min(w,h)*.32,0,0,Math.max(w,h)*.76);
+  rim.addColorStop(0,'rgba(0,0,0,0)'); rim.addColorStop(1,'rgba(45,22,18,.42)');
+  c.globalAlpha=.25; c.fillStyle=rim; c.fillRect(-w,-h,w*2,h*2);
+  if(tuneVals.gloss>5&&!flatLook(nailLooks[index])){
+    c.globalAlpha=(tuneVals.gloss/100)*.56; c.fillStyle='#fff'; c.beginPath();
+    c.ellipse(-w*.17,-h*.19,w*.13,h*.25,-.28,0,Math.PI*2); c.fill();
+  }
+  c.restore();
+  c.globalAlpha=.25; c.strokeStyle='#fff'; c.lineWidth=Math.max(1,w*.018);
+  exhibitNailPath(c,w,h,tuneVals.sculptShape); c.stroke(); c.restore();
+}
+function exhibitBackground(c,w,h,warm){
+  const base=c.createLinearGradient(0,0,0,h);
+  if(warm){base.addColorStop(0,'#eee8e1');base.addColorStop(.58,'#d9cec4');base.addColorStop(1,'#b9aaa0');}
+  else{base.addColorStop(0,'#111216');base.addColorStop(.58,'#090a0d');base.addColorStop(1,'#050608');}
+  c.fillStyle=base;c.fillRect(0,0,w,h);
+  const halo=c.createRadialGradient(w*.5,h*.42,0,w*.5,h*.42,w*.58);
+  halo.addColorStop(0,warm?'rgba(255,255,255,.78)':'rgba(215,179,158,.16)');halo.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=halo;c.fillRect(0,0,w,h);
+  c.fillStyle=warm?'rgba(36,30,27,.72)':'rgba(255,255,255,.68)';
+  c.font='500 13px ui-monospace, SFMono-Regular, Menlo, monospace';c.letterSpacing='3px';c.fillText('HAND & LIGHT / PERSONAL WORK',54,77);
+  c.font='300 58px "Times New Roman", "Yu Mincho", serif';c.fillStyle=warm?'#29231f':'#f1ede8';c.fillText('MY TRACE',52,144);
+  c.fillStyle=warm?'rgba(36,30,27,.52)':'rgba(255,255,255,.46)';c.font='500 11px ui-monospace, SFMono-Regular, Menlo, monospace';
+  c.fillText('FIVE NAIL STUDY / 2026',55,h-55);
+}
+function drawChipExhibit(c,w,h){
+  exhibitBackground(c,w,h,false);
+  const floorY=h*.79;
+  const floor=c.createLinearGradient(0,floorY,0,h);floor.addColorStop(0,'rgba(215,179,158,.05)');floor.addColorStop(1,'rgba(0,0,0,.34)');
+  c.fillStyle=floor;c.fillRect(0,floorY,w,h-floorY);
+  c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=1;c.beginPath();c.moveTo(50,floorY);c.lineTo(w-50,floorY);c.stroke();
+  const xs=[w*.15,w*.32,w*.50,w*.68,w*.85], baseHeights=[240,292,326,286,226];
+  const length=tuneVals.sculptLen/140, scale=tuneVals.nailSize/100;
+  xs.forEach((x,i)=>{
+    const nh=baseHeights[i]*length*scale, nw=nh*(i===0?.52:.45);
+    const y=floorY-nh*.47-(i%2?13:0);
+    c.save();c.filter='blur(12px)';c.fillStyle='rgba(0,0,0,.62)';c.beginPath();c.ellipse(x+10,floorY+21,nw*.62,18,0,0,Math.PI*2);c.fill();c.restore();
+    c.strokeStyle='rgba(215,179,158,.28)';c.lineWidth=2;c.beginPath();c.moveTo(x,floorY+2);c.lineTo(x,y+nh*.42);c.stroke();
+    paintExhibitNail(c,x,y,nw,nh,0,i);
+  });
+}
+function mannequinHandPath(c){
+  c.beginPath();c.moveTo(320,1130);
+  c.bezierCurveTo(310,1030,272,950,250,866);
+  c.bezierCurveTo(224,820,167,791,125,744);
+  c.bezierCurveTo(92,707,101,663,133,643);
+  c.bezierCurveTo(162,624,190,649,221,700);
+  c.lineTo(240,726);c.bezierCurveTo(240,625,241,480,246,379);
+  c.bezierCurveTo(249,319,278,290,311,303);c.bezierCurveTo(338,314,341,346,337,400);c.lineTo(334,610);
+  c.bezierCurveTo(341,493,344,326,356,232);c.bezierCurveTo(364,174,400,148,432,168);c.bezierCurveTo(458,184,458,217,451,278);c.lineTo(431,603);
+  c.bezierCurveTo(449,480,460,351,476,284);c.bezierCurveTo(489,231,525,216,553,239);c.bezierCurveTo(577,259,570,299,560,349);c.lineTo(515,632);
+  c.bezierCurveTo(536,528,550,430,570,385);c.bezierCurveTo(591,338,628,335,650,361);c.bezierCurveTo(670,384,655,425,638,467);c.lineTo(563,717);
+  c.bezierCurveTo(607,756,630,811,620,870);c.bezierCurveTo(610,946,576,1014,570,1130);c.closePath();
+}
+function drawHandExhibit(c,w,h){
+  exhibitBackground(c,w,h,true);
+  c.save();c.translate((w-900)/2,(h-1200)/2);
+  c.save();c.filter='blur(24px)';c.fillStyle='rgba(54,41,35,.28)';c.translate(25,28);mannequinHandPath(c);c.fill();c.restore();
+  const skin=c.createLinearGradient(150,170,650,1050);skin.addColorStop(0,'#fbf8f3');skin.addColorStop(.48,'#e8ddd3');skin.addColorStop(1,'#bfaea2');
+  c.fillStyle=skin;mannequinHandPath(c);c.fill();
+  c.strokeStyle='rgba(91,69,58,.24)';c.lineWidth=3;mannequinHandPath(c);c.stroke();
+  const light=c.createRadialGradient(390,540,20,390,540,300);light.addColorStop(0,'rgba(255,255,255,.58)');light.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=light;c.save();mannequinHandPath(c);c.clip();c.fillRect(80,130,620,950);c.restore();
+  c.strokeStyle='rgba(120,91,76,.13)';c.lineWidth=5;c.lineCap='round';
+  [[283,454,285,690],[392,330,384,697],[510,380,478,716],[607,478,540,751]].forEach(p=>{c.beginPath();c.moveTo(p[0],p[1]);c.quadraticCurveTo((p[0]+p[2])/2+10,(p[1]+p[3])/2,p[2],p[3]);c.stroke();});
+  const nails=[
+    [154,678,76,142,-.72],
+    [290,348,72,160,-.02],
+    [407,216,76,176,.03],
+    [526,282,71,158,.10],
+    [617,402,64,136,.21]
+  ];
+  nails.forEach((p,i)=>paintExhibitNail(c,p[0],p[1],p[2],p[3],p[4],i));
+  c.restore();
+}
+function renderExhibit(){
+  const c=exhibitCtx,w=exhibitCanvas.width,h=exhibitCanvas.height;c.clearRect(0,0,w,h);
+  if(exhibitView==='hand') drawHandExhibit(c,w,h); else drawChipExhibit(c,w,h);
+}
+function openExhibit(){
+  exhibit.classList.add('open');exhibit.setAttribute('aria-hidden','false');renderExhibit();
+}
+function closeExhibit(){exhibit.classList.remove('open');exhibit.setAttribute('aria-hidden','true');}
+document.querySelectorAll('.exhibit-open').forEach(btn=>btn.onclick=openExhibit);
+$('exhibitClose').onclick=closeExhibit;
+document.querySelectorAll('[data-exhibit-view]').forEach(btn=>btn.onclick=()=>{
+  exhibitView=btn.dataset.exhibitView;
+  document.querySelectorAll('[data-exhibit-view]').forEach(x=>x.classList.toggle('active',x===btn));renderExhibit();
+});
+$('exhibitSave').onclick=async()=>{
+  const blob=await new Promise(resolve=>exhibitCanvas.toBlob(resolve,'image/jpeg',.95));if(!blob)return;
+  const file=new File([blob],'tsuya-my-trace.jpg',{type:'image/jpeg'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'MY TRACE'});return;}catch(e){if(e&&e.name==='AbortError')return;}
+  }
+  fallbackSave(blob);
+};
+$('exhibit').addEventListener('click',event=>{if(event.target===exhibit)closeExhibit();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&exhibit.classList.contains('open'))closeExhibit();});
+
 $('resetPal').onclick=()=>{ renderChips(defaultPalette); $('note').textContent=''; };
 $('varSlider').addEventListener('input', e=>{
   lookVar[activeLook()] = +e.target.value/100;
@@ -3053,7 +3249,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile29';
+  const BUILD_VERSION='mobile30';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
