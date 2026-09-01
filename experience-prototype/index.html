@@ -1163,39 +1163,48 @@
     body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:68px}
   }
 
-  /* 試作38：5本を中央へ置き、自由制作への入口だけに淡い発光と粒子を与える。 */
+  /* 試作39：スマホで見失わない大きさの発光アイコンと、目で追える粒子へ強化する。 */
   .create-particle{
-    position:fixed; z-index:70; left:var(--particle-x); top:var(--particle-y);
+    position:fixed; z-index:999; left:var(--particle-x); top:var(--particle-y);
     width:var(--particle-size); height:var(--particle-size); margin:calc(var(--particle-size) / -2) 0 0 calc(var(--particle-size) / -2);
-    border-radius:50%; pointer-events:none; background:rgba(224,250,255,.98);
-    box-shadow:0 0 5px rgba(188,239,255,.95),0 0 12px rgba(150,219,239,.64);
-    animation:create-particle-flight .48s cubic-bezier(.16,.7,.25,1) var(--particle-delay) forwards;
+    border:1px solid rgba(255,255,255,.96); border-radius:50%; pointer-events:none; background:#dffaff;
+    box-shadow:0 0 8px #fff,0 0 22px rgba(89,215,249,1);
+    animation:create-particle-flight .78s cubic-bezier(.12,.68,.22,1) var(--particle-delay) forwards;
+  }
+  .create-particle.is-star{
+    width:auto; height:auto; margin:-.55em 0 0 -.55em; border-radius:0;
+    color:#e5fbff; background:transparent; box-shadow:none;
+    font:400 var(--particle-size)/1 serif; text-shadow:0 0 6px #fff,0 0 17px rgba(109,218,247,.95);
   }
   @keyframes create-particle-flight{
     0%{opacity:0; transform:translate(0,0) scale(.3)}
-    18%{opacity:1}
-    100%{opacity:0; transform:translate(var(--particle-dx),var(--particle-dy)) scale(.08)}
+    12%{opacity:1; transform:translate(0,0) scale(1.1)}
+    72%{opacity:.92}
+    100%{opacity:0; transform:translate(var(--particle-dx),var(--particle-dy)) scale(.78) rotate(92deg)}
   }
   @keyframes create-entry-breathe{
-    0%,100%{border-color:rgba(190,230,240,.34); box-shadow:inset 0 0 16px rgba(170,224,238,.035),0 0 0 rgba(159,225,244,0)}
-    50%{border-color:rgba(213,246,252,.72); box-shadow:inset 0 0 18px rgba(178,234,247,.1),0 0 18px rgba(159,225,244,.16)}
+    0%,100%{border-color:rgba(190,230,240,.52); box-shadow:inset 0 0 18px rgba(170,224,238,.08),0 0 7px rgba(159,225,244,.08)}
+    50%{border-color:rgba(225,251,255,.95); box-shadow:inset 0 0 24px rgba(178,234,247,.19),0 0 27px rgba(134,224,249,.38)}
   }
   @keyframes create-entry-star{
-    0%,100%{opacity:.58; transform:scale(.82) rotate(0deg)}
-    50%{opacity:1; transform:scale(1.16) rotate(22deg)}
+    0%,100%{opacity:.76; transform:scale(.88) rotate(0deg); box-shadow:0 0 8px rgba(174,235,250,.48),inset 0 0 8px rgba(205,247,255,.2)}
+    50%{opacity:1; transform:scale(1.1) rotate(20deg); box-shadow:0 0 22px rgba(128,224,249,.92),inset 0 0 12px rgba(225,252,255,.46)}
   }
   @media (max-width:819px){
     body.art-page #workNails{justify-content:center}
     body.art-page .work-custom{
-      position:relative; isolation:isolate; overflow:visible;
-      border-color:rgba(190,230,240,.46);
-      background:radial-gradient(circle at 50% 40%,rgba(183,235,248,.12),rgba(255,255,255,.035) 68%);
-      animation:create-entry-breathe 3.4s ease-in-out infinite;
+      position:relative; isolation:isolate; overflow:visible; flex-direction:column; gap:3px;
+      border-color:rgba(190,230,240,.62); color:#f0fcff;
+      background:radial-gradient(circle at 50% 28%,rgba(175,235,250,.22),rgba(255,255,255,.045) 70%);
+      font-size:10px; line-height:1; text-shadow:0 0 8px rgba(166,229,246,.42);
+      animation:create-entry-breathe 2.6s ease-in-out infinite;
     }
     body.art-page .work-custom::before{
-      content:"✦"; display:inline-block; margin-right:7px; color:#e2fbff;
-      font-size:12px; line-height:1; text-shadow:0 0 7px rgba(183,237,250,.85);
-      animation:create-entry-star 2.7s ease-in-out infinite;
+      content:"✦"; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+      width:22px; height:22px; margin:0; border:1px solid rgba(225,251,255,.82); border-radius:50%;
+      color:#f4feff; background:radial-gradient(circle,rgba(225,251,255,.3),rgba(106,211,239,.08) 66%,transparent 70%);
+      font-size:14px; line-height:1; text-shadow:0 0 5px #fff,0 0 12px rgba(116,220,248,1);
+      animation:create-entry-star 2.1s ease-in-out infinite;
     }
   }
   @media (prefers-reduced-motion:reduce){
@@ -1260,7 +1269,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile38" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile39" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -3368,7 +3377,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile38';
+  const BUILD_VERSION='mobile39';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -3658,24 +3667,26 @@ updateCmpBadge();
       document.body.classList.add('create-entering');
       const rect=customLink.getBoundingClientRect();
       if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-        const centerX=rect.left+rect.width/2, centerY=rect.top+rect.height/2;
-        for(let i=0;i<16;i++){
-          const angle=(Math.PI*2*i/16)+((i%3)-1)*.08;
-          const distance=25+(i%5)*7;
+        const centerX=rect.left+rect.width/2, centerY=rect.top+18;
+        for(let i=0;i<24;i++){
+          const angle=-2.65+(1.7*i/23)+((i%3)-1)*.025;
+          const distance=70+(i%6)*14;
           const particle=document.createElement('span');
-          particle.className='create-particle';
+          const star=i%3===0;
+          particle.className='create-particle'+(star?' is-star':'');
+          if(star) particle.textContent='✦';
           particle.style.setProperty('--particle-x',centerX+'px');
           particle.style.setProperty('--particle-y',centerY+'px');
           particle.style.setProperty('--particle-dx',Math.cos(angle)*distance+'px');
           particle.style.setProperty('--particle-dy',Math.sin(angle)*distance+'px');
-          particle.style.setProperty('--particle-size',(2+(i%4))+'px');
-          particle.style.setProperty('--particle-delay',((i%4)*12)+'ms');
+          particle.style.setProperty('--particle-size',(star?(18+(i%4)*3):(8+(i%5)*2))+'px');
+          particle.style.setProperty('--particle-delay',((i%6)*10)+'ms');
           document.body.appendChild(particle);
-          setTimeout(()=>particle.remove(),650);
+          setTimeout(()=>particle.remove(),1050);
         }
       }
-      setTimeout(()=>document.body.classList.add('route-leaving'),180);
-      setTimeout(()=>{location.href=customHref;},460);
+      setTimeout(()=>document.body.classList.add('route-leaving'),720);
+      setTimeout(()=>{location.href=customHref;},1060);
     };
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
     const activeButton=index.querySelector('button.active');
