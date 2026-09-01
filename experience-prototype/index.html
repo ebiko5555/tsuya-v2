@@ -1138,6 +1138,31 @@
     }
   }
 
+  /* 試作37：スマホの作品ページでは、作品映像と5本のネイル見本を主役として見せる。 */
+  @media (max-width:819px){
+    body.art-page .work-film{height:50svh}
+    body.art-page .work-layer::after{height:50svh}
+    body.art-page .work-index{top:calc(50svh + 2px)}
+    body.art-page .work-copy{
+      top:calc(50svh + 72px);
+      padding-top:17px;
+    }
+    body.art-page .work-title{
+      margin:6px 0 8px;
+      font-size:clamp(25px,7.2vw,34px);
+      line-height:1.05;
+    }
+    body.art-page .work-title::after{left:calc(100% + 10px); width:24px}
+    body.art-page #workNails{
+      height:92px;
+      gap:11px;
+      margin-top:22px;
+    }
+    body.art-page #workNails canvas{width:38px; height:74px}
+    body.art-page #workNails canvas:nth-child(1),body.art-page #workNails canvas:nth-child(5){height:61px}
+    body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:68px}
+  }
+
   /* 自由制作した5本を、操作画面ではなく一つの作品として見る。 */
   .exhibit-open{
     display:none; align-items:center; justify-content:center; min-height:36px; padding:0 12px;
@@ -1195,7 +1220,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile36" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile37" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -3303,7 +3328,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile36';
+  const BUILD_VERSION='mobile37';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
