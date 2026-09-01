@@ -1195,7 +1195,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile35" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile36" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -2721,7 +2721,26 @@ function applyAutomaticSubjectMask(canvas){
   }
   cx.putImageData(img,0,0);
 }
-function extractSourcePalette(source,n){
+function sourceSeedFromPixels(data){
+  let hash=2166136261;
+  for(let i=0;i<data.length;i+=16){
+    const alpha=data[i+3];
+    if(alpha<32) continue;
+    const packed=((data[i]>>4)<<12)|((data[i+1]>>4)<<8)|((data[i+2]>>4)<<4)|(alpha>>4);
+    hash^=packed;
+    hash=Math.imul(hash,16777619);
+  }
+  return hash>>>0;
+}
+function sourcePaletteTunings(seed){
+  const rnd=seeded((seed%230000)+137);
+  return [
+    {base:.25+rnd()*.06,saturation:2.75+rnd()*.40},
+    {base:.30+rnd()*.06,saturation:2.20+rnd()*.45},
+    {base:.22+rnd()*.06,saturation:3.05+rnd()*.40},
+  ];
+}
+function extractSourcePalette(source,n,tuning={base:.28,saturation:2.8}){
   const c=document.createElement('canvas'),s=96;c.width=s;c.height=s;
   const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(source,0,0,s,s);
   const d=cx.getImageData(0,0,s,s).data,buckets={};
@@ -2735,7 +2754,7 @@ function extractSourcePalette(source,n){
   }
   const candidates=Object.values(buckets).map(x=>{
     const r=x.r/x.c,g=x.g/x.c,b=x.b/x.c,sat=x.s/x.c;
-    return {r,g,b,score:x.c*(.28+sat*2.8)};
+    return {r,g,b,score:x.c*(tuning.base+sat*tuning.saturation)};
   }).sort((a,b)=>b.score-a.score);
   const chosen=[];
   for(const x of candidates){
@@ -2769,10 +2788,15 @@ function analyzeSource(source){
   points.sort((a,b)=>b.m-a.m);
   const used=Math.max(1,totalWeight),avg=sum/used, variance=Math.max(0,sum2/used-avg*avg);
   const fallback=['#d8c4b8','#806c65','#ece7df','#384047','#b9977d','#f7f4ef'];
-  const palette=extractSourcePalette(source,8);
-  fallback.forEach(col=>{ if(palette.length<8&&!palette.includes(col)) palette.push(col); });
+  const sourceSeed=sourceSeedFromPixels(data),paletteTunings=sourcePaletteTunings(sourceSeed);
+  const paletteVariants=paletteTunings.map(tuning=>{
+    const colors=extractSourcePalette(source,8,tuning);
+    fallback.forEach(col=>{ if(colors.length<8&&!colors.includes(col)) colors.push(col); });
+    return colors.slice(0,8);
+  });
+  const palette=paletteVariants[0].slice();
   return {
-    palette:palette.slice(0,8), points:points.slice(0,42),
+    palette:palette.slice(0,8), paletteVariants, paletteTunings, sourceSeed, points:points.slice(0,42),
     angle:.5*Math.atan2(ey,ex), density:Math.max(.08,Math.min(1,(edge/Math.max(1,count))/62)),
     contrast:Math.max(.05,Math.min(1,Math.sqrt(variance)/70)),
     light:Math.max(.04,Math.min(1,bright/used*3.4)), saturation:Math.max(.04,Math.min(1,satSum/used*1.45))
@@ -2805,16 +2829,20 @@ function sourceRecipes(mode){
 }
 function makeSourceSets(mode){
   if(!sourceProfile) return [];
-  const p=sourceProfile.palette;
-  return sourceRecipes(mode).map(([name,looks],idx)=>({
-    name, looks,
-    colors:[p[idx%p.length],p[(idx+3)%p.length],p[(idx+1)%p.length],p[(idx+4)%p.length],p[(idx+2)%p.length]],
-    tune:{gloss:mode==='PATTERN'?72:96,opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
-    vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.55+idx*.15,flash:.55+idx*.12}
-  }));
+  return sourceRecipes(mode).map(([name,looks],idx)=>{
+    const p=(sourceProfile.paletteVariants&&sourceProfile.paletteVariants[idx])||sourceProfile.palette;
+    return {
+      name, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
+      colors:[p[idx%p.length],p[(idx+3)%p.length],p[(idx+1)%p.length],p[(idx+4)%p.length],p[(idx+2)%p.length]],
+      tune:{gloss:mode==='PATTERN'?72:96,opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
+      vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.55+idx*.15,flash:.55+idx*.12}
+    };
+  });
 }
 function drawSourceSetPreview(canvas,set){
   const c=canvas.getContext('2d'); c.clearRect(0,0,canvas.width,canvas.height);
+  const keepPalette=sourceProfile&&sourceProfile.palette;
+  if(sourceProfile&&set.sourcePalette) sourceProfile.palette=set.sourcePalette;
   withVars(set.vars,()=>set.looks.forEach((look,i)=>{
     const heights=[48,58,63,58,50], x=20+i*42;
     const w=24,h=heights[i],baseY=h*.28;
@@ -2825,11 +2853,17 @@ function drawSourceSetPreview(canvas,set){
     c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
     paintByKey(c,look,24,heights[i],set.colors[i],i+11); c.restore();
   }));
+  if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
 function renderSourceSets(){
   const box=$('sourceSets'); box.innerHTML=''; sourceSets=makeSourceSets(sourceMode);
   sourceSets.forEach((set,idx)=>{
     const btn=document.createElement('button'); btn.type='button'; btn.className='source-set'+(idx===0?' active':'');
+    if(set.paletteTuning){
+      btn.dataset.paletteBase=set.paletteTuning.base.toFixed(6);
+      btn.dataset.paletteSaturation=set.paletteTuning.saturation.toFixed(6);
+      btn.dataset.palette=set.sourcePalette.join(',');
+    }
     const code=document.createElement('span'); code.className='source-set-code'; code.textContent='0'+(idx+1);
     const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
     const name=document.createElement('span'); name.className='source-set-name'; name.textContent=set.name;
@@ -2862,6 +2896,7 @@ function ingestSource(input,label){
   $('signalNo').textContent='SOURCE'; $('signalName').textContent='SELECTED';
   $('artSignal').setAttribute('aria-label','選択した画像のプレビュー');
   $('sourceName').textContent=label||'FOUND MATERIAL';
+  $('sourceFrame').dataset.sourceSeed=String(sourceProfile.sourceSeed);
   const deg=Math.round(sourceProfile.angle*180/Math.PI);
   $('sourceReading').textContent=`${sourceProfile.palette.length} COLORS / LINE ${Math.round(sourceProfile.density*100)} / LIGHT ${Math.round(sourceProfile.light*100)} / ${deg}°`;
   $('sourceFrame').classList.add('ready'); $('sourceModes').classList.add('ready'); $('sourceTry').classList.add('ready');
@@ -2990,6 +3025,10 @@ function withVars(vars, fn){
   }
 }
 function applySet(st){
+  if(sourceProfile&&st.sourcePalette){
+    sourceProfile.palette=st.sourcePalette.slice();
+    renderChips(sourceProfile.palette);
+  }
   st.looks.forEach((k,i)=>{
     nailLooks[i] = (k && (LOOKS[k] || k.indexOf('custom:')===0)) ? k : 'onecolor';
   });
@@ -3264,7 +3303,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile35';
+  const BUILD_VERSION='mobile36';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);

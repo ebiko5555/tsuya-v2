@@ -86,7 +86,7 @@ tsuya-v2-deploy/
 3. 作品を追加・変更するときは、`works` 定義、作品映像、作品専用ネイル、作品切替、固定試着、SOURCEからの戻り先を一組として確認する。
 4. 作品タイトルや順序は `works` オブジェクトの順番が正本。2026-08-31時点では01〜10の10作品。
 5. `BUILD_VERSION` と内部リンクのクエリを変更した場合は、作品一覧、作品ページ、試着、CUSTOM、BACK、HOMEの全導線を確認する。
-6. SOURCEの生成規則は `sourceRecipes()` と `makeSourceSets()`、背景抑制は `applyAutomaticSubjectMask()`、分析は `extractSourcePalette()` と `analyzeSource()` にある。
+6. SOURCEの生成規則は `sourceRecipes()` と `makeSourceSets()`、背景抑制は `applyAutomaticSubjectMask()`、分析は `extractSourcePalette()` と `analyzeSource()`、画像由来の再現可能な揺らぎは `sourceSeedFromPixels()` と `sourcePaletteTunings()` にある。
 7. 写真分析の変更では、元画像の表示と分析用Canvasを混同しない。表示は元画像、マスクは分析専用とする。
 8. UI変更後は必ず390×844相当で確認し、TRY ONやBACKが画面外・他要素の背後へ隠れていないか矩形位置も見る。
 9. AppleDoubleのためGitが `non-monotonic index` 警告を出す場合がある。警告だけで失敗と判断せず、コミットIDとpush結果を確認する。
@@ -172,7 +172,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 このリポジトリのアプリ実装に伴うcommit、push、GitHub Pages公開は、利用者が「やって」または「公開して」と指示した時点で明示的に許可されたものとして扱う。「まだ公開しないで」と指示された場合だけローカルで止める。
 
-改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。現在のローカル改善版と公開版は試作34 / `mobile34`。
+改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。現在のローカル改善版は試作36 / `mobile36`。公開版は `PROJECT_STATUS.md` の冒頭を正本とする。
 
 GitHub Pagesは常に `main` の最新版1つだけを現行公開版として扱う。過去版を別の公開先へ複製したり、旧版URLを利用者向けの選択肢として並べたりしない。公開報告では最新版の作品トップURLを先頭に1つ提示する。`?v=コミットID-mobile番号` はiPhone等のキャッシュを避けて同じ最新版を読み直すための値であり、過去版を残すURLではない。
 
