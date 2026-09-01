@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作37）: `e55d142` (`Publish mobile37 enlarged artwork layout`)
+公開中のアプリ実装コミット（試作38）: `5fa9044` (`Publish mobile38 creative entry particles`)
 
-現行公開版: `試作37 / mobile37`（スマホの全作品ページで作品映像と5本のネイル見本を拡大し、題名を縮小）
+現行公開版: `試作38 / mobile38`（作品ネイルを中央配置し、自由制作入口へ淡い発光とタップ粒子を追加）
 
-現行ローカル改善版: `試作38 / mobile38`（作品ネイルを中央配置し、自由制作入口へ淡い発光とタップ粒子を追加。公開前）
+現行ローカル改善版: `試作38 / mobile38`（公開版と同じ）
 
-アプリ実装コミット: `e55d142` (`Publish mobile37 enlarged artwork layout`)
+アプリ実装コミット: `5fa9044` (`Publish mobile38 creative entry particles`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -220,10 +220,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile37`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile38`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile37`に統一して公開済み。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile38`に統一して公開済み。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -583,4 +583,14 @@
 - 390×844で5本の中心が195pxとなり、画面中心195pxと一致することを確認した。
 - 淡い発光、星印、タップ時の粒子16個、`?mode=custom&from=COLOR&v=mobile38`への遷移、CUSTOMのBACK表示を確認した。
 - TRY ON、WORKS、HOMEが表示され、ブラウザの新しいerror/warnが0件であることを確認した。
-- 現在はローカル動作確認済み、公開前。
+- アプリ実装コミット: `5fa9044` (`Publish mobile38 creative entry particles`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesの390×844表示で、5本の中心195pxと画面中心195pxの一致、発光、星印を確認した。
+- 公開版でタップ70ms後に粒子16個が存在し、`?mode=custom&from=COLOR&v=mobile38`へ遷移してBACKが表示されることを確認した。
+- トップ、HOME、アプリ本体の内部版は`mobile38`に統一した。
+- 公開版のブラウザコンソールの新しいerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=5fa9044-mobile38`
+
+実機要確認:
+
+- iPhone Safari実機での呼吸する発光の強さと、タップ粒子の見え方。
