@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作35）: `9718c24` (`Publish mobile35 Japanese source set names`)
+公開中のアプリ実装コミット（試作36）: `bdc0772` (`Publish mobile36 seeded palette variation`)
 
-現行公開版: `試作35 / mobile35`（SOURCEの3案名称「流転」「景層」「残光」を含む）
+現行公開版: `試作36 / mobile36`（SOURCEの3案へ画像由来の再現可能な色係数の揺らぎを追加）
 
-現行ローカル改善版: `試作36 / mobile36`（画像由来の再現可能な色係数の揺らぎを追加。公開前）
+現行ローカル改善版: `試作36 / mobile36`（公開版と同じ）
 
-アプリ実装コミット: `9718c24` (`Publish mobile35 Japanese source set names`)
+アプリ実装コミット: `bdc0772` (`Publish mobile36 seeded palette variation`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -220,10 +220,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile34`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile36`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile34`に統一して公開済み。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile36`に統一して公開済み。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -509,3 +509,37 @@
 - `origin/main`へのpushに成功した。
 - GitHub Pagesの公開HTMLで、「流転」「景層」「残光」、`BUILD_VERSION='mobile35'`、トップの`mobile35`リンクを確認した。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=9718c24-mobile35`
+
+## 19. 画像由来の再現可能な色係数の揺らぎ
+
+2026-09-02、`試作36 / mobile36`として、SOURCEの色得点係数を3案ごと、画像ごとに狭い範囲で変える試作を実装した。
+
+- 分析用画像の色と透明度を順番に読み、画像ごとの整数を作る。
+- 同じ整数からは同じ数の並びを作るため、同じ画像を読み直しても3案を再現できる。
+- 流転、景層、残光はそれぞれ異なる基礎値・彩度倍率の範囲を持つ。
+- 数値が変わっても色順位が変わらない画像がある。これは係数だけを安全な範囲で動かしているためで、不具合ではない。
+- MediaPipe、カメラ、手の追跡、爪座標、5本の模様順、BACK、HOME、TRY ONは変更していない。
+- 授業用PowerPointへ、画像番号を作る順序と3案の数値範囲を説明する2枚を追加した。
+- 授業用PDFへ、同じ内容をまとめた9ページ目を追加した。
+
+ローカル確認:
+
+- 390×844で《ひまわり》を2回読み込み、画像番号 `1495010852`、3案の係数、8色が完全一致した。
+- Ferrari F8 Tributoへ変更すると画像番号が `1786882790`へ変わり、3案の係数も変わった。
+- 流転、景層、残光の選択、TRY ON表示、BACK、HOME、`mobile36`リンクを確認した。
+- ブラウザコンソールの新しいerror/warnは0件。
+- PowerPoint全13枚の描画とオーバーフロー検査に成功した。
+- PDF全9ページを再描画し、追加ページの文字切れと重なりがないことを確認した。
+
+公開状態:
+
+- アプリ実装コミット: `bdc0772` (`Publish mobile36 seeded palette variation`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesで`sourceSeedFromPixels()`、`sourcePaletteTunings()`、`BUILD_VERSION='mobile36'`、トップとHOMEの`mobile36`リンクを確認した。
+- 公開版のブラウザコンソールの新しいerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=bdc0772-mobile36`
+
+実機要確認:
+
+- iPhone Safariで端末内写真とカメラ映像から3案を作る操作。
+- TRY ON後のMediaPipe追跡と各案の色反映。
