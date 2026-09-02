@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作44）: `3dadae0` (`Publish mobile44 minimal set preview`)
+公開中のアプリ実装コミット（試作45）: `61ee082` (`Keep source camera raw and fast`)
 
-現行公開版: `試作44 / mobile44`（拡大確認画面を大きいネイルと操作だけに整理）
+現行公開版: `試作45 / mobile45`（自由制作の素材撮影UIを最小限にし、生のカメラ映像を素早く撮影）
 
-現行ローカル改善版: `試作45 / mobile45`（自由制作の素材撮影UIを最小限に整理）
+現行ローカル改善版: `試作45 / mobile45`（公開版と同じ）
 
-アプリ実装コミット: `3dadae0` (`Publish mobile44 minimal set preview`)
+アプリ実装コミット: `61ee082` (`Keep source camera raw and fast`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -761,6 +761,18 @@
 - シャッターで撮った画像を素材解析へ渡し、写真、4方式、3つの小案を表示する画面へ直接進む。
 - 写真選択、ネイル生成、作品試着、自由制作の試着機能は変更していない。
 
-公開前確認:
+公開状態:
 
-- 390×844で撮影画面と、撮影後の素材選択画面への遷移を確認する。
+- 390×844で、素材撮影中に表示される操作がシャッターとカメラ切替だけになることを確認した。
+- 撮影後は約46%高の写真、4方式、3つの小案を表示する画面へ直接進むことを確認した。
+- 素材撮影ではMediaPipeと試着描画を起動せず、生のカメラ映像を約0.6秒で表示できることを確認した。
+- 作品見本、SOURCE表示、比較、タイマー、デザインパネルは素材撮影中に表示されない。
+- インラインJavaScript 3件の構文検査に合格した。
+- アプリ実装コミット: `d684f7c` (`Publish mobile45 focused source camera`)。
+- 素材カメラ最適化コミット: `61ee082` (`Keep source camera raw and fast`)。
+- `origin main`へのpushに成功した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=61ee082-mobile45`
+
+実機要確認:
+
+- iPhone Safariで、前面・背面カメラ切替と実写画像の向きを確認する。
