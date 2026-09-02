@@ -1742,11 +1742,14 @@ async function startCamera(){
   if(cameraStarting) return;
   cameraStarting=true;
   setStatus('準備しています…');
-  try{ await ensureLive(); }
-  catch(e){
-    setStatus('AIモデルを読み込めませんでした。通信環境を確認して再読み込みしてください。');
-    cameraStarting=false;
-    return;
+  const sourceCapture=document.body.classList.contains('source-camera-capture');
+  if(!sourceCapture){
+    try{ await ensureLive(); }
+    catch(e){
+      setStatus('AIモデルを読み込めませんでした。通信環境を確認して再読み込みしてください。');
+      cameraStarting=false;
+      return;
+    }
   }
   try{
     if(stream) stream.getTracks().forEach(t=>t.stop());
@@ -1793,11 +1796,12 @@ function startLoops(){
   (function draw(now){
     const dt = Math.min(0.05, Math.max(0.001, (now - lastT)/1000)); lastT = now;
     if(mode === 'live' && video.readyState >= 2){
+      const sourceCapture=document.body.classList.contains('source-camera-capture');
       const sp = SKIN_FX;
       ctx.save();
       if(mirrored()){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
       ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      if(sp){
+      if(sp&&!sourceCapture){
         /* 縮めて描き戻すとぼける。色味の処理も縮小側でやれば画素数が 1/25 で済む */
         const sw = Math.max(16, Math.round(canvas.width/sp.div));
         const sh = Math.max(16, Math.round(canvas.height/sp.div));
@@ -1814,15 +1818,18 @@ function startLoops(){
         ctx.globalAlpha = 1;
       }
       ctx.restore();
-      recordTrails();
-      drawTrails(dt);
-      drawNails();
-      setGuide(document.body.classList.contains('source-camera-capture')?'':(smoothed.length ? '' : '手をかざしてください'));
+      if(sourceCapture){setGuide('');}
+      else{
+        recordTrails();
+        drawTrails(dt);
+        drawNails();
+        setGuide(smoothed.length ? '' : '手をかざしてください');
+      }
     }
     requestAnimationFrame(draw);
   })(lastT);
   (async function detect(){
-    if(mode === 'live' && video.readyState >= 2 && !liveBusy){
+    if(mode === 'live' && video.readyState >= 2 && !liveBusy && !document.body.classList.contains('source-camera-capture')){
       liveBusy = true;
       try{ await liveHands.send({image: video}); }
       catch(e){ liveBusy = false; }
