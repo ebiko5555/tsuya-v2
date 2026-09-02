@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作45）: `61ee082` (`Keep source camera raw and fast`)
+公開中のアプリ実装コミット（試作46）: `ca37a07` (`Publish mobile46 create label`)
 
-現行公開版: `試作45 / mobile45`（自由制作の素材撮影UIを最小限にし、生のカメラ映像を素早く撮影）
+現行公開版: `試作46 / mobile46`（作品ページの自由制作入口をCREATE表記へ変更）
 
-現行ローカル改善版: `試作46 / mobile46`（作品ページの自由制作入口をCREATE表記へ変更）
+現行ローカル改善版: `試作46 / mobile46`（公開版と同じ）
 
-アプリ実装コミット: `61ee082` (`Keep source camera raw and fast`)
+アプリ実装コミット: `ca37a07` (`Publish mobile46 create label`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -784,6 +784,11 @@
 - `じぶんでつくる`を`CREATE`へ変更した。
 - 自由制作へのリンク、発光、粒子、写真・カメラから作る機能は変更していない。
 
-公開前確認:
+公開状態:
 
-- 390×844の作品ページでCREATEの表示と自由制作への遷移を確認する。
+- 390×844の作品ページで`CREATE`が表示され、旧表記がないことを確認した。
+- リンクが元作品を引き継ぐ`?mode=custom&from=作品キー&v=mobile46`を維持していることを確認した。
+- インラインJavaScript 3件の構文検査に合格した。
+- アプリ実装コミット: `ca37a07` (`Publish mobile46 create label`)。
+- `origin main`へのpushに成功した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=ca37a07-mobile46`
