@@ -1317,7 +1317,7 @@
     body.art-page .work-custom::before{width:18px; height:18px; border-color:rgba(23,23,23,.38); color:#171717; background:rgba(255,255,255,.25); text-shadow:none; animation:none}
   }
 
-  /* 試作43：写真を大きく見せ、その下の小さな3案から拡大確認へ進む。 */
+  /* 試作44：写真を大きく見せ、その下の小さな3案から文字なしの拡大確認へ進む。 */
   body.custom-mode.source-planning .sheet-handle,
   body.custom-mode.source-planning .tabs,
   body.custom-mode.source-planning .source-origin,
@@ -1345,8 +1345,8 @@
   body.custom-mode.source-planning .source-set-name{font-size:7px}
 
   .source-confirm{overflow:hidden; padding-left:16px; padding-right:16px}
+  .source-confirm-head{justify-content:flex-end}
   .source-confirm-body{justify-content:center; padding-top:10px; overflow:hidden}
-  .source-confirm-title{margin:0 0 20px; font-size:clamp(25px,7.5vw,38px)}
   #sourceConfirmCanvas{display:block; width:min(100%,520px); height:auto; aspect-ratio:620/300}
   .source-confirm-name{margin-top:14px; color:rgba(255,255,255,.68)}
   .source-confirm-try{flex:0 0 auto; min-height:58px; margin-top:12px}
@@ -1362,7 +1362,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile43" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile44" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1439,11 +1439,9 @@
 
 <section class="source-confirm" id="sourceConfirm" aria-hidden="true" aria-label="試着するネイルを確認">
   <div class="source-confirm-head">
-    <div class="source-confirm-kicker">SOURCE / NAIL SET</div>
     <button type="button" class="source-confirm-back" id="sourceConfirmBack">戻る</button>
   </div>
   <div class="source-confirm-body">
-    <h2 class="source-confirm-title"><span id="sourceConfirmMode">MIX</span> / <span id="sourceConfirmName">SOURCE</span></h2>
     <canvas id="sourceConfirmCanvas" width="620" height="300" aria-label="選んだネイルセット"></canvas>
     <button type="button" class="source-confirm-try" id="sourceConfirmTry">TRY ON</button>
   </div>
@@ -3070,8 +3068,6 @@ function drawLargeSourceSetPreview(canvas,set){
 function openSourceConfirm(set){
   if(!set) return;
   selectedSourceSet=set; applySet(set);
-  $('sourceConfirmMode').textContent=sourceMode;
-  $('sourceConfirmName').textContent=set.name;
   drawLargeSourceSetPreview($('sourceConfirmCanvas'),set);
   $('sourceConfirm').classList.add('open');
   $('sourceConfirm').setAttribute('aria-hidden','false');
@@ -3533,7 +3529,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile43';
+  const BUILD_VERSION='mobile44';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
