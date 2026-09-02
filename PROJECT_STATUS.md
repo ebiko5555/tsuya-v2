@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作42）: `d1cf79f` (`Publish mobile42 focused source set selection`)
+公開中のアプリ実装コミット（試作43）: `a1fa1db` (`Publish mobile43 photo-led source selection`)
 
-現行公開版: `試作42 / mobile42`（写真後の画面を簡潔にし、4方式から3案の大きな選択画面へ進む構成）
+現行公開版: `試作43 / mobile43`（写真を大きくし、4方式と小案から選んだ1案を拡大確認する構成）
 
-現行ローカル改善版: `試作43 / mobile43`（写真を大きくし、4方式と小案から選んだ1案を拡大確認する構成）
+現行ローカル改善版: `試作43 / mobile43`（公開版と同じ）
 
-アプリ実装コミット: `d1cf79f` (`Publish mobile42 focused source set selection`)
+アプリ実装コミット: `a1fa1db` (`Publish mobile43 photo-led source selection`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -718,6 +718,17 @@
 - 「5本を選んでください」と選択説明文を削除した。
 - 写真解析、3案生成、ネイル描画、カメラ試着は変更していない。
 
-公開前確認:
+公開状態:
 
-- 390×844で写真、小案、拡大確認、TRY ONの表示と遷移を確認する。
+- 390×844で、写真表示が画面高の約46%になり、4方式と3つの小案が同じ画面に収まることを確認した。
+- 4方式を切り替えると、それぞれ対応する3つの小案へ更新されることを確認した。
+- 小案を押すと、選んだ1案だけを大きく表示する全画面へ進み、TRY ONが表示されることを確認した。
+- 「5本を選んでください」が表示されず、横方向のはみ出しと新しいerror/warnがないことを確認した。
+- インラインJavaScript 3件の構文検査に合格した。
+- アプリ実装コミット: `a1fa1db` (`Publish mobile43 photo-led source selection`)。
+- `origin main`へのpushに成功した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=a1fa1db-mobile43`
+
+実機要確認:
+
+- iPhone Safariで、実際に撮影した縦写真の見え方と、拡大画面からのカメラ許可・手追跡。
