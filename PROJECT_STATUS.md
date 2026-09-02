@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作40）: `2402de5` (`Publish mobile40 centered artwork typography`)
+公開中のアプリ実装コミット（試作41）: `d4750ff` (`Publish mobile41 immersive exhibition redesign`)
 
-現行公開版: `試作40 / mobile40`（スマホ作品ページの作品番号・題名・飾り線・NAIL SET・5本を中央軸へ統一）
+現行公開版: `試作41 / mobile41`（全面映像、白い明朝体、点のグリッド、生成り色の情報面による展示UI）
 
-現行ローカル改善版: `試作41 / mobile41`（参考サイトの全面映像・白い明朝体・点のグリッド・生成り色の案内面を「艶 II」向けに再構成。公開前）
+現行ローカル改善版: `試作41 / mobile41`（公開版と同じ）
 
-アプリ実装コミット: `2402de5` (`Publish mobile40 centered artwork typography`)
+アプリ実装コミット: `d4750ff` (`Publish mobile41 immersive exhibition redesign`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -670,7 +670,12 @@
 
 公開状態:
 
-- 公開前。
+- アプリ実装コミット: `d4750ff` (`Publish mobile41 immersive exhibition redesign`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesでトップの全面映像と`mobile41`リンク、作品ページの生成り色の情報面を確認した。
+- 390×844の公開版で作品切替10件、TRY ON、じぶんでつくる、HOMEが表示されている。
+- 公開版のブラウザコンソールの新しいerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=d4750ff-mobile41`
 
 実機要確認:
 
