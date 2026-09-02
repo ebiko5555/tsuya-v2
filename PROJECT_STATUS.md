@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作39）: `bcb4419` (`Publish mobile39 visible creative portal effects`)
+公開中のアプリ実装コミット（試作40）: `2402de5` (`Publish mobile40 centered artwork typography`)
 
-現行公開版: `試作39 / mobile39`（自由制作の発光アイコンとタップ粒子をスマホで明確に見える強さへ変更）
+現行公開版: `試作40 / mobile40`（スマホ作品ページの作品番号・題名・飾り線・NAIL SET・5本を中央軸へ統一）
 
-現行ローカル改善版: `試作40 / mobile40`（スマホ作品ページの作品番号・題名・飾り線・NAIL SET・5本を中央軸へ統一。公開前）
+現行ローカル改善版: `試作40 / mobile40`（公開版と同じ）
 
-アプリ実装コミット: `bcb4419` (`Publish mobile39 visible creative portal effects`)
+アプリ実装コミット: `2402de5` (`Publish mobile40 centered artwork typography`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -220,10 +220,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile39`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。内部 `BUILD_VERSION` と公開版は現在 `mobile40`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は旧来の単体試着ページで、統合作品のトップではない。鑑賞導線は `/top-prototype/` から始める。
-- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile39`に統一して公開済み。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile40`に統一して公開済み。
 - SOURCEの右上画像は選択画像を表示するが、分析は中央正方形へcover切り取りしたCanvasを用いる。縦長・横長画像では分析範囲が表示全体と一致しない場合がある。
 
 ## 7. 次に着手すべき作業
@@ -636,4 +636,14 @@
 - 390×844で「色」と「二つの手の輪舞曲」を確認し、作品番号、題名、NAIL SET、5本の中心が画面中央195pxと一致した。
 - 「二つの手の輪舞曲」は左右78.74〜311.25pxに収まり、画面からはみ出していない。
 - ブラウザの新しいerror/warnは0件。
-- 現在はローカル動作確認済み、公開前。
+- アプリ実装コミット: `2402de5` (`Publish mobile40 centered artwork typography`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesの390×844表示で、「色」と「二つの手の輪舞曲」の作品番号、題名、NAIL SET、5本が画面中央195pxと一致することを確認した。
+- TRY ON、じぶんでつくる、HOMEが表示され、従来の導線が残っていることを確認した。
+- トップ、HOME、アプリ本体の内部版は`mobile40`に統一した。
+- 公開版のブラウザコンソールの新しいerror/warnは0件。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=2402de5-mobile40`
+
+実機要確認:
+
+- iPhone Safari実機で、URLバーを含む表示時の上下余白の最終バランス。
