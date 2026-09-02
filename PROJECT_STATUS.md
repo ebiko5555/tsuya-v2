@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作43）: `a1fa1db` (`Publish mobile43 photo-led source selection`)
+公開中のアプリ実装コミット（試作44）: `3dadae0` (`Publish mobile44 minimal set preview`)
 
-現行公開版: `試作43 / mobile43`（写真を大きくし、4方式と小案から選んだ1案を拡大確認する構成）
+現行公開版: `試作44 / mobile44`（拡大確認画面を大きいネイルと操作だけに整理）
 
-現行ローカル改善版: `試作44 / mobile44`（拡大確認画面を大きいネイルと操作だけに整理）
+現行ローカル改善版: `試作44 / mobile44`（公開版と同じ）
 
-アプリ実装コミット: `a1fa1db` (`Publish mobile43 photo-led source selection`)
+アプリ実装コミット: `3dadae0` (`Publish mobile44 minimal set preview`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -742,6 +742,12 @@
 - 拡大画面は「戻る・大きいネイル・TRY ON」だけにした。
 - 写真表示、4方式、小案、写真解析、試着機能は変更していない。
 
-公開前確認:
+公開状態:
 
-- 390×844で余計な文字が表示されず、拡大ネイルとTRY ONが表示されることを確認する。
+- 390×844で、拡大確認画面の表示文字が`戻る`と`TRY ON`だけであることを確認した。
+- 選んだ1案の大きなネイル表示は維持されている。
+- 公開版のブラウザコンソールの新しいerror/warnは0件。
+- インラインJavaScript 3件の構文検査に合格した。
+- アプリ実装コミット: `3dadae0` (`Publish mobile44 minimal set preview`)。
+- `origin main`へのpushに成功した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=3dadae0-mobile44`
