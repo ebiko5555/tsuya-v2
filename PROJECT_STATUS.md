@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作40）: `2402de5` (`Publish mobile40 centered artwork typography`)
+公開中のアプリ実装コミット（試作41）: `dc93802` (`Publish mobile41 nail preview and camera UI fixes`)
 
-現行公開版: `試作40 / mobile40`（スマホ作品ページの作品番号・題名・飾り線・NAIL SET・5本を中央軸へ統一）
+現行公開版: `試作41 / mobile41`（表記・操作配置を整理し、SOURCE試着前の大きなチップ確認画面を追加）
 
-現行ローカル改善版: `試作41 / mobile41`（表記・操作配置を整理し、SOURCE試着前の大きなチップ確認画面を追加）
+現行ローカル改善版: `試作41 / mobile41`（公開版と同じ）
 
-アプリ実装コミット: `2402de5` (`Publish mobile40 centered artwork typography`)
+アプリ実装コミット: `dc93802` (`Publish mobile41 nail preview and camera UI fixes`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -672,7 +672,12 @@
 
 公開状態:
 
-- 公開前。ローカル検証後に`main`へ反映する。
+- アプリ実装コミット: `dc93802` (`Publish mobile41 nail preview and camera UI fixes`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesの390×844表示で、作品ページの中央縦並びボタン、10作品、HOME、「艶」見出しの削除を確認した。
+- 公開版で写真ファイルを選び、3案の生成から大きな5本の確認画面へ進み、戻るとTRY ONが表示されることを確認した。
+- 公開環境の自動ブラウザではMediaPipeの準備が完了しなかったため、公開版のカメラ実動作はiPhone実機で要確認。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=dc93802-mobile41`
 
 実機要確認:
 
