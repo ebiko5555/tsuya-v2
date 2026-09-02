@@ -7,13 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>艶 II — 自分の手から、作品へ</title>
-<meta name="description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
-<meta property="og:title" content="艶 II">
-<meta property="og:description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
-<meta property="og:image" content="https://ebiko5555.github.io/tsuya-v2/og.png">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://ebiko5555.github.io/tsuya-v2/experience-prototype/">
-<meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
         onerror="window.__mpFailed=true"></script>
 <style>
@@ -1283,200 +1276,6 @@
   @media (min-width:820px){
     .exhibit-controls{left:50%; right:auto; width:520px; transform:translateX(-50%)}
   }
-
-  /* 試作41：全面映像、白い明朝体、点のグリッド、生成りの案内面で展示体験を再構成。 */
-  body{--ayana-cream:#eee9dc; --ayana-ink:#202624; --ayana-blue:#89b8be}
-  body.hub-mode header{
-    display:flex; align-items:center; justify-content:center; min-height:92px;
-    padding:calc(21px + env(safe-area-inset-top)) 24px 12px; mix-blend-mode:normal;
-  }
-  body.hub-mode header::before{
-    content:""; position:absolute; left:24px; top:calc(27px + env(safe-area-inset-top));
-    width:4px; height:4px; border-radius:50%; background:#fff;
-    box-shadow:10px 0 #fff,20px 0 #fff,0 10px #fff,10px 10px #fff,20px 10px #fff,0 20px #fff,10px 20px #fff,20px 20px #fff;
-  }
-  body.hub-mode header .overline{display:none}
-  body.hub-mode header h1{font-size:34px; line-height:1; letter-spacing:.12em; text-shadow:0 4px 24px rgba(0,0,0,.28)}
-  body.hub-mode header .rule{display:none}
-  body.hub-mode #startOverlay{background:#071a1d}
-  body.hub-mode .opening-films::after{
-    background:linear-gradient(180deg,rgba(4,20,24,.18),rgba(4,20,24,.02) 44%,rgba(4,20,24,.72) 92%),radial-gradient(circle at 50% 43%,transparent 18%,rgba(4,20,24,.28) 100%);
-  }
-  body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{filter:saturate(.78) contrast(1.07) brightness(.9)}
-  body.hub-mode .opening-work-meta{left:clamp(25px,8vw,64px); right:clamp(25px,8vw,64px); bottom:calc(46px + env(safe-area-inset-bottom)); text-align:center}
-  body.hub-mode .opening-work-code{color:rgba(255,255,255,.8); letter-spacing:.28em}
-  body.hub-mode .opening-work-title{
-    max-width:9em; margin:12px auto 0; font-family:"Times New Roman","Yu Mincho",serif;
-    font-size:clamp(44px,14vw,76px); line-height:1.03; letter-spacing:.06em; text-shadow:0 3px 30px rgba(0,0,0,.26);
-  }
-  body.hub-mode .opening-work-cue{justify-content:center; gap:18px; width:170px; margin:25px auto 0; padding-top:12px; letter-spacing:.2em}
-  body.hub-mode .opening-work-cue::after{font-size:13px}
-  body.hub-mode .opening-progress{width:170px; margin:14px auto 0; background:rgba(255,255,255,.34)}
-  body.hub-mode .opening-progress::after{background:#fff}
-
-  @media (max-width:819px){
-    body.art-page .work-layer{background:var(--ayana-cream)}
-    body.art-page .work-film{height:52svh; background:#071a1d}
-    body.art-page .work-layer::after{height:52svh; background:linear-gradient(180deg,rgba(4,20,24,.14),transparent 68%,rgba(4,20,24,.36))}
-    body.art-page .work-close{
-      left:18px!important; top:calc(18px + env(safe-area-inset-top)); min-height:36px; padding:0!important;
-      border:0; border-radius:0; color:#fff; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none;
-    }
-    body.art-page .work-close svg{width:20px; height:20px}
-    body.art-page .work-close span{font-size:0}
-    body.art-page .work-close span::after{content:"WORKS"; font-size:8px; letter-spacing:.2em}
-    body.art-page .work-index{
-      top:52svh; height:70px; padding:20px 15px 7px; gap:0; background:var(--ayana-cream);
-      border-bottom:1px solid rgba(32,38,36,.16);
-    }
-    body.art-page .work-index::before{content:"TSUYA II　　WORKS / SWIPE"; left:18px; top:7px; color:rgba(32,38,36,.5); letter-spacing:.18em}
-    body.art-page .work-index button{
-      flex-basis:76px; height:42px; border:0; border-right:1px solid rgba(32,38,36,.15); border-radius:0;
-      color:rgba(32,38,36,.48); background:transparent;
-    }
-    body.art-page .work-index button:first-of-type{border-left:1px solid rgba(32,38,36,.15)}
-    body.art-page .work-index button.active{color:var(--ayana-cream); background:var(--ayana-ink); border-color:var(--ayana-ink); box-shadow:none}
-    body.art-page .work-copy{
-      top:calc(52svh + 70px); padding:24px 22px calc(116px + env(safe-area-inset-bottom));
-      color:var(--ayana-ink); background:var(--ayana-cream); border-top:0;
-    }
-    body.art-page .work-code{color:rgba(32,38,36,.54)!important; font-size:8px; letter-spacing:.22em}
-    body.art-page .work-title{margin:9px auto 20px; color:var(--ayana-ink); font-size:clamp(31px,9vw,43px); font-weight:400; letter-spacing:.06em}
-    body.art-page .work-title::after{top:calc(100% + 9px); background:var(--ayana-ink); opacity:.35}
-    body.art-page #workNails{height:88px; margin-top:29px; gap:12px}
-    body.art-page #workNails::before{color:rgba(32,38,36,.46); letter-spacing:.2em}
-    body.art-page #workNails canvas{filter:drop-shadow(0 7px 9px rgba(38,34,29,.18))}
-    body.art-page .work-actions{
-      left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); padding:0; gap:0;
-      grid-template-columns:minmax(0,1fr) 114px; border:1px solid var(--ayana-ink); border-radius:0;
-      background:var(--ayana-cream); box-shadow:0 -12px 32px rgba(37,35,30,.12); backdrop-filter:none; -webkit-backdrop-filter:none;
-    }
-    body.art-page .work-try{min-height:62px; color:var(--ayana-cream); background:var(--ayana-ink)}
-    body.art-page .work-try-label{font-family:"Times New Roman",serif; font-size:20px; font-weight:400}
-    body.art-page .work-custom{
-      min-height:62px; border:0; border-left:1px solid var(--ayana-ink); color:var(--ayana-ink);
-      background:transparent; text-shadow:none; animation:none;
-    }
-    body.art-page .work-custom::before{color:var(--ayana-ink); border-color:rgba(32,38,36,.45); background:transparent; text-shadow:none; animation:none; box-shadow:none}
-  }
-
-  @media (min-width:820px){
-    body.art-page .work-layer{display:none; grid-template-columns:minmax(0,64%) minmax(360px,36%); background:var(--ayana-cream)}
-    body.art-page .work-layer.open{display:grid}
-    body.art-page .work-film{grid-column:1; width:100%; height:100svh; object-fit:contain; background:#071a1d}
-    body.art-page .work-layer::after{width:64%; height:100svh; background:linear-gradient(180deg,rgba(4,20,24,.1),transparent 70%,rgba(4,20,24,.26))}
-    body.art-page .work-index{left:calc(64% + 34px); right:34px; top:54px; grid-template-columns:repeat(5,1fr); gap:0}
-    body.art-page .work-index button{width:auto; border-color:rgba(32,38,36,.2); color:rgba(32,38,36,.5)}
-    body.art-page .work-index button.active{color:var(--ayana-cream); background:var(--ayana-ink); border-color:var(--ayana-ink)}
-    body.art-page .work-copy{grid-column:2; min-height:100svh; padding:170px 44px 120px; color:var(--ayana-ink); background:var(--ayana-cream)}
-    body.art-page .work-code{color:rgba(32,38,36,.52)!important}
-    body.art-page .work-title{font-weight:400}
-    body.art-page .work-title::after{background:var(--ayana-ink)}
-    body.art-page #workNails::before{color:rgba(32,38,36,.45)}
-    body.art-page .work-try{color:var(--ayana-cream); background:var(--ayana-ink)}
-    body.art-page .work-custom{color:var(--ayana-ink); border-color:rgba(32,38,36,.35)}
-    body.art-page .work-close{color:#fff; background:rgba(4,20,24,.24)}
-  }
-
-  /* 試作42：色替えではなく、作品ページとメニューの構造そのものを全面映像型へ変更。 */
-  .site-menu{
-    position:fixed; z-index:240; top:calc(24px + env(safe-area-inset-top)); left:24px;
-    display:grid; grid-template-columns:repeat(3,4px); gap:6px; width:28px; height:28px;
-    padding:0; border:0; color:inherit; background:transparent;
-  }
-  .site-menu span{width:4px; height:4px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(0,0,0,.2)}
-  body.menu-open{overflow:hidden}
-  .site-menu-panel{
-    position:fixed; z-index:230; inset:0; display:flex; flex-direction:column;
-    padding:calc(30px + env(safe-area-inset-top)) 26px calc(28px + env(safe-area-inset-bottom));
-    color:#232725; background:#eee9dc; opacity:0; visibility:hidden;
-    transform:translateY(-4%); transition:opacity .32s ease,transform .45s cubic-bezier(.22,.75,.2,1),visibility .32s;
-  }
-  .site-menu-panel.open{opacity:1; visibility:visible; transform:none}
-  .site-menu-head{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:54px}
-  .site-menu-brand{font:400 25px/1 "Times New Roman","Yu Mincho",serif; letter-spacing:.16em}
-  .site-menu-brand small{display:block; margin-top:9px; font:500 7px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.22em; opacity:.48}
-  .site-menu-close{width:42px; height:42px; border:1px solid rgba(35,39,37,.25); background:transparent; font-size:22px; font-weight:300}
-  .site-menu-kicker{margin-bottom:18px; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.24em; opacity:.48}
-  .site-menu-works{display:grid; grid-template-columns:1fr 1fr; border-top:1px solid rgba(35,39,37,.24)}
-  .site-menu-works a{
-    min-height:60px; display:flex; align-items:center; gap:13px; border-bottom:1px solid rgba(35,39,37,.18);
-    color:#232725; text-decoration:none; font:400 15px/1.2 "Times New Roman","Yu Mincho",serif; letter-spacing:.06em;
-  }
-  .site-menu-works a:nth-child(odd){border-right:1px solid rgba(35,39,37,.18); padding-right:12px}
-  .site-menu-works a:nth-child(even){padding-left:15px}
-  .site-menu-works span{font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em; opacity:.45}
-  .site-menu-foot{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:auto}
-  .site-menu-foot a{min-height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 15px; border:1px solid #232725; color:#232725; text-decoration:none; font-size:11px; letter-spacing:.15em}
-  .site-menu-foot a:last-child{color:#eee9dc; background:#232725}
-  body.hub-mode header::before{display:none}
-
-  .work-ribbon{display:none}
-  .work-ribbon img{width:100%; height:100%; object-fit:cover; filter:saturate(.72) contrast(1.06)}
-  .work-ribbon img:nth-child(2){filter:saturate(.95) contrast(1.06)}
-
-  @media (max-width:819px){
-    body.art-page .work-layer{background:#06191d}
-    body.art-page .work-film{inset:0; height:100svh; object-fit:contain; background:#06191d}
-    body.art-page .work-layer::after{
-      height:100svh; background:linear-gradient(180deg,rgba(2,12,15,.18) 0,rgba(2,12,15,.04) 35%,rgba(2,12,15,.72) 69%,rgba(2,12,15,.96) 100%);
-    }
-    body.art-page .work-ribbon{
-      position:fixed; z-index:18; left:0; right:0; top:0; height:88px;
-      display:grid; grid-template-columns:1fr 1.45fr 1fr; gap:2px; overflow:hidden; background:#06191d;
-    }
-    body.art-page .work-ribbon::after{content:""; position:absolute; inset:0; border-bottom:1px solid rgba(255,255,255,.42); pointer-events:none}
-    body.art-page .work-close{z-index:32; top:calc(98px + env(safe-area-inset-top)); left:20px!important}
-    body.art-page .site-home{top:calc(98px + env(safe-area-inset-top)); right:18px; min-width:52px; min-height:34px; border-color:rgba(255,255,255,.5); color:#fff; background:rgba(4,20,24,.24)}
-    body.art-page .work-index{
-      position:fixed; z-index:34; left:0; right:0; top:auto; bottom:0; height:72px;
-      padding:20px 10px calc(6px + env(safe-area-inset-bottom)); background:#eee9dc; border:0;
-    }
-    body.art-page .work-index::before{content:"TSUYA II　　WORKS / SWIPE"; left:12px; top:7px; color:rgba(32,38,36,.52)}
-    body.art-page .work-index button{flex-basis:72px; color:rgba(32,38,36,.5); border-color:rgba(32,38,36,.18)}
-    body.art-page .work-index button.active{color:#eee9dc; background:#202624; border-color:#202624}
-    body.art-page .work-copy{
-      position:absolute; z-index:20; left:0; right:0; top:auto; bottom:72px; min-height:0;
-      padding:0 20px 98px; overflow:visible; color:#fff; background:transparent; border:0; text-align:center;
-    }
-    body.art-page .work-code{color:rgba(255,255,255,.72)!important; text-shadow:0 2px 12px rgba(0,0,0,.55)}
-    body.art-page .work-title{margin:9px auto 22px; color:#fff; font-size:clamp(38px,11vw,54px); text-shadow:0 3px 22px rgba(0,0,0,.48)}
-    body.art-page .work-title::after{background:#fff; opacity:.65}
-    body.art-page #workNails{
-      width:max-content; max-width:100%; height:77px; margin:29px auto 0; padding:8px 16px 7px;
-      border-top:1px solid rgba(255,255,255,.38); border-bottom:1px solid rgba(255,255,255,.28);
-      background:rgba(3,15,18,.22); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
-    }
-    body.art-page #workNails::before{top:-15px; color:rgba(255,255,255,.62)}
-    body.art-page #workNails canvas{width:31px; height:60px; filter:drop-shadow(0 6px 8px rgba(0,0,0,.42))}
-    body.art-page #workNails canvas:nth-child(1),body.art-page #workNails canvas:nth-child(5){height:50px}
-    body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:55px}
-    body.art-page .work-actions{
-      position:fixed; z-index:35; left:14px; right:14px; bottom:calc(84px + env(safe-area-inset-bottom));
-      grid-template-columns:minmax(0,1fr) 112px; gap:8px; padding:0; border:0; background:transparent; box-shadow:none;
-    }
-    body.art-page .work-try{min-height:58px; color:#fff; border:1px solid rgba(255,255,255,.8); background:rgba(3,15,18,.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
-    body.art-page .work-custom{min-height:58px; border:1px solid #eee9dc; color:#202624; background:#eee9dc}
-    body.art-page .work-custom::before{width:18px; height:18px; color:#202624; border-color:rgba(32,38,36,.42)}
-  }
-
-  @media (min-width:820px){
-    body.art-page .work-layer{display:none; background:#06191d}
-    body.art-page .work-layer.open{display:block}
-    body.art-page .work-film{position:absolute; inset:0; width:100%; height:100svh; object-fit:contain; background:#06191d}
-    body.art-page .work-layer::after{width:100%; height:100svh; background:linear-gradient(90deg,rgba(2,12,15,.12),transparent 48%,rgba(2,12,15,.6)),linear-gradient(180deg,transparent 48%,rgba(2,12,15,.9))}
-    body.art-page .work-ribbon{position:fixed; z-index:18; right:32px; top:32px; width:38vw; height:116px; display:grid; grid-template-columns:1fr 1.5fr 1fr; gap:3px}
-    body.art-page .work-copy{position:absolute; z-index:20; left:auto; right:5vw; top:176px; bottom:auto; width:min(520px,42vw); min-height:0; padding:0; color:#fff; background:transparent; text-align:left}
-    body.art-page .work-code{color:rgba(255,255,255,.68)!important}
-    body.art-page .work-title{color:#fff; font-size:clamp(54px,6vw,90px); text-shadow:0 3px 25px rgba(0,0,0,.42)}
-    body.art-page .work-title::after{background:#fff}
-    body.art-page #workNails::before{color:rgba(255,255,255,.56)}
-    body.art-page .work-index{position:fixed; left:32px; right:auto; top:auto; bottom:32px; grid-template-columns:repeat(5,44px)}
-    body.art-page .work-index button{color:rgba(255,255,255,.5); border-color:rgba(255,255,255,.22)}
-    body.art-page .work-index button.active{color:#202624; background:#eee9dc; border-color:#eee9dc}
-    body.art-page .work-try{color:#202624; background:#eee9dc}
-    body.art-page .work-custom{color:#fff; border-color:rgba(255,255,255,.45)}
-  }
 </style>
 </head>
 <body>
@@ -1490,20 +1289,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<button type="button" class="site-menu" id="siteMenu" aria-label="メニューを開く" aria-expanded="false"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></button>
-<aside class="site-menu-panel" id="siteMenuPanel" aria-hidden="true">
-  <div class="site-menu-head"><div class="site-menu-brand">艶 II<small>HAND &amp; LIGHT / 2026</small></div><button type="button" class="site-menu-close" id="siteMenuClose" aria-label="メニューを閉じる">×</button></div>
-  <div class="site-menu-kicker">WORKS / 01—10</div>
-  <nav class="site-menu-works" aria-label="全作品">
-    <a href="?work=COLOR&amp;v=mobile42"><span>01</span>色</a><a href="?work=SURFACE&amp;v=mobile42"><span>02</span>表面</a>
-    <a href="?work=SCULPT&amp;v=mobile42"><span>03</span>FORMWORK</a><a href="?work=LIGHT&amp;v=mobile42"><span>04</span>光</a>
-    <a href="?work=HAND&amp;v=mobile42"><span>05</span>手</a><a href="?work=TRACE&amp;v=mobile42"><span>06</span>痕跡</a>
-    <a href="?work=SPACE&amp;v=mobile42"><span>07</span>宇宙と手</a><a href="?work=THINKING&amp;v=mobile42"><span>08</span>思惟する手</a>
-    <a href="?work=ORB&amp;v=mobile42"><span>09</span>White Orb</a><a href="?work=FRAME&amp;v=mobile42"><span>10</span>二つの手の輪舞曲</a>
-  </nav>
-  <div class="site-menu-foot"><a href="../top-prototype/?v=mobile42">HOME <span>←</span></a><a href="?mode=custom&amp;v=mobile42">SOURCE <span>→</span></a></div>
-</aside>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile42" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile40" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1703,7 +1489,6 @@
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
   <video class="work-film" id="workFilm" muted loop autoplay playsinline preload="auto"></video>
-  <div class="work-ribbon" id="workRibbon" aria-hidden="true"><img alt=""><img alt=""><img alt=""></div>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>試着へ戻る</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
@@ -3612,7 +3397,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile42';
+  const BUILD_VERSION='mobile40';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -3886,9 +3671,6 @@ updateCmpBadge();
 
   function openWork(key){
     setCurrent(key); const work=works[key];
-    const workPosition=order.indexOf(key);
-    const ribbonKeys=[order[(workPosition-1+order.length)%order.length],key,order[(workPosition+1)%order.length]];
-    document.querySelectorAll('#workRibbon img').forEach((image,i)=>{image.src=works[ribbonKeys[i]].motion; image.alt='';});
     if(document.body.classList.contains('art-page')){
       history.replaceState(null,'',route('work',key));
       document.title='艶 II — '+work.title;
@@ -4072,18 +3854,6 @@ updateCmpBadge();
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
   document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=route('try',current); });
-
-  const siteMenu=document.getElementById('siteMenu');
-  const siteMenuPanel=document.getElementById('siteMenuPanel');
-  const closeSiteMenu=()=>{
-    siteMenuPanel.classList.remove('open'); siteMenuPanel.setAttribute('aria-hidden','true');
-    siteMenu.setAttribute('aria-expanded','false'); document.body.classList.remove('menu-open');
-  };
-  siteMenu.addEventListener('click',()=>{
-    siteMenuPanel.classList.add('open'); siteMenuPanel.setAttribute('aria-hidden','false');
-    siteMenu.setAttribute('aria-expanded','true'); document.body.classList.add('menu-open');
-  });
-  document.getElementById('siteMenuClose').addEventListener('click',closeSiteMenu);
 
   const globalBack=document.getElementById('globalBack');
   globalBack.addEventListener('click',event=>{
