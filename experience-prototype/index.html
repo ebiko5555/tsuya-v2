@@ -1316,6 +1316,44 @@
     }
     body.art-page .work-custom::before{width:18px; height:18px; border-color:rgba(23,23,23,.38); color:#171717; background:rgba(255,255,255,.25); text-shadow:none; animation:none}
   }
+
+  /* 試作42：写真選択後は素材と4方式だけを残し、3案の選択を別画面に分ける。 */
+  body.custom-mode.source-planning .sheet-handle,
+  body.custom-mode.source-planning .tabs,
+  body.custom-mode.source-planning .source-origin,
+  body.custom-mode.source-planning .source-intro,
+  body.custom-mode.source-planning .source-actions,
+  body.custom-mode.source-planning .source-sets,
+  body.custom-mode.source-planning .source-exhibit,
+  body.custom-mode.source-planning .source-try{display:none!important}
+  body.custom-mode.source-planning .panel{
+    top:calc(76px + env(safe-area-inset-top)); left:14px; right:14px; bottom:auto;
+    width:auto; height:auto; max-height:none; box-sizing:border-box; padding:24px 18px 26px; border:1px solid rgba(255,255,255,.16);
+    background:#08090c; box-shadow:none; transform:none;
+  }
+  body.custom-mode.source-planning #tray-source{max-height:none; padding:0}
+  body.custom-mode.source-planning .source-frame{grid-template-columns:88px 1fr; gap:16px; margin:0}
+  body.custom-mode.source-planning #sourcePreview{width:88px; height:88px}
+  body.custom-mode.source-planning .source-meta{font-size:9px; line-height:1.8}
+  body.custom-mode.source-planning .source-modes{display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:25px}
+  body.custom-mode.source-planning .source-mode{min-height:52px; font-size:10px; letter-spacing:.12em}
+
+  .source-confirm{overflow:hidden; padding-left:16px; padding-right:16px}
+  .source-confirm-body{justify-content:flex-start; padding-top:14px; overflow:hidden}
+  .source-confirm-title{margin:0 0 5px; font-size:clamp(25px,7.5vw,38px)}
+  .source-confirm-note{margin-bottom:13px}
+  .source-confirm-sets{width:min(100%,520px); min-height:0; overflow-y:auto; display:grid; gap:10px; padding:1px 1px 8px; scrollbar-width:none}
+  .source-confirm-sets::-webkit-scrollbar{display:none}
+  .source-confirm-set{
+    display:grid; grid-template-columns:1fr; width:100%; min-height:150px; padding:10px 12px 8px;
+    border:1px solid rgba(255,255,255,.22); border-radius:10px; color:#fff; background:rgba(255,255,255,.035); text-align:left;
+  }
+  .source-confirm-set.active{border-color:#eadfce; background:rgba(234,223,206,.11); box-shadow:0 0 0 1px rgba(234,223,206,.28)}
+  .source-confirm-set canvas{display:block; width:100%; height:auto; aspect-ratio:620/190}
+  .source-confirm-set-label{display:flex; align-items:center; justify-content:space-between; margin-top:2px; font:500 9px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; color:rgba(255,255,255,.68)}
+  .source-confirm-set-label strong{color:#fff; font-weight:500; font-size:11px}
+  .source-confirm-try{flex:0 0 auto; min-height:58px; margin-top:12px}
+  .source-confirm-try:disabled{color:rgba(255,255,255,.42); background:rgba(255,255,255,.08); box-shadow:none}
 </style>
 </head>
 <body>
@@ -1328,7 +1366,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile41" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile42" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1409,11 +1447,10 @@
     <button type="button" class="source-confirm-back" id="sourceConfirmBack">戻る</button>
   </div>
   <div class="source-confirm-body">
-    <h2 class="source-confirm-title">この5本で試着する</h2>
-    <p class="source-confirm-note">写真から組み替えたネイルセット</p>
-    <canvas id="sourceConfirmCanvas" width="700" height="360" aria-label="選んだ5本のネイルチップ"></canvas>
-    <div class="source-confirm-name" id="sourceConfirmName">SOURCE SET</div>
-    <button type="button" class="source-confirm-try" id="sourceConfirmTry">TRY ON</button>
+    <h2 class="source-confirm-title"><span id="sourceConfirmMode">MIX</span> の3案</h2>
+    <p class="source-confirm-note">大きな5本から、試着するセットを選ぶ</p>
+    <div class="source-confirm-sets" id="sourceConfirmSets" aria-label="写真から作った3つのネイルセット"></div>
+    <button type="button" class="source-confirm-try" id="sourceConfirmTry" disabled>5本を選んでください</button>
   </div>
 </section>
 
@@ -3017,14 +3054,14 @@ function drawSourceSetPreview(canvas,set){
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
-function drawSourceConfirmPreview(set){
-  const canvas=$('sourceConfirmCanvas'), c=canvas.getContext('2d');
+function drawLargeSourceSetPreview(canvas,set){
+  const c=canvas.getContext('2d');
   c.clearRect(0,0,canvas.width,canvas.height);
   const keepPalette=sourceProfile&&sourceProfile.palette;
   if(sourceProfile&&set.sourcePalette) sourceProfile.palette=set.sourcePalette;
-  const heights=[190,224,244,224,194], widths=[76,84,88,84,76];
+  const heights=[126,146,158,146,130], widths=[54,60,64,60,54];
   withVars(set.vars,()=>set.looks.forEach((look,i)=>{
-    const w=widths[i],h=heights[i],x=82+i*134,y=184,baseY=h*.28;
+    const w=widths[i],h=heights[i],x=60+i*125,y=94,baseY=h*.28;
     c.save(); c.translate(x,y); c.beginPath(); c.moveTo(-w/2,baseY);
     c.bezierCurveTo(-w/2,-h*.26,-w*.32,-h*.50,0,-h*.50);
     c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
@@ -3034,11 +3071,30 @@ function drawSourceConfirmPreview(set){
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
+function renderSourceConfirmSets(){
+  const box=$('sourceConfirmSets'); box.innerHTML=''; selectedSourceSet=null;
+  const tryButton=$('sourceConfirmTry'); tryButton.disabled=true; tryButton.textContent='5本を選んでください';
+  sourceSets.forEach((set,idx)=>{
+    const button=document.createElement('button'); button.type='button'; button.className='source-confirm-set';
+    button.setAttribute('aria-label','0'+(idx+1)+' '+set.name+'を選ぶ');
+    const canvas=document.createElement('canvas'); canvas.width=620; canvas.height=190;
+    drawLargeSourceSetPreview(canvas,set);
+    const label=document.createElement('span'); label.className='source-confirm-set-label';
+    const number=document.createElement('span'); number.textContent='0'+(idx+1);
+    const name=document.createElement('strong'); name.textContent=set.name;
+    label.append(number,name); button.append(canvas,label);
+    button.onclick=()=>{
+      box.querySelectorAll('.source-confirm-set').forEach(x=>x.classList.remove('active'));
+      button.classList.add('active'); selectedSourceSet=set; applySet(set);
+      tryButton.disabled=false; tryButton.textContent='この5本で TRY ON';
+    };
+    box.appendChild(button);
+  });
+}
 function openSourceConfirm(){
-  if(!selectedSourceSet) return;
-  applySet(selectedSourceSet);
-  drawSourceConfirmPreview(selectedSourceSet);
-  $('sourceConfirmName').textContent=(selectedSourceSet.name||'SOURCE SET').toUpperCase();
+  if(!sourceSets.length) return;
+  $('sourceConfirmMode').textContent=sourceMode;
+  renderSourceConfirmSets();
   $('sourceConfirm').classList.add('open');
   $('sourceConfirm').setAttribute('aria-hidden','false');
 }
@@ -3067,8 +3123,7 @@ function renderSourceSets(){
     };
     box.appendChild(btn);
   });
-  selectedSourceSet=sourceSets[0]||null;
-  if(selectedSourceSet) applySet(selectedSourceSet);
+  selectedSourceSet=null;
 }
 function ingestSource(input,label){
   const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
@@ -3103,6 +3158,7 @@ function ingestSource(input,label){
     ctx.fillStyle='rgba(8,9,12,.12)'; ctx.fillRect(0,0,W,visibleH);
   }
   renderChips(sourceProfile.palette); buildLooks(); renderSourceSets();
+  document.querySelectorAll('[data-source-mode]').forEach(x=>x.classList.remove('active'));
 }
 function activateSourceTab(){
   const tab=document.querySelector('.tab[data-t="source"]'); if(!tab) return;
@@ -3122,6 +3178,7 @@ $('sourceCamera').onclick=()=>{
 $('sourceTry').onclick=openSourceConfirm;
 $('sourceConfirmBack').onclick=closeSourceConfirm;
 $('sourceConfirmTry').onclick=()=>{
+  if(!selectedSourceSet) return;
   closeSourceConfirm();
   if(mode==='live'){
     if(window.setControlPanelCollapsed) window.setControlPanelCollapsed(true);
@@ -3135,6 +3192,7 @@ document.querySelectorAll('[data-source-mode]').forEach(btn=>btn.onclick=()=>{
   sourceMode=btn.dataset.sourceMode;
   document.querySelectorAll('[data-source-mode]').forEach(x=>x.classList.toggle('active',x===btn));
   renderSourceSets();
+  openSourceConfirm();
 });
 /* ================= ユーティリティ ================= */
 function rgb2hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('')}
@@ -3498,7 +3556,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile41';
+  const BUILD_VERSION='mobile42';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
