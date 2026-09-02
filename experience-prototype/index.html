@@ -7,6 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>艶 II — 自分の手から、作品へ</title>
+<meta name="description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
+<meta property="og:title" content="艶 II">
+<meta property="og:description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
+<meta property="og:image" content="https://ebiko5555.github.io/tsuya-v2/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ebiko5555.github.io/tsuya-v2/experience-prototype/">
+<meta name="twitter:card" content="summary_large_image">
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
         onerror="window.__mpFailed=true"></script>
 <style>
@@ -1276,6 +1283,100 @@
   @media (min-width:820px){
     .exhibit-controls{left:50%; right:auto; width:520px; transform:translateX(-50%)}
   }
+
+  /* 試作41：全面映像、白い明朝体、点のグリッド、生成りの案内面で展示体験を再構成。 */
+  body{--ayana-cream:#eee9dc; --ayana-ink:#202624; --ayana-blue:#89b8be}
+  body.hub-mode header{
+    display:flex; align-items:center; justify-content:center; min-height:92px;
+    padding:calc(21px + env(safe-area-inset-top)) 24px 12px; mix-blend-mode:normal;
+  }
+  body.hub-mode header::before{
+    content:""; position:absolute; left:24px; top:calc(27px + env(safe-area-inset-top));
+    width:4px; height:4px; border-radius:50%; background:#fff;
+    box-shadow:10px 0 #fff,20px 0 #fff,0 10px #fff,10px 10px #fff,20px 10px #fff,0 20px #fff,10px 20px #fff,20px 20px #fff;
+  }
+  body.hub-mode header .overline{display:none}
+  body.hub-mode header h1{font-size:34px; line-height:1; letter-spacing:.12em; text-shadow:0 4px 24px rgba(0,0,0,.28)}
+  body.hub-mode header .rule{display:none}
+  body.hub-mode #startOverlay{background:#071a1d}
+  body.hub-mode .opening-films::after{
+    background:linear-gradient(180deg,rgba(4,20,24,.18),rgba(4,20,24,.02) 44%,rgba(4,20,24,.72) 92%),radial-gradient(circle at 50% 43%,transparent 18%,rgba(4,20,24,.28) 100%);
+  }
+  body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{filter:saturate(.78) contrast(1.07) brightness(.9)}
+  body.hub-mode .opening-work-meta{left:clamp(25px,8vw,64px); right:clamp(25px,8vw,64px); bottom:calc(46px + env(safe-area-inset-bottom)); text-align:center}
+  body.hub-mode .opening-work-code{color:rgba(255,255,255,.8); letter-spacing:.28em}
+  body.hub-mode .opening-work-title{
+    max-width:9em; margin:12px auto 0; font-family:"Times New Roman","Yu Mincho",serif;
+    font-size:clamp(44px,14vw,76px); line-height:1.03; letter-spacing:.06em; text-shadow:0 3px 30px rgba(0,0,0,.26);
+  }
+  body.hub-mode .opening-work-cue{justify-content:center; gap:18px; width:170px; margin:25px auto 0; padding-top:12px; letter-spacing:.2em}
+  body.hub-mode .opening-work-cue::after{font-size:13px}
+  body.hub-mode .opening-progress{width:170px; margin:14px auto 0; background:rgba(255,255,255,.34)}
+  body.hub-mode .opening-progress::after{background:#fff}
+
+  @media (max-width:819px){
+    body.art-page .work-layer{background:var(--ayana-cream)}
+    body.art-page .work-film{height:52svh; background:#071a1d}
+    body.art-page .work-layer::after{height:52svh; background:linear-gradient(180deg,rgba(4,20,24,.14),transparent 68%,rgba(4,20,24,.36))}
+    body.art-page .work-close{
+      left:18px!important; top:calc(18px + env(safe-area-inset-top)); min-height:36px; padding:0!important;
+      border:0; border-radius:0; color:#fff; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none;
+    }
+    body.art-page .work-close svg{width:20px; height:20px}
+    body.art-page .work-close span{font-size:0}
+    body.art-page .work-close span::after{content:"WORKS"; font-size:8px; letter-spacing:.2em}
+    body.art-page .work-index{
+      top:52svh; height:70px; padding:20px 15px 7px; gap:0; background:var(--ayana-cream);
+      border-bottom:1px solid rgba(32,38,36,.16);
+    }
+    body.art-page .work-index::before{content:"TSUYA II　　WORKS / SWIPE"; left:18px; top:7px; color:rgba(32,38,36,.5); letter-spacing:.18em}
+    body.art-page .work-index button{
+      flex-basis:76px; height:42px; border:0; border-right:1px solid rgba(32,38,36,.15); border-radius:0;
+      color:rgba(32,38,36,.48); background:transparent;
+    }
+    body.art-page .work-index button:first-of-type{border-left:1px solid rgba(32,38,36,.15)}
+    body.art-page .work-index button.active{color:var(--ayana-cream); background:var(--ayana-ink); border-color:var(--ayana-ink); box-shadow:none}
+    body.art-page .work-copy{
+      top:calc(52svh + 70px); padding:24px 22px calc(116px + env(safe-area-inset-bottom));
+      color:var(--ayana-ink); background:var(--ayana-cream); border-top:0;
+    }
+    body.art-page .work-code{color:rgba(32,38,36,.54)!important; font-size:8px; letter-spacing:.22em}
+    body.art-page .work-title{margin:9px auto 20px; color:var(--ayana-ink); font-size:clamp(31px,9vw,43px); font-weight:400; letter-spacing:.06em}
+    body.art-page .work-title::after{top:calc(100% + 9px); background:var(--ayana-ink); opacity:.35}
+    body.art-page #workNails{height:88px; margin-top:29px; gap:12px}
+    body.art-page #workNails::before{color:rgba(32,38,36,.46); letter-spacing:.2em}
+    body.art-page #workNails canvas{filter:drop-shadow(0 7px 9px rgba(38,34,29,.18))}
+    body.art-page .work-actions{
+      left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); padding:0; gap:0;
+      grid-template-columns:minmax(0,1fr) 114px; border:1px solid var(--ayana-ink); border-radius:0;
+      background:var(--ayana-cream); box-shadow:0 -12px 32px rgba(37,35,30,.12); backdrop-filter:none; -webkit-backdrop-filter:none;
+    }
+    body.art-page .work-try{min-height:62px; color:var(--ayana-cream); background:var(--ayana-ink)}
+    body.art-page .work-try-label{font-family:"Times New Roman",serif; font-size:20px; font-weight:400}
+    body.art-page .work-custom{
+      min-height:62px; border:0; border-left:1px solid var(--ayana-ink); color:var(--ayana-ink);
+      background:transparent; text-shadow:none; animation:none;
+    }
+    body.art-page .work-custom::before{color:var(--ayana-ink); border-color:rgba(32,38,36,.45); background:transparent; text-shadow:none; animation:none; box-shadow:none}
+  }
+
+  @media (min-width:820px){
+    body.art-page .work-layer{display:none; grid-template-columns:minmax(0,64%) minmax(360px,36%); background:var(--ayana-cream)}
+    body.art-page .work-layer.open{display:grid}
+    body.art-page .work-film{grid-column:1; width:100%; height:100svh; object-fit:contain; background:#071a1d}
+    body.art-page .work-layer::after{width:64%; height:100svh; background:linear-gradient(180deg,rgba(4,20,24,.1),transparent 70%,rgba(4,20,24,.26))}
+    body.art-page .work-index{left:calc(64% + 34px); right:34px; top:54px; grid-template-columns:repeat(5,1fr); gap:0}
+    body.art-page .work-index button{width:auto; border-color:rgba(32,38,36,.2); color:rgba(32,38,36,.5)}
+    body.art-page .work-index button.active{color:var(--ayana-cream); background:var(--ayana-ink); border-color:var(--ayana-ink)}
+    body.art-page .work-copy{grid-column:2; min-height:100svh; padding:170px 44px 120px; color:var(--ayana-ink); background:var(--ayana-cream)}
+    body.art-page .work-code{color:rgba(32,38,36,.52)!important}
+    body.art-page .work-title{font-weight:400}
+    body.art-page .work-title::after{background:var(--ayana-ink)}
+    body.art-page #workNails::before{color:rgba(32,38,36,.45)}
+    body.art-page .work-try{color:var(--ayana-cream); background:var(--ayana-ink)}
+    body.art-page .work-custom{color:var(--ayana-ink); border-color:rgba(32,38,36,.35)}
+    body.art-page .work-close{color:#fff; background:rgba(4,20,24,.24)}
+  }
 </style>
 </head>
 <body>
@@ -1289,7 +1390,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile40" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile41" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -3397,7 +3498,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile40';
+  const BUILD_VERSION='mobile41';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);

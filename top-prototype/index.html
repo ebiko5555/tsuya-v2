@@ -6,6 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>艶 II — Hand &amp; Light Atelier</title>
+<meta name="description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
+<meta property="og:title" content="艶 II">
+<meta property="og:description" content="作品を手にのせ、身のまわりの色と光からネイルをつくる体験型Web作品。">
+<meta property="og:image" content="https://ebiko5555.github.io/tsuya-v2/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ebiko5555.github.io/tsuya-v2/top-prototype/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&text=%E8%89%B6&display=swap" rel="stylesheet">
@@ -14,7 +21,7 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   body{
-    background:radial-gradient(125% 85% at 50% 40%, #fcf9f6 0%, #f4efe9 58%, #ece3da 100%);
+    background:#071a1d;
     font-family:"Hiragino Sans","Yu Gothic",sans-serif;
   }
   #stage{
@@ -23,33 +30,55 @@
     text-decoration:none;
   }
   #stage:focus-visible{outline:1px solid rgba(42,37,34,.32); outline-offset:-10px}
-  #glyph{position:absolute; inset:0; width:100%; height:100%; display:block}
+  #glyph{position:absolute; z-index:2; inset:0; width:100%; height:100%; display:block; filter:drop-shadow(0 8px 28px rgba(0,0,0,.22))}
+  .hero-film{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;
+    filter:saturate(.72) contrast(1.08) brightness(.82); opacity:.9;
+  }
+  #stage::before{
+    content:""; position:absolute; z-index:1; inset:0; pointer-events:none;
+    background:linear-gradient(180deg,rgba(4,17,21,.18),rgba(4,17,21,.04) 42%,rgba(4,17,21,.66)),radial-gradient(circle at 50% 42%,transparent 18%,rgba(4,17,21,.34) 100%);
+  }
+  .dot-menu{
+    position:absolute; z-index:3; top:calc(30px + env(safe-area-inset-top)); left:24px;
+    display:grid; grid-template-columns:repeat(3,4px); gap:6px; width:max-content;
+  }
+  .dot-menu i{width:4px; height:4px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,.28)}
+  .brand{
+    position:absolute; z-index:3; left:0; right:0; top:calc(108px + env(safe-area-inset-top));
+    color:#fff; text-align:center; pointer-events:none;
+  }
+  .brand strong{display:block; font:400 12px/1 "Times New Roman","Yu Mincho",serif; letter-spacing:.48em; text-indent:.48em}
+  .brand span{display:block; margin-top:10px; font-size:8px; letter-spacing:.3em; text-indent:.3em; opacity:.7}
 
   .over{
     position:absolute; top:calc(30px + env(safe-area-inset-top)); left:0; right:0;
     text-align:center; font-size:8.5px; letter-spacing:.58em; text-indent:.58em;
-    color:var(--faint); text-transform:uppercase; pointer-events:none;
+    z-index:3; color:rgba(255,255,255,.72); text-transform:uppercase; pointer-events:none;
   }
   .rule{
     position:absolute; left:50%; bottom:calc(112px + env(safe-area-inset-bottom));
-    width:0; height:1px; background:var(--ink); opacity:.3;
+    z-index:3; width:0; height:1px; background:#fff; opacity:.62;
     transform:translateX(-50%); pointer-events:none;
   }
   .sub{
     position:absolute; left:0; right:0; bottom:calc(84px + env(safe-area-inset-bottom));
     text-align:center; font-size:9.5px; letter-spacing:.38em; text-indent:.38em;
-    color:var(--sub); pointer-events:none; opacity:0;
+    z-index:3; color:#fff; pointer-events:none; opacity:0;
   }
 
   #veil{
-    position:fixed; inset:0; background:#f4efe9; opacity:0; pointer-events:none;
+    position:fixed; inset:0; background:#e9e3d5; opacity:0; pointer-events:none;
     transition:opacity .45s ease; z-index:9;
   }
 </style>
 </head>
 <body>
-<a id="stage" href="../experience-prototype/?v=mobile40" aria-label="触れて作品へ">
+<a id="stage" href="../experience-prototype/?v=mobile41" aria-label="触れて作品へ">
+  <video class="hero-film" src="../experience-prototype/art-assets/light-mandala.mp4" muted loop autoplay playsinline preload="auto"></video>
   <canvas id="glyph"></canvas>
+  <span class="dot-menu" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  <div class="brand"><strong>TSUYA II</strong><span>HAND &amp; LIGHT</span></div>
   <div class="over" id="over">HAND &amp; LIGHT / 2026</div>
   <div class="rule" id="rule"></div>
   <div class="sub" id="sub">触れて、作品へ</div>
@@ -106,8 +135,8 @@ function stamp(drawInside, alpha, dx, dy, scale){
 }
 function bronze(c){
   const g = c.createLinearGradient(0,0,GS,GS);
-  g.addColorStop(0,'#8a5a45'); g.addColorStop(.42,'#d4a887');
-  g.addColorStop(.62,'#b98263'); g.addColorStop(1,'#7d4f3c');
+  g.addColorStop(0,'rgba(255,255,255,.72)'); g.addColorStop(.42,'#ffffff');
+  g.addColorStop(.62,'#e7eee9'); g.addColorStop(1,'rgba(255,255,255,.7)');
   c.fillStyle=g; c.fillRect(0,0,GS,GS);
 }
 function sheen(c, pos, width, strength){
