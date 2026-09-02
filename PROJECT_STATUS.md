@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作41）: `d4750ff` (`Publish mobile41 immersive exhibition redesign`)
+公開中のアプリ実装コミット（試作42）: `145f02d` (`Publish mobile42 full-screen artwork architecture`)
 
-現行公開版: `試作41 / mobile41`（全面映像、白い明朝体、点のグリッド、生成り色の情報面による展示UI）
+現行公開版: `試作42 / mobile42`（全面映像、上部3画面リボン、作品情報の重ね表示、下部作品ナビ、生成り色の全画面メニュー）
 
-現行ローカル改善版: `試作42 / mobile42`（全面映像へ作品情報を重ね、上部3画面リボン・下部作品ナビ・全画面メニューを加えた構造変更版）
+現行ローカル改善版: `試作42 / mobile42`（公開版と同じ）
 
-アプリ実装コミット: `d4750ff` (`Publish mobile41 immersive exhibition redesign`)
+アプリ実装コミット: `145f02d` (`Publish mobile42 full-screen artwork architecture`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -704,7 +704,12 @@
 
 公開状態:
 
-- 公開前。ローカル検証後に`main`へ反映する。
+- アプリ実装コミット: `145f02d` (`Publish mobile42 full-screen artwork architecture`)。
+- `origin main`へのpushに成功した。
+- GitHub Pagesの390×844表示で、全面映像、上部3画面リボン、作品情報、操作帯、下部作品ナビを確認した。
+- 公開版の全画面メニューで作品リンク10件、HOME、SOURCE、閉じる操作を確認した。
+- 公開版で`?try=COLOR&v=mobile42`への固定試着遷移と、`?mode=custom&from=COLOR&v=mobile42`の自由制作を確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=145f02d-mobile42`
 
 実機要確認:
 
