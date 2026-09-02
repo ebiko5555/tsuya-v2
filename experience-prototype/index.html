@@ -1350,6 +1350,17 @@
   #sourceConfirmCanvas{display:block; width:min(100%,520px); height:auto; aspect-ratio:620/300}
   .source-confirm-name{margin-top:14px; color:rgba(255,255,255,.68)}
   .source-confirm-try{flex:0 0 auto; min-height:58px; margin-top:12px}
+
+  /* 試作45：自由制作のカメラ入口は、素材撮影だけに集中する。 */
+  body.custom-mode.source-camera-capture .art-signal,
+  body.custom-mode.source-camera-capture .try-identity,
+  body.custom-mode.source-camera-capture .panel{display:none!important}
+  body.custom-mode.source-camera-capture #cmpBtn,
+  body.custom-mode.source-camera-capture #timerBtn{display:none!important}
+  body.custom-mode.source-camera-capture .stagebtns{
+    bottom:calc(34px + env(safe-area-inset-bottom)); gap:34px;
+  }
+  body.custom-mode.source-camera-capture .shutter{background:rgba(8,9,12,.26); border-color:#fff}
 </style>
 </head>
 <body>
@@ -1362,7 +1373,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile44" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile45" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1762,7 +1773,7 @@ async function startCamera(){
     $('startOverlay').style.display='none';
     $('liveBtns').style.display='flex';
     $('snapBar').style.display='none';
-    setGuide('手をかざしてください');
+    setGuide(document.body.classList.contains('source-camera-capture')?'':'手をかざしてください');
     setStatus('');
     startLoops();
   }catch(e){
@@ -1806,7 +1817,7 @@ function startLoops(){
       recordTrails();
       drawTrails(dt);
       drawNails();
-      setGuide(smoothed.length ? '' : '手をかざしてください');
+      setGuide(document.body.classList.contains('source-camera-capture')?'':(smoothed.length ? '' : '手をかざしてください'));
     }
     requestAnimationFrame(draw);
   })(lastT);
@@ -1819,11 +1830,30 @@ function startLoops(){
     requestAnimationFrame(detect);
   })();
 }
-$('startBtn').onclick = startCamera;
+$('startBtn').onclick = ()=>{
+  if(document.body.classList.contains('custom-mode')&&!document.body.classList.contains('source-selected')){
+    document.body.classList.add('source-camera-capture');
+  }
+  startCamera();
+};
 $('flipBtn').onclick = () => { facing = facing==='environment' ? 'user' : 'environment'; startCamera(); };
 
 /* ================= 撮影 ================= */
+function captureSourcePhoto(){
+  if(video.readyState<2) return;
+  const frame=document.createElement('canvas');
+  frame.width=video.videoWidth||1280; frame.height=video.videoHeight||720;
+  const frameCtx=frame.getContext('2d');
+  if(mirrored()){frameCtx.translate(frame.width,0);frameCtx.scale(-1,1);}
+  frameCtx.drawImage(video,0,0,frame.width,frame.height);
+  mode='idle';
+  if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}
+  $('liveBtns').style.display='none';
+  document.body.classList.remove('camera-started','controls-collapsed','source-camera-capture');
+  ingestSource(frame,'CAMERA');
+}
 function doCapture(){
+  if(document.body.classList.contains('source-camera-capture')){captureSourcePhoto();return;}
   mode = 'frozen';
   $('liveBtns').style.display='none';
   $('snapBar').style.display='flex';
@@ -3529,7 +3559,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile44';
+  const BUILD_VERSION='mobile45';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
