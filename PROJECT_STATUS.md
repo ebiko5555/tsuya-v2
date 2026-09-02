@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作41）: `dc93802` (`Publish mobile41 nail preview and camera UI fixes`)
+公開中のアプリ実装コミット（試作42）: `d1cf79f` (`Publish mobile42 focused source set selection`)
 
-現行公開版: `試作41 / mobile41`（表記・操作配置を整理し、SOURCE試着前の大きなチップ確認画面を追加）
+現行公開版: `試作42 / mobile42`（写真後の画面を簡潔にし、4方式から3案の大きな選択画面へ進む構成）
 
-現行ローカル改善版: `試作42 / mobile42`（写真後の画面を簡潔にし、4方式から3案の大きな選択画面へ進む構成）
+現行ローカル改善版: `試作42 / mobile42`（公開版と同じ）
 
-アプリ実装コミット: `dc93802` (`Publish mobile41 nail preview and camera UI fixes`)
+アプリ実装コミット: `d1cf79f` (`Publish mobile42 focused source set selection`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -692,6 +692,17 @@
 - 3案から1案を選ぶと試着ボタンが有効になり、そのセットでTRY ONへ進む。
 - 写真解析、3案生成、ネイル描画、カメラ試着の既存機能は変更していない。
 
-公開前確認:
+公開状態:
 
-- 390×844で写真選択、4方式、3案選択、TRY ONへの遷移を確認する。
+- 390×844で写真選択後に旧タブ、写真選択ボタン、小さな3案、旧TRY ONが表示されず、写真情報と4方式だけになることを確認した。
+- `COLOR / PATTERN / LIGHT / MIX`の全方式から、それぞれ3案の全画面へ遷移することを確認した。
+- 3案を大きな5本セットで表示し、1案を選ぶまでは試着ボタンが無効、選択後は`この5本で TRY ON`が有効になることを確認した。
+- 画面幅390pxで横方向にはみ出さず、公開版のブラウザコンソールの新しいerror/warnが0件であることを確認した。
+- インラインJavaScript 3件の構文検査に合格した。
+- アプリ実装コミット: `d1cf79f` (`Publish mobile42 focused source set selection`)。
+- `origin main`へのpushに成功した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=d1cf79f-mobile42`
+
+実機要確認:
+
+- iPhone Safariで、URLバーを含む状態の3案画面の縦余白と、選択後のカメラ許可・手追跡。
