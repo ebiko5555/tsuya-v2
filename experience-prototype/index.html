@@ -1302,6 +1302,15 @@
   #sourceConfirmCanvas{display:block; width:min(100%,460px); height:auto; aspect-ratio:700/360}
   .source-confirm-name{margin-top:18px; font:500 9px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.17em; color:rgba(255,255,255,.62)}
   .source-confirm-try{width:min(100%,360px); min-height:64px; margin:22px auto 0; border:0; border-radius:999px; color:#171717; background:#f2eee6; font:600 15px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em; box-shadow:0 14px 34px rgba(0,0,0,.34)}
+  .length-choice{display:grid; grid-template-columns:1fr 1fr; gap:7px; width:min(100%,360px); margin:13px auto 0}
+  .length-choice button{display:flex; align-items:center; justify-content:center; gap:8px; min-height:46px; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.68); background:transparent; font:500 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em}
+  .length-choice button::before{content:""; display:block; width:9px; border-radius:8px 8px 5px 5px; background:currentColor}
+  .length-choice button[data-length="short"]::before{height:18px}
+  .length-choice button[data-length="long"]::before{height:29px}
+  .length-choice button.active{border-color:#f2eee6; color:#141414; background:#f2eee6}
+  .work-length-choice{width:min(100%,280px); margin:12px 0 0}
+  .work-length-choice button{min-height:39px; font-size:8px}
+  .work-actions .work-length-choice{width:100%; margin:0}
 
   body.work-tryon.camera-started .try-identity{width:244px}
   body.work-tryon .try-identity .work-nails{height:82px; margin-top:12px; gap:8px}
@@ -1522,6 +1531,9 @@
   </div>
   <div class="source-confirm-body">
     <canvas id="sourceConfirmCanvas" width="620" height="300" aria-label="選んだネイルセット"></canvas>
+    <div class="length-choice" id="sourceLengthChoice" aria-label="ネイルの長さを選ぶ">
+      <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
+    </div>
     <button type="button" class="source-confirm-try" id="sourceConfirmTry">TRY ON</button>
   </div>
 </section>
@@ -1659,6 +1671,9 @@
     <p class="work-text" id="workText"></p>
     <div class="work-nails" id="workNails" aria-label="作品から作った5本のネイル"></div>
     <div class="work-actions">
+      <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
+        <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
+      </div>
       <button type="button" class="work-try" id="workTryBtn">
         <span class="work-try-label">TRY ON</span>
       </button>
@@ -1733,6 +1748,19 @@ let currentLook = 'onecolor';
 let smoothed = [];
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
+const TRY_LENGTHS={short:112,long:164};
+function normalizeTryLength(value,fallback='short'){
+  return value==='long'||value==='short'?value:fallback;
+}
+function inferTryLength(tune){
+  return (tune&&tune.sculptLen>=145)?'long':'short';
+}
+function applyTryLength(length){
+  const key=normalizeTryLength(length);
+  tuneVals.sculptLen=TRY_LENGTHS[key];
+  if($('sculptLen')) $('sculptLen').value=tuneVals.sculptLen;
+  return key;
+}
 /* 肌をやわらかく見せる。縮小して描き戻すことでぼかす(重い実フィルタを使わない)。
    爪はこのあとに描くので、肌だけ柔らかく、爪はくっきり残る。選択肢は出さず常にかける。 */
 const SKIN_FX = {div:5, a:0.42, lift:0.45};
@@ -2957,6 +2985,12 @@ function extractPalette(img,n){
 let sourceMode='MIX';
 let sourceSets=[];
 let selectedSourceSet=null;
+let sourceTryLength='short';
+function renderLengthChoice(box,length){
+  if(!box) return;
+  const active=normalizeTryLength(length);
+  box.querySelectorAll('[data-length]').forEach(button=>button.classList.toggle('active',button.dataset.length===active));
+}
 function sourceCanvasFrom(input){
   const out=document.createElement('canvas'); out.width=160; out.height=160;
   const ow=input.videoWidth||input.naturalWidth||input.width||160;
@@ -3153,12 +3187,13 @@ function drawSourceSetPreview(canvas,set){
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
-function drawLargeSourceSetPreview(canvas,set){
+function drawLargeSourceSetPreview(canvas,set,length){
   const c=canvas.getContext('2d');
   c.clearRect(0,0,canvas.width,canvas.height);
   const keepPalette=sourceProfile&&sourceProfile.palette;
   if(sourceProfile&&set.sourcePalette) sourceProfile.palette=set.sourcePalette;
-  const heights=[126,146,158,146,130], widths=[54,60,64,60,54];
+  const lengthScale=normalizeTryLength(length,inferTryLength(set.tune))==='long'?1.18:.76;
+  const heights=[126,146,158,146,130].map(h=>h*lengthScale), widths=[54,60,64,60,54];
   withVars(set.vars,()=>set.looks.forEach((look,i)=>{
     const w=widths[i],h=heights[i],x=60+i*125,y=150,baseY=h*.28;
     c.save(); c.translate(x,y); c.beginPath(); c.moveTo(-w/2,baseY);
@@ -3173,7 +3208,10 @@ function drawLargeSourceSetPreview(canvas,set){
 function openSourceConfirm(set){
   if(!set) return;
   selectedSourceSet=set; applySet(set);
-  drawLargeSourceSetPreview($('sourceConfirmCanvas'),set);
+  sourceTryLength=inferTryLength(set.tune);
+  applyTryLength(sourceTryLength);
+  renderLengthChoice($('sourceLengthChoice'),sourceTryLength);
+  drawLargeSourceSetPreview($('sourceConfirmCanvas'),set,sourceTryLength);
   $('sourceConfirm').classList.add('open');
   $('sourceConfirm').setAttribute('aria-hidden','false');
 }
@@ -3262,8 +3300,16 @@ $('sourceCamera').onclick=()=>{
 };
 $('sourceTry').onclick=()=>openSourceConfirm(selectedSourceSet||sourceSets[0]);
 $('sourceConfirmBack').onclick=closeSourceConfirm;
+$('sourceLengthChoice').addEventListener('click',event=>{
+  const button=event.target.closest('[data-length]'); if(!button||!selectedSourceSet) return;
+  sourceTryLength=normalizeTryLength(button.dataset.length);
+  applySet(selectedSourceSet); applyTryLength(sourceTryLength);
+  renderLengthChoice($('sourceLengthChoice'),sourceTryLength);
+  drawLargeSourceSetPreview($('sourceConfirmCanvas'),selectedSourceSet,sourceTryLength);
+});
 $('sourceConfirmTry').onclick=()=>{
   if(!selectedSourceSet) return;
+  applySet(selectedSourceSet); applyTryLength(sourceTryLength);
   closeSourceConfirm();
   document.body.classList.add('source-tryon');
   if(mode==='live'){
@@ -3641,7 +3687,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile54';
+  const BUILD_VERSION='mobile55';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -3655,12 +3701,19 @@ updateCmpBadge();
     if(from) query.set('from',from);
     query.set('v',BUILD_VERSION); return '?'+query.toString();
   };
+  const tryRoute=(key,length)=>{
+    const query=new URLSearchParams();
+    query.set('try',key); query.set('length',normalizeTryLength(length)); query.set('v',BUILD_VERSION);
+    return '?'+query.toString();
+  };
   const normalizeWorkKey=key=>key==='NAILORB'?'ORB':key;
   const artKey=normalizeWorkKey((params.get('work')||'').toUpperCase());
   const tryKey=normalizeWorkKey((params.get('try')||'').toUpperCase());
+  const requestedTryLength=normalizeTryLength(params.get('length'));
   const customMode=params.get('mode')==='custom';
   const fromKey=normalizeWorkKey((params.get('from')||'').toUpperCase());
   let current='COLOR';
+  let artworkTryLength='short';
 
   document.querySelectorAll('a[href="?mode=custom"]').forEach(link=>{link.href=customRoute();});
 
@@ -3885,15 +3938,17 @@ updateCmpBadge();
     c.quadraticCurveTo(-w*.46,-h*.5,0,-h*.54); c.quadraticCurveTo(w*.46,-h*.5,w*.5,-h*.2);
     c.lineTo(w*.5,h*.42); c.quadraticCurveTo(0,h*.55,-w*.5,h*.42); c.closePath();
   }
-  function renderNailPreview(key,targetId){
+  function renderNailPreview(key,targetId,length){
     const box=document.getElementById(targetId); if(!box) return; box.innerHTML='';
     const p=works[key].preset;
+    const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.76;
     withVars(p.vars,()=>p.looks.forEach((look,i)=>{
       const cv=document.createElement('canvas'); cv.width=56; cv.height=104;
       cv.dataset.look=look; cv.title=LOOKS[look]?.name||look;
       cv.setAttribute('aria-label',(i+1)+'本目 '+(LOOKS[look]?.name||look));
-      const c=cv.getContext('2d'); c.translate(28,52); nailShape(c,36,78); c.clip();
-      paintByKey(c,look,36,78,p.colors[i],i); box.appendChild(cv);
+      const h=78*lengthScale;
+      const c=cv.getContext('2d'); c.translate(28,52); nailShape(c,36,h); c.clip();
+      paintByKey(c,look,36,h,p.colors[i],i); box.appendChild(cv);
     }));
   }
   installArtworkLooks();
@@ -3938,7 +3993,9 @@ updateCmpBadge();
     document.getElementById('workCode').textContent=work.no+' / '+key;
     document.getElementById('workTitle').textContent=work.title;
     document.getElementById('workText').textContent=work.text;
-    renderNailPreview(key,'workNails');
+    artworkTryLength=inferTryLength(work.preset.tune);
+    renderNailPreview(key,'workNails',artworkTryLength);
+    renderLengthChoice($('workLengthChoice'),artworkTryLength);
     const customLink=document.querySelector('.work-custom');
     const customHref=customRoute(key); customLink.href=customHref;
     customLink.onclick=event=>{
@@ -3988,6 +4045,12 @@ updateCmpBadge();
     openWork(current);
   });
   document.getElementById('workClose').addEventListener('click',closeWork);
+  $('workLengthChoice').addEventListener('click',event=>{
+    const button=event.target.closest('[data-length]'); if(!button) return;
+    artworkTryLength=normalizeTryLength(button.dataset.length);
+    renderLengthChoice($('workLengthChoice'),artworkTryLength);
+    renderNailPreview(current,'workNails',artworkTryLength);
+  });
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&layer.classList.contains('open'))closeWork();});
   window.addEventListener('pageshow',playWorkFilmWhenReady);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) playWorkFilmWhenReady();});
@@ -4024,13 +4087,13 @@ updateCmpBadge();
     const work=works[key];
     document.body.classList.add('work-tryon');
     document.title='HAND & LIGHT — '+work.tryTitle+'のネイルを試す';
-    setCurrent(key); applyArtworkPreset(key);
+    setCurrent(key); applyArtworkPreset(key); applyTryLength(requestedTryLength);
     document.querySelector('.opening-mark').innerHTML=work.no+' / '+key+'<br>ARTWORK TRY ON';
     document.querySelector('#startOverlay .invite').textContent='TRY ON';
     document.getElementById('openingGuide').textContent=key;
     document.getElementById('startBtn').textContent='START CAMERA';
     document.getElementById('tryIdentityText').textContent=work.no+' / '+key;
-    renderNailPreview(key,'tryNails');
+    renderNailPreview(key,'tryNails',requestedTryLength);
     document.getElementById('tryWorkBack').href=route('work',key);
     document.getElementById('globalBack').href=route('work',key);
     document.getElementById('globalBackText').textContent='WORK';
@@ -4141,7 +4204,7 @@ updateCmpBadge();
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
-  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=route('try',current); });
+  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=tryRoute(current,artworkTryLength); });
 
   const globalBack=document.getElementById('globalBack');
   globalBack.addEventListener('click',event=>{

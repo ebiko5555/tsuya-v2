@@ -8,9 +8,9 @@
 
 現行公開版: `試作54 / mobile54`（作品一覧映像の再生修正）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作55 / mobile55`（SHORT / LONG の二択を試着前に追加、未公開）
 
-アプリ実装コミット: `a4e1d52` (`Publish mobile54 fix hub video playback`)
+アプリ実装コミット: 試作55をローカルで実装中（未コミット・未公開）
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -909,3 +909,13 @@
 - インラインJavaScriptの構文検査と`git diff --check`を通過した。
 - `origin main`へのpushに成功し、GitHub Pagesで`hubTapStarted`を含む試作54のHTMLを確認した。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=a4e1d52-mobile54`
+
+## 38. 試着前の長さ選択を二択にする（試作55・公開前）
+
+2026-09-03、作品ネイルと「じぶんでつくる」の両方で、試着を始める前に `SHORT` / `LONG` を選べるようにした。
+
+- 作品ページでは、5本の見本チップの直下に長さの二択を置いた。選択すると、見本チップ自体の縦の比率も即時に短く／長く変わる。
+- `TRY ON` は選んだ長さをURLパラメータで固定試着画面へ渡す。作品側のネイル柄・色・質感は従来の作品別プリセットを維持する。
+- 写真から作る画面では、5本セットを選んだ後の確認画面に同じ二択を置いた。中央の大きい5本プレビューも選択に追随し、選択した長さを実カメラ試着へ反映する。
+- `SHORT` はスカルプ長 `112`、`LONG` は `164` とし、従来のスライダー範囲（100〜220）内に収めて既存の手の追跡・描画処理を変更していない。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。iPhone Safariでの最終確認、GitHubへのpush、GitHub Pagesの反映確認は未実施。
