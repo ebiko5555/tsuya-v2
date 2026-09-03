@@ -1073,8 +1073,18 @@
   body.hub-mode .bigbtn::after,body.hub-mode .make-link::after{content:"→"; font-size:15px; font-weight:300}
   body.hub-mode .make-link{border-color:rgba(255,255,255,.16); color:rgba(255,255,255,.76)}
   body.custom-mode #startOverlay{padding-bottom:calc(54px + env(safe-area-inset-bottom))}
-  body.custom-mode #startOverlay .invite{text-align:center}
-  body.custom-mode .opening-guide{text-align:center; margin:0 auto 17px; max-width:340px}
+  body.custom-mode #startOverlay .invite{
+    text-align:center; margin:0 auto 14px;
+    font-size:clamp(25px,7.2vw,35px); letter-spacing:.14em; text-indent:.14em;
+    line-height:1.2;
+  }
+  body.custom-mode .invite-sub{
+    display:block; margin-top:7px;
+    font-size:11px; font-weight:400; letter-spacing:.22em; text-indent:.22em;
+    color:rgba(255,255,255,.68);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  body.custom-mode .opening-guide{text-align:center; margin:0 auto 20px; max-width:340px; font-size:13.5px; line-height:1.7; color:rgba(255,255,255,.8)}
   body.custom-mode .opening-actions{width:min(100%,340px); margin:0 auto; flex-direction:column; align-items:stretch; gap:9px}
   body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
   body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
@@ -3842,7 +3852,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile67';
+  const BUILD_VERSION='mobile68';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4261,7 +4271,7 @@ updateCmpBadge();
 
   function prepareCustomPage(){
     document.body.classList.add('custom-mode');
-    document.title='HAND & LIGHT — 光と色の採集';
+    document.title='HAND & LIGHT — COLOUR ATELIER';
     const sourceHero=document.querySelector('.opening-film.a');
     sourceHero.src='source-assets/source-process-loop-v1.mp4';
     sourceHero.load(); playSilently(sourceHero);
@@ -4280,7 +4290,7 @@ updateCmpBadge();
     }else{
       document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
     }
-    document.querySelector('#startOverlay .invite').textContent='CUSTOM';
+    document.querySelector('#startOverlay .invite').innerHTML='COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
     document.getElementById('openingGuide').textContent=origin?(origin.title+' / 身のまわりから採集する'):'身のまわりから採集する';
     document.getElementById('startBtn').textContent='カメラから作る';
     document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';

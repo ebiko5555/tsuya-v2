@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作66）: `a92d5f1` (`Publish mobile66 revert custom texts and remove white borders, center align`)
+公開中のアプリ実装コミット（試作67）: `6059a0d` (`Publish mobile67 restore original overlay layout and pill create button without white borders`)
 
-現行公開版: `試作66 / mobile66`（CUSTOM画面の文言復帰）
+現行公開版: `試作67 / mobile67`（CUSTOM画面とCREATEボタンの大元完全復元・白い枠の完全撤廃）
 
-現行ローカル改善版: `試作67 / mobile67`（CUSTOM画面とCREATEボタンの大元完全復元・白い枠と不自然な浮きの完全撤廃・中央揃え維持）
+現行ローカル改善版: `試作68 / mobile68`（CUSTOMからCOLOUR ATELIERへの昇華・手と光のアトリエへの調和）
 
-アプリ実装コミット: 試作67をローカルで実装中
+アプリ実装コミット: 試作68をローカルで実装中
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -1094,3 +1094,18 @@
    - 大元の「作品アクセント色の丸いピルボタン（`border: 0; border-radius: 999px; background: var(--work-accent);`）」へ完全復帰（星マーク ✦ のみ非表示）。
 3. **完全な反映とキャッシュ回避:**
    - `mobile67` としてコミット・pushし、GitHub Pagesで最新版の反映を確認。
+- コミットID: `6059a0d`。
+
+## 51. CUSTOMからCOLOUR ATELIERへの昇華（試作68・ローカル改善）
+
+2026-09-04、利用者の「custom を、create your nail colour とかに近いような文言だとどうだろうか？？？」という相談・提案を受け、「手と光のアトリエ」という作品世界に調和する案D（`COLOUR ATELIER` / `CREATE YOUR OWN NAIL`）を採用・改修した。
+
+1. **「CUSTOM」の機能的・機械的響きからの脱却:**
+   - 設定変更のような無機質な「CUSTOM」を廃止。
+   - 体験者が光や色から自分だけのネイルを生み出す「作り手（アトリエの当事者）」となる場所として、**`COLOUR ATELIER`** を主タイトルに設定。
+2. **端正なサブフレーズによる行為の明示:**
+   - タイトル直下に、洗練された等幅タイポグラフィで **`CREATE YOUR OWN NAIL`**（あなたのネイルを創る）を添字。
+   - 案内文「身のまわりから採集する」と連動し、日常の光から自分だけの色を生み出す詩的で創造的なプロセスが直感的に伝わる構成へ昇華した。
+3. **視認性と中央揃えの維持:**
+   - スマートフォンの画面幅に合わせた端正なフォントサイズ（25px〜35px）と品格のある字間を設定。
+   - 文字・ボタンともに完全中央揃えを維持し、老若男女が心地よく体験できるようにした。
