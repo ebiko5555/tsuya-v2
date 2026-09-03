@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作56）: `543b7ef` (`Set mobile56 app version`)
+公開中のアプリ実装コミット（試作57）: `e472e40` (`Publish mobile57 restore hub video autoplay`)
 
-現行公開版: `試作56 / mobile56`（作品ページ映像の自動再生修正）
+現行公開版: `試作57 / mobile57`（作品一覧映像の自動再生を元の方式へ復帰）
 
-現行ローカル改善版: `試作57 / mobile57`（作品一覧映像の自動再生を元の方式へ復帰、未公開）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 試作57をローカルで実装中（未コミット・未公開）
+アプリ実装コミット: `e472e40` (`Publish mobile57 restore hub video autoplay`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -941,4 +941,7 @@
 - 試作54で追加した「読込完了まで待ってから再生」と「映像が止まっている時は最初のタップを再生開始へ使う」処理を取り除いた。
 - 映像の`src`を設定・読み込み直した直後に`play()`を呼ぶ、試作50以前に動作していた方式へ戻した。
 - 画面全体のタップは必ずそのまま該当作品ページへ移動する。再生のためだけにタップを消費しない。
-- MediaPipe、カメラ、個別作品ページ、作品映像ファイルは変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。
+- MediaPipe、カメラ、個別作品ページ、作品映像ファイルは変更していない。
+- `origin main`へのpushに成功し、GitHub Pagesが`mobile57`を返すことを確認した。
+- 公開URLの作品一覧で、5秒後も表示中の映像が停止せず `currentTime` が約5.0秒まで進んでいることを確認した。画面タップがそのまま作品ページへ遷移することも確認した。iPhone Safari実機での最終確認は要確認。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=e472e40-mobile57`
