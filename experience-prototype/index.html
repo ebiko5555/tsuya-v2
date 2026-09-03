@@ -3687,7 +3687,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile56';
+  const BUILD_VERSION='mobile57';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4147,19 +4147,7 @@ updateCmpBadge();
     const code=document.getElementById('openingWorkCode');
     const title=document.getElementById('openingWorkTitle');
     const progress=document.getElementById('openingProgress');
-    let hubIndex=0, activeFilm=0, timer=null, hubTapStarted=false;
-
-    function playHubFilmWhenReady(video){
-      if(!video) return;
-      video.muted=true; video.defaultMuted=true; video.playsInline=true;
-      video.setAttribute('muted',''); video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
-      const play=()=>playSilently(video);
-      if(video.readyState>=2) play();
-      else{
-        video.addEventListener('loadeddata',play,{once:true});
-        video.addEventListener('canplay',play,{once:true});
-      }
-    }
+    let hubIndex=0, activeFilm=0, timer=null;
 
     function restartProgress(){
       progress.classList.add('restart');
@@ -4176,8 +4164,9 @@ updateCmpBadge();
         activeFilm=nextFilm;
       };
       if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
-      playHubFilmWhenReady(video);
-      [180,700,1500].forEach(delay=>setTimeout(()=>playHubFilmWhenReady(video),delay));
+      /* 作品一覧は、srcを入れた直後に再生を予約する元の方式を使う。
+         iPhoneでは読込完了を待ってから呼ぶと、先頭フレームで止まることがある。 */
+      playSilently(video);
       if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
@@ -4186,17 +4175,6 @@ updateCmpBadge();
       restartProgress();
     }
     showHubWork(0,true);
-    /* 低電力モード等で自動再生が止められた時だけ、最初のタップを再生開始に使う。
-       通常に動いている時は従来どおり、そのまま作品ページへ進む。 */
-    enter.addEventListener('click',event=>{
-      const video=films[activeFilm];
-      if(!hubTapStarted&&video&&video.paused){
-        event.preventDefault();
-        hubTapStarted=true;
-        playHubFilmWhenReady(video);
-        [120,500,1100].forEach(delay=>setTimeout(()=>playHubFilmWhenReady(video),delay));
-      }
-    });
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
       timer=setInterval(()=>showHubWork(hubIndex+1),5200);
       document.addEventListener('visibilitychange',()=>{
