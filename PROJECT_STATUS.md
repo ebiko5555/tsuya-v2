@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作49）: 公開前
+公開中のアプリ実装コミット（試作49）: `7579d4a` (`Publish mobile49 simplify source view`)
 
-現行公開版: `試作48 / mobile48`（SOURCE写真の再拡大）
+現行公開版: `試作49 / mobile49`（SOURCE情報表示の削除）
 
-現行ローカル改善版: `試作49 / mobile49`（SOURCE情報表示の削除・公開前）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 公開前
+アプリ実装コミット: `7579d4a` (`Publish mobile49 simplify source view`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -846,3 +846,6 @@
 - 写真右下の分析範囲小窓を非表示にした。
 - `IMG_...`、`8 COLORS`、`LINE`、`LIGHT`など、素材分析の途中値を示す文字を非表示にした。
 - 大きい選択写真、4方式、縦に並ぶ3案、分析・背景抑制・生成規則、試着機能は変更していない。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushに成功し、GitHub Pagesで`mobile49`のHTMLを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=7579d4a-mobile49`
