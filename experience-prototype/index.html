@@ -104,25 +104,47 @@
   #guide{
     position:absolute; inset:0; z-index:4;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    pointer-events:none; transition:opacity .45s ease;
+    pointer-events:none; transition:opacity .3s ease;
     color:#fff;
   }
+  #guide.hand-detected{
+    opacity:0!important; visibility:hidden!important;
+    transition:opacity .12s ease, visibility .12s!important;
+  }
   .guide-silhouette{
-    width:140px; height:195px;
-    color:rgba(255,255,255,.58);
-    filter:drop-shadow(0 2px 12px rgba(0,0,0,.55));
+    width:210px; height:290px;
+    color:rgba(255,255,255,.62);
+    filter:drop-shadow(0 2px 14px rgba(0,0,0,.6));
     animation:guidePulse 2.8s ease-in-out infinite;
   }
   .guide-silhouette svg{width:100%; height:100%; display:block}
   .guide-text{
-    margin-top:16px; font-size:11.5px; letter-spacing:.26em; text-indent:.26em;
-    color:rgba(255,255,255,.9);
-    text-shadow:0 2px 10px rgba(0,0,0,.75);
+    margin-top:16px; font-size:12px; letter-spacing:.26em; text-indent:.26em;
+    color:rgba(255,255,255,.94);
+    text-shadow:0 2px 10px rgba(0,0,0,.8);
     font-family:"Hiragino Sans","Yu Gothic",sans-serif;
   }
   @keyframes guidePulse{
-    0%, 100% { opacity:.48; transform:scale(0.97); }
-    50% { opacity:.9; transform:scale(1.02); }
+    0%, 100% { opacity:.46; transform:scale(0.97); }
+    50% { opacity:.92; transform:scale(1.02); }
+  }
+  /* カメラから作る（素材撮影）時のガイド表示 */
+  body.source-camera-capture .guide-silhouette{display:none!important}
+  body.source-camera-capture #guide{
+    justify-content:flex-start;
+    padding-top:calc(78px + env(safe-area-inset-top));
+  }
+  body.source-camera-capture .guide-text{
+    background:rgba(12,10,9,.72);
+    padding:11px 22px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.32);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    font-size:12px; letter-spacing:.18em; text-indent:.18em;
+  }
+  /* 撮影直後の確認画面：撮った写真とキャプションを画面内に収めて全体を見せる */
+  body.photo-frozen #canvas{
+    object-fit:contain;
+    background:#080706;
   }
   #countdown{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
@@ -683,8 +705,8 @@
   #status{position:relative; z-index:2; text-align:left; color:rgba(255,255,255,.5)}
   .stagebtns{bottom:calc(110px + env(safe-area-inset-bottom)); gap:16px}
   .roundbtn{background:rgba(8,9,12,.48); border:1px solid rgba(255,255,255,.22); box-shadow:none}
-  .shutter{background:rgba(8,9,12,.28); box-shadow:none}
   #snapBar{bottom:calc(112px + env(safe-area-inset-bottom))}
+  body.photo-frozen #snapBar{bottom:calc(16px + env(safe-area-inset-bottom))!important}
 
   .panel{
     position:fixed; z-index:22; left:50%; bottom:0; width:min(calc(100% - 12px),708px);
@@ -1912,7 +1934,7 @@ async function startCamera(){
         video.addEventListener('resize',finish,{once:true});
       });
     }
-    document.body.classList.remove('source-planning');
+    document.body.classList.remove('source-planning','photo-frozen');
     canvas.width = video.videoWidth||1280; canvas.height = video.videoHeight||720;
     mode = 'live';
     smoothed = [];
@@ -1921,7 +1943,9 @@ async function startCamera(){
     $('startOverlay').style.display='none';
     $('liveBtns').style.display='flex';
     $('snapBar').style.display='none';
-    setGuide(document.body.classList.contains('source-camera-capture')?'':'手をかざしてください');
+    const isSourceCap=document.body.classList.contains('source-camera-capture');
+    setGuide(isSourceCap ? 'お気に入りのものを写真に撮ってください' : '枠に手をかざしてください');
+    $('guide')?.classList.remove('hand-detected');
     setStatus('');
     startLoops();
   }catch(e){
@@ -1933,6 +1957,7 @@ async function startCamera(){
 
 /* 描画ループ：AIとは独立して映像を常に描く */
 let liveBusy = false;
+let handLostFrames = 0;
 
 function startLoops(){
   if(rafOn) return;
@@ -1963,12 +1988,22 @@ function startLoops(){
         ctx.globalAlpha = 1;
       }
       ctx.restore();
-      if(sourceCapture){setGuide('');}
+      if(sourceCapture){
+        /* 素材撮影時はメッセージを維持し、シャッター時に消去する */
+      }
       else{
         recordTrails();
         drawTrails(dt);
         drawNails();
-        setGuide(smoothed.length ? '' : '手をかざしてください');
+        if(smoothed.length > 0){
+          handLostFrames = 0;
+          $('guide')?.classList.add('hand-detected');
+        }else{
+          handLostFrames++;
+          if(handLostFrames > 14){
+            $('guide')?.classList.remove('hand-detected');
+          }
+        }
       }
     }
     requestAnimationFrame(draw);
@@ -1992,6 +2027,7 @@ $('flipBtn').onclick = () => { facing = facing==='environment' ? 'user' : 'envir
 
 /* ================= 撮影 ================= */
 function captureSourcePhoto(){
+  setGuide('');
   if(video.readyState<2) return;
   const frame=document.createElement('canvas');
   frame.width=video.videoWidth||1280; frame.height=video.videoHeight||720;
@@ -2001,7 +2037,7 @@ function captureSourcePhoto(){
   mode='idle';
   if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}
   $('liveBtns').style.display='none';
-  document.body.classList.remove('camera-started','controls-collapsed','source-camera-capture');
+  document.body.classList.remove('camera-started','controls-collapsed','source-camera-capture','photo-frozen');
   ingestSource(frame,'CAMERA');
 }
 function stampArtCaption(c, w, h){
@@ -2009,15 +2045,16 @@ function stampArtCaption(c, w, h){
   const isCustom = document.body.classList.contains('custom-mode');
   const work = typeof works!=='undefined'&&works[current]?works[current]:null;
   const scale = Math.min(w, h) / 380;
-  const fontSizeMain = Math.max(9, Math.round(8.5 * scale));
-  const fontSizeSub = Math.max(11, Math.round(11 * scale));
-  const padX = Math.round(18 * scale);
-  const padBottom = Math.round(20 * scale);
+  const fontSizeMain = Math.max(10, Math.round(9.5 * scale));
+  const fontSizeSub = Math.max(12, Math.round(12.5 * scale));
+  const padX = Math.round(22 * scale);
+  const padBottom = Math.round(36 * scale);
 
-  const gradH = Math.round(62 * scale);
+  const gradH = Math.round(86 * scale);
   const g = c.createLinearGradient(0, h - gradH, 0, h);
   g.addColorStop(0, 'rgba(0,0,0,0)');
-  g.addColorStop(1, 'rgba(10,8,7,0.64)');
+  g.addColorStop(0.3, 'rgba(10,8,7,0.38)');
+  g.addColorStop(1, 'rgba(10,8,7,0.82)');
   c.fillStyle = g;
   c.fillRect(0, h - gradH, w, gradH);
 
@@ -2025,15 +2062,15 @@ function stampArtCaption(c, w, h){
   c.textBaseline = 'alphabetic';
 
   c.font = `500 ${fontSizeMain}px ui-monospace,SFMono-Regular,Menlo,monospace`;
-  c.fillStyle = 'rgba(255,255,255,0.72)';
-  c.shadowColor = 'rgba(0,0,0,0.6)';
-  c.shadowBlur = 4;
+  c.fillStyle = 'rgba(255,255,255,0.76)';
+  c.shadowColor = 'rgba(0,0,0,0.75)';
+  c.shadowBlur = 6;
   c.letterSpacing = '0.18em';
   const line1 = 'TSUYA II — HAND & LIGHT / 2026';
   c.fillText(line1, padX, h - padBottom - fontSizeSub * 1.35);
 
   c.font = `300 ${fontSizeSub}px "Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif`;
-  c.fillStyle = 'rgba(255,255,255,0.95)';
+  c.fillStyle = 'rgba(255,255,255,0.98)';
   const line2 = isCustom ? 'MY TRACE / 自作ネイル' : (work ? `${work.no} ${current} · ${work.title}` : 'HAND & LIGHT');
   c.fillText(line2, padX, h - padBottom);
 
@@ -2042,10 +2079,12 @@ function stampArtCaption(c, w, h){
 function doCapture(){
   if(document.body.classList.contains('source-camera-capture')){captureSourcePhoto();return;}
   mode = 'frozen';
+  document.body.classList.add('photo-frozen');
   stampArtCaption(ctx, canvas.width, canvas.height);
   $('liveBtns').style.display='none';
   $('snapBar').style.display='flex';
   setGuide('');
+  $('guide')?.classList.add('hand-detected');
   const stored=keepShot();       /* 撮ったら自動で比較用に残す(4枚まで) */
   if(stored) setSnapStatus('撮影しました','アプリ内の「比べる」に保存済みです。端末保存は下のボタンです。','ok');
   else setSnapStatus('撮影しました','比較への保存に失敗しました。必要なら端末に保存してください。','warn');
@@ -2122,7 +2161,11 @@ $('timerBtn').onclick = () => {
 $('cmpBtn').onclick = openCompare;
 $('cmpClose').onclick = closeCompare;
 $('retryBtn').onclick = () => {
-  mode='live'; $('snapBar').style.display='none'; $('liveBtns').style.display='flex';
+  mode='live';
+  document.body.classList.remove('photo-frozen');
+  $('snapBar').style.display='none';
+  $('liveBtns').style.display='flex';
+  $('guide')?.classList.remove('hand-detected');
   setSnapStatus('撮影しました','アプリ内の「比べる」に保存されています','');
 };
 $('saveBtn').onclick = async () => {
@@ -3772,7 +3815,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile62';
+  const BUILD_VERSION='mobile63';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
