@@ -8,9 +8,9 @@
 
 現行公開版: `試作54 / mobile54`（作品一覧映像の再生修正）
 
-現行ローカル改善版: `試作55 / mobile55`（SHORT / LONG の二択を試着前に追加、GitHubへ送信済み。Pages反映は要確認）
+現行ローカル改善版: `試作56 / mobile56`（作品ページ映像の自動再生を修正中、未公開）
 
-アプリ実装コミット: `8b634df` (`Publish mobile55 add short long try-on`)
+アプリ実装コミット: 試作56をローカルで実装中（未コミット・未公開）
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -921,3 +921,12 @@
 - インラインJavaScriptの構文検査と`git diff --check`を通過した。
 - `origin main`へのpushは成功し、GitHub本体で`mobile55`のソースを確認した。
 - 2026-09-03の確認時点でGitHub Pagesはキャッシュによりまだ`mobile54`を返していたため、公開反映とiPhone Safariでの最終確認は要確認。
+
+## 39. 作品ページ映像を開いた直後に再生する（試作56・公開前）
+
+2026-09-03、iPhoneで作品ページへ入った時に、作品映像が最初のフレームで止まる報告を受けて修正した。
+
+- `loadeddata`待ちだけにせず、作品ページを開いた直後に必ず`play()`を呼ぶ以前の動作へ戻した。
+- 読み込み完了後の再生指示と、既存の180ms・700ms・1500ms後の再試行は残す。
+- `muted`、`playsinline`、`webkit-playsinline`を再生直前にも明示して、iPhoneの画面内・無音自動再生条件を満たす。
+- MediaPipe、カメラ、作品映像ファイルそのものは変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。

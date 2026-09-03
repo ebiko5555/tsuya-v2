@@ -3734,10 +3734,15 @@ updateCmpBadge();
     workFilm.muted=true;
     workFilm.defaultMuted=true;
     workFilm.playsInline=true;
+    workFilm.setAttribute('muted','');
+    workFilm.setAttribute('playsinline','');
     workFilm.setAttribute('webkit-playsinline','');
     const play=()=>{ if(layer.classList.contains('open')) playSilently(workFilm); };
-    if(workFilm.readyState>=2) play();
-    else{
+    /* iPhoneではloadeddataを待つだけだと、先頭フレームで停止することがある。
+       srcを差し替えた直後のplay()が「読み込み後に再生する予約」になるため、
+       まず必ずここで指示し、イベント側は再試行として残す。 */
+    play();
+    if(workFilm.readyState<2){
       workFilm.addEventListener('loadeddata',play,{once:true});
       workFilm.addEventListener('canplay',play,{once:true});
     }
