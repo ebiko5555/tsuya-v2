@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作46）: `ca37a07` (`Publish mobile46 create label`)
+公開中のアプリ実装コミット（試作47）: `8229dca` (`Publish mobile47 improve mobile flow`)
 
-現行公開版: `試作46 / mobile46`（作品ページの自由制作入口をCREATE表記へ変更）
+現行公開版: `試作47 / mobile47`（入口・視認性・SOURCEの再整理）
 
-現行ローカル改善版: `試作47 / mobile47`（公開前）
+現行ローカル改善版: `試作47 / mobile47`（公開版と同じ）
 
-アプリ実装コミット: 公開前
+アプリ実装コミット: `8229dca` (`Publish mobile47 improve mobile flow`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -224,7 +224,7 @@
 - iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。ローカルの内部 `BUILD_VERSION` は現在 `mobile47`。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は試作47から統合作品トップへ遷移する正式入口である。旧単体試着は`/tsuya-v2/?legacy=1`へ残す。
-- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile47`に統一して公開予定。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile47`に統一した。
 - SOURCEの小さな全体プレビューには、実際に分析する中央正方形の細い枠を表示する。縦長・横長画像で分析範囲が分からなくなる問題を避けるためである。
 
 ## 7. 次に着手すべき作業
@@ -812,9 +812,10 @@
 - CUSTOMの2つの入口が各340×52pxで表示される。
 - 作品一覧の動画は最初の作品だけを読み込み、遷移時に次の動画を設定する。
 - 上記確認でコンソールのerror/warnは0件。
+- アプリ実装コミット: `8229dca` (`Publish mobile47 improve mobile flow`)。
 
 実機要確認:
 
 - iPhone SafariでのSOURCE写真選択後の縦並び3案と、中央分析枠の見え方。
 - カメラ許可、MediaPipe追跡、カメラ映像からSOURCE、撮影・保存、動画自動再生。
-- コミット、push、GitHub Pages反映後の正式公開URL。
+- GitHub Pages反映後の実機確認。
