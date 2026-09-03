@@ -144,24 +144,21 @@
     animation:cardFloat 3.8s ease-in-out infinite;
   }
   body.source-camera-capture .source-guide-card{display:flex}
-  .sg-head{display:flex; align-items:center; gap:6px; margin-bottom:5px}
-  .sg-spark{color:#d7b39e; font-size:12px; animation:sparkGlow 2.4s ease-in-out infinite}
-  .sg-tag{font:500 8.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.22em; color:rgba(255,255,255,.68)}
+  .sg-tag{
+    font:500 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.26em; color:#d7b39e; margin-bottom:7px;
+  }
   .sg-title{
     color:#fffdfa; font:300 15px/1.38 "Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
-    letter-spacing:.14em; text-indent:.14em; margin-bottom:4px;
+    letter-spacing:.14em; text-indent:.14em; margin-bottom:5px;
     text-shadow:0 2px 10px rgba(0,0,0,.6);
   }
   .sg-sub{
-    color:rgba(255,255,255,.7); font-size:9.5px; letter-spacing:.12em; line-height:1.45;
+    color:rgba(255,255,255,.68); font-size:9.5px; letter-spacing:.12em; line-height:1.45;
   }
   @keyframes cardFloat{
     0%, 100%{transform:translateX(-50%) translateY(0)}
     50%{transform:translateX(-50%) translateY(-3px)}
-  }
-  @keyframes sparkGlow{
-    0%, 100%{opacity:.55; transform:scale(.92)}
-    50%{opacity:1; transform:scale(1.15); filter:drop-shadow(0 0 6px rgba(215,179,158,.8))}
   }
   /* 撮影直後の確認画面：撮った写真とキャプションを画面内に収めて全体を見せる */
   body.photo-frozen #canvas{
@@ -1279,48 +1276,34 @@
   .create-particle{
     position:fixed; z-index:999; left:var(--particle-x); top:var(--particle-y);
     width:var(--particle-size); height:var(--particle-size); margin:calc(var(--particle-size) / -2) 0 0 calc(var(--particle-size) / -2);
-    border:1px solid rgba(255,255,255,.96); border-radius:50%; pointer-events:none; background:#dffaff;
-    box-shadow:0 0 8px #fff,0 0 22px rgba(89,215,249,1);
+    border:1px solid rgba(255,255,255,.8); border-radius:50%; pointer-events:none; background:rgba(255,255,255,.85);
+    box-shadow:0 0 6px rgba(255,255,255,.5), 0 0 14px rgba(215,179,158,.4);
     animation:create-particle-flight .78s cubic-bezier(.12,.68,.22,1) var(--particle-delay) forwards;
-  }
-  .create-particle.is-star{
-    width:auto; height:auto; margin:-.55em 0 0 -.55em; border-radius:0;
-    color:#e5fbff; background:transparent; box-shadow:none;
-    font:400 var(--particle-size)/1 serif; text-shadow:0 0 6px #fff,0 0 17px rgba(109,218,247,.95);
   }
   @keyframes create-particle-flight{
     0%{opacity:0; transform:translate(0,0) scale(.3)}
-    12%{opacity:1; transform:translate(0,0) scale(1.1)}
-    72%{opacity:.92}
-    100%{opacity:0; transform:translate(var(--particle-dx),var(--particle-dy)) scale(.78) rotate(92deg)}
-  }
-  @keyframes create-entry-breathe{
-    0%,100%{border-color:rgba(190,230,240,.52); box-shadow:inset 0 0 18px rgba(170,224,238,.08),0 0 7px rgba(159,225,244,.08)}
-    50%{border-color:rgba(225,251,255,.95); box-shadow:inset 0 0 24px rgba(178,234,247,.19),0 0 27px rgba(134,224,249,.38)}
-  }
-  @keyframes create-entry-star{
-    0%,100%{opacity:.76; transform:scale(.88) rotate(0deg); box-shadow:0 0 8px rgba(174,235,250,.48),inset 0 0 8px rgba(205,247,255,.2)}
-    50%{opacity:1; transform:scale(1.1) rotate(20deg); box-shadow:0 0 22px rgba(128,224,249,.92),inset 0 0 12px rgba(225,252,255,.46)}
+    12%{opacity:1; transform:translate(0,0) scale(1)}
+    72%{opacity:.85}
+    100%{opacity:0; transform:translate(var(--particle-dx),var(--particle-dy)) scale(.5)}
   }
   @media (max-width:819px){
     body.art-page #workNails{justify-content:center}
     body.art-page .work-custom{
-      position:relative; isolation:isolate; overflow:visible; flex-direction:column; gap:3px;
-      border-color:rgba(190,230,240,.62); color:#f0fcff;
-      background:radial-gradient(circle at 50% 28%,rgba(175,235,250,.22),rgba(255,255,255,.045) 70%);
-      font-size:10px; line-height:1; text-shadow:0 0 8px rgba(166,229,246,.42);
-      animation:create-entry-breathe 2.6s ease-in-out infinite;
+      position:relative; isolation:isolate; overflow:visible;
+      flex-direction:row; align-items:center; justify-content:center; gap:6px;
+      padding:11px 20px;
+      border:1px solid rgba(255,255,255,.32); color:#fff;
+      background:rgba(255,255,255,.06);
+      font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.22em; text-indent:.22em;
+      backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      text-shadow:none; box-shadow:none;
+      transition:border-color .2s ease, background .2s ease;
     }
-    body.art-page .work-custom::before{
-      content:"✦"; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
-      width:22px; height:22px; margin:0; border:1px solid rgba(225,251,255,.82); border-radius:50%;
-      color:#f4feff; background:radial-gradient(circle,rgba(225,251,255,.3),rgba(106,211,239,.08) 66%,transparent 70%);
-      font-size:14px; line-height:1; text-shadow:0 0 5px #fff,0 0 12px rgba(116,220,248,1);
-      animation:create-entry-star 2.1s ease-in-out infinite;
-    }
+    body.art-page .work-custom::before{display:none!important}
   }
   @media (prefers-reduced-motion:reduce){
-    body.art-page .work-custom,body.art-page .work-custom::before{animation:none}
+    body.art-page .work-custom{animation:none}
     .create-particle{display:none}
   }
 
@@ -1566,12 +1549,9 @@
     <div class="guide-text">枠に手をかざしてください</div>
   </div>
   <div class="source-guide-card" id="sourceGuideCard" aria-hidden="true">
-    <div class="sg-head">
-      <span class="sg-spark">✦</span>
-      <span class="sg-tag">SOURCE / 光の採集</span>
-    </div>
+    <div class="sg-tag">SOURCE · 光の採集</div>
     <div class="sg-title">心惹かれる光や色を、写しとる</div>
-    <div class="sg-sub">身のまわりの光・質感・景色にかざしてください</div>
+    <div class="sg-sub">身のまわりの光や景色にかざしてください</div>
   </div>
   <div id="countdown"></div>
 
@@ -3868,7 +3848,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile64';
+  const BUILD_VERSION='mobile65';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4191,21 +4171,19 @@ updateCmpBadge();
       const rect=customLink.getBoundingClientRect();
       if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
         const centerX=rect.left+rect.width/2, centerY=rect.top+18;
-        for(let i=0;i<24;i++){
-          const angle=-2.65+(1.7*i/23)+((i%3)-1)*.025;
-          const distance=70+(i%6)*14;
+        for(let i=0;i<16;i++){
+          const angle=-2.65+(1.7*i/15)+((i%3)-1)*.025;
+          const distance=60+(i%5)*12;
           const particle=document.createElement('span');
-          const star=i%3===0;
-          particle.className='create-particle'+(star?' is-star':'');
-          if(star) particle.textContent='✦';
+          particle.className='create-particle';
           particle.style.setProperty('--particle-x',centerX+'px');
           particle.style.setProperty('--particle-y',centerY+'px');
           particle.style.setProperty('--particle-dx',Math.cos(angle)*distance+'px');
           particle.style.setProperty('--particle-dy',Math.sin(angle)*distance+'px');
-          particle.style.setProperty('--particle-size',(star?(18+(i%4)*3):(8+(i%5)*2))+'px');
-          particle.style.setProperty('--particle-delay',((i%6)*10)+'ms');
+          particle.style.setProperty('--particle-size',(6+(i%4)*2)+'px');
+          particle.style.setProperty('--particle-delay',((i%5)*12)+'ms');
           document.body.appendChild(particle);
-          setTimeout(()=>particle.remove(),1050);
+          setTimeout(()=>particle.remove(),900);
         }
       }
       setTimeout(()=>document.body.classList.add('route-leaving'),720);
