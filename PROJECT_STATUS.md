@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作52）: 公開前
+公開中のアプリ実装コミット（試作52）: `3a9d0c5` (`Publish mobile52 resume artwork videos`)
 
-現行公開版: `試作51 / mobile51`（SOURCE試着の固定化）
+現行公開版: `試作52 / mobile52`（作品動画の再生再試行）
 
-現行ローカル改善版: `試作52 / mobile52`（作品動画の再生再試行・公開前）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 公開前
+アプリ実装コミット: `3a9d0c5` (`Publish mobile52 resume artwork videos`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -882,3 +882,6 @@
 - 作品映像のsrcを差し替えた直後だけでなく、`loadeddata`と`canplay`の後にも再生を指示する。
 - ページを表示し直した時・別タブから戻った時も、開いている作品映像の再生を再試行する。
 - 映像ファイル、作品内容、MediaPipe、試着機能は変更していない。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushに成功し、GitHub Pagesで`mobile52`のHTMLを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=3a9d0c5-mobile52`
