@@ -1072,27 +1072,12 @@
   }
   body.hub-mode .bigbtn::after,body.hub-mode .make-link::after{content:"→"; font-size:15px; font-weight:300}
   body.hub-mode .make-link{border-color:rgba(255,255,255,.16); color:rgba(255,255,255,.76)}
-  body.custom-mode #startOverlay{
-    padding-bottom:calc(54px + env(safe-area-inset-bottom));
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-  }
-  body.custom-mode #startOverlay .invite{
-    text-align:center; margin:0 0 16px; font-size:clamp(30px,8.8vw,44px); letter-spacing:.14em; text-indent:.14em;
-  }
-  body.custom-mode .opening-guide{
-    text-align:center; margin:0 auto 20px; font-size:13.5px; line-height:1.7; color:rgba(255,255,255,.8);
-  }
-  body.custom-mode .opening-actions{
-    width:min(100%,340px); flex-direction:column; align-items:stretch; gap:10px;
-  }
-  body.custom-mode .bigbtn,body.custom-mode .make-link{
-    box-sizing:border-box; width:100%; text-align:center;
-    min-height:50px; font-size:13.5px; letter-spacing:.14em; text-indent:.14em;
-    display:flex; align-items:center; justify-content:center;
-  }
-  body.custom-mode .make-link{
-    padding:13px 16px; border:1px solid rgba(255,255,255,.16);
-  }
+  body.custom-mode #startOverlay{padding-bottom:calc(54px + env(safe-area-inset-bottom))}
+  body.custom-mode #startOverlay .invite{text-align:center}
+  body.custom-mode .opening-guide{text-align:center; margin:0 auto 17px; max-width:340px}
+  body.custom-mode .opening-actions{width:min(100%,340px); margin:0 auto; flex-direction:column; align-items:stretch; gap:9px}
+  body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
+  body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
   body.work-tryon .opening-steps,body.custom-mode .opening-steps{display:none}
   body.work-tryon .make-link{display:none}
   body.work-tryon .opening-guide{margin-bottom:17px}
@@ -1306,16 +1291,8 @@
   @media (max-width:819px){
     body.art-page #workNails{justify-content:center}
     body.art-page .work-custom{
-      position:relative; isolation:isolate; overflow:visible;
-      flex-direction:row; align-items:center; justify-content:center; gap:6px;
-      padding:11px 20px;
-      border:1px solid rgba(255,255,255,.32); color:#fff;
-      background:rgba(255,255,255,.06);
-      font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.22em; text-indent:.22em;
-      backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-      text-shadow:none; box-shadow:none;
-      transition:border-color .2s ease, background .2s ease;
+      justify-self:center; width:78%; min-height:43px; border:0; border-radius:999px;
+      color:#171717; background:var(--work-accent); text-shadow:none; animation:none;
     }
     body.art-page .work-custom::before{display:none!important}
   }
@@ -3865,7 +3842,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile66';
+  const BUILD_VERSION='mobile67';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();

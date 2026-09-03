@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作65）: `30ea8df` (`Publish mobile65 eliminate stars and refine custom guidance flow`)
+公開中のアプリ実装コミット（試作66）: `a92d5f1` (`Publish mobile66 revert custom texts and remove white borders, center align`)
 
-現行公開版: `試作65 / mobile65`（星マーク完全撤廃・CUSTOM導入ガイダンス刷新）
+現行公開版: `試作66 / mobile66`（CUSTOM画面の文言復帰）
 
-現行ローカル改善版: `試作66 / mobile66`（CUSTOMタイトル復帰・中央揃え・老若男女向け文字拡大と極小文字排除）
+現行ローカル改善版: `試作67 / mobile67`（CUSTOM画面とCREATEボタンの大元完全復元・白い枠と不自然な浮きの完全撤廃・中央揃え維持）
 
-アプリ実装コミット: 試作66をローカルで実装中
+アプリ実装コミット: 試作67をローカルで実装中
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -1079,5 +1079,18 @@
    - タイトル `CUSTOM`、案内文、ボタンをすべて垂直中央軸（`text-align: center`）へ整流。
    - 文字サイズはスマートフォンで快適に読める 13.5px を確保（極小文字は排除）。
    - 作品ページ・SOURCE画面内の 7px 極小フォントも 11px〜13.5px へ引き上げを維持。
-4. **運用ルールへの不変指針追加 (`AGENTS.md`):**
-   - 「老若男女が迷わず使えるアクセシビリティ（文字サイズ・視認性・中央揃え）」をルールに明記。
+- コミットID: `a92d5f1`。
+
+## 50. CUSTOM画面とCREATEボタンの大元完全復元・白い枠の完全撤廃（試作67・ローカル改善）
+
+2026-09-04、利用者の「なおってない」「白い枠何これ。前のやつに戻してっていったんだけど」という再度の強い指摘を受けて、直前の誤った中央配置 flex指定およびボタンの枠線スタイルを完全に撤廃し、大元のコードへ完全復元した。
+
+1. **CUSTOM画面の大元レイアウトへの完全復元:**
+   - 不自然に真ん中に浮き上がらせていた `display: flex; flex-direction: column; justify-content: center;` を完全に削除。
+   - 大元通りの下部配置レイアウト（`#startOverlay` の標準ルール）へ復帰させつつ、文字のみ中央揃え（`text-align: center; margin: 0 auto;`）を適用。
+   - タイトルは `CUSTOM`、案内文は `身のまわりから採集する`、ボタンは `カメラから作る` / `写真から作る` の大元仕様を維持。
+2. **作品ページのCREATEボタン（`.work-custom`）の大元復元:**
+   - 誤って付加されていた四角い白枠（`border: 1px solid rgba(255,255,255,.32)`）を撤廃。
+   - 大元の「作品アクセント色の丸いピルボタン（`border: 0; border-radius: 999px; background: var(--work-accent);`）」へ完全復帰（星マーク ✦ のみ非表示）。
+3. **完全な反映とキャッシュ回避:**
+   - `mobile67` としてコミット・pushし、GitHub Pagesで最新版の反映を確認。
