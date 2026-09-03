@@ -813,6 +813,8 @@
 - 作品一覧の動画は最初の作品だけを読み込み、遷移時に次の動画を設定する。
 - 上記確認でコンソールのerror/warnは0件。
 - アプリ実装コミット: `8229dca` (`Publish mobile47 improve mobile flow`)。
+- `origin main`へのpushに成功し、GitHub Pagesが`mobile47`を返すことを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=8229dca-mobile47`
 
 実機要確認:
 
