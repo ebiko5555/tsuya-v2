@@ -1662,7 +1662,7 @@
 </div>
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
-  <video class="work-film" id="workFilm" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
+  <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>試着へ戻る</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
@@ -3687,7 +3687,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile58';
+  const BUILD_VERSION='mobile59';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -3731,6 +3731,8 @@ updateCmpBadge();
      読み込み完了後にも再生を指示して、作品映像の静止を防ぐ。 */
   function playWorkFilmWhenReady(){
     if(!layer.classList.contains('open')) return;
+    workFilm.controls=false;
+    workFilm.removeAttribute('controls');
     workFilm.muted=true;
     workFilm.defaultMuted=true;
     workFilm.playsInline=true;

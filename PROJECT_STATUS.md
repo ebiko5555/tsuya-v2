@@ -8,9 +8,9 @@
 
 現行公開版: `試作58 / mobile58`（最初の一覧映像をHTML読込時からボタンなしで自動再生）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作59 / mobile59`（COLORの作品映像をHTML読込時からボタンなしで自動再生、未公開）
 
-アプリ実装コミット: `195447e` (`Publish mobile58 start hub video without button`)
+アプリ実装コミット: 試作59をローカルで実装中（未コミット・未公開）
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -957,3 +957,12 @@
 - `origin main`へのpushに成功し、GitHub Pagesが`mobile58`を返すことを確認した。
 - 公開HTMLに、最初の映像の`src`、`muted`、`autoplay`、`playsinline`が直接記述されていることを確認した。iPhone Safari実機での最終確認は要確認。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=195447e-mobile58`
+
+## 42. 最初の作品ページ映像をボタンなしで即時再生する（試作59・公開前）
+
+2026-09-03、画面録画を確認し、問題の対象がトップ直後に出る`01 / COLOR`の個別作品ページであると確定した。
+
+- 個別作品ページの最初の映像（COLOR）も、JavaScriptで後から設定せず、`video`要素の`src`属性としてHTMLに直接記述した。
+- `controls`属性は置かず、JavaScriptでも明示的に無効化する。再生を求めるボタンは出さない。
+- `muted`、`autoplay`、`playsinline`、`webkit-playsinline`をHTML読込時から揃え、ページ表示と同時に再生する。
+- 他の作品は既存の作品切替時に同じ`video`要素へ映像を読み込む。MediaPipe、カメラ、作品ファイルは変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。
