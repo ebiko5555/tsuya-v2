@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作49）: `7579d4a` (`Publish mobile49 simplify source view`)
+公開中のアプリ実装コミット（試作50）: `4a85e95` (`Fix source mode icon colors`)
 
-現行公開版: `試作49 / mobile49`（SOURCE情報表示の削除）
+現行公開版: `試作50 / mobile50`（SOURCE方式アイコンの追加）
 
 現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: `7579d4a` (`Publish mobile49 simplify source view`)
+アプリ実装コミット: `4a85e95` (`Fix source mode icon colors`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -849,3 +849,16 @@
 - インラインJavaScriptの構文検査と`git diff --check`を通過した。
 - `origin main`へのpushに成功し、GitHub Pagesで`mobile49`のHTMLを確認した。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=7579d4a-mobile49`
+
+## 33. SOURCE方式をアイコンで示す（試作50）
+
+2026-09-03、`試作50 / mobile50`として、SOURCEの4方式を文字だけではなく、処理の違いを示す図形でも区別できるようにした。
+
+- COLOR: 3色の重なる丸。写真から色を主に使う。
+- PATTERN: 波状の3本線。写真から線・模様を主に使う。
+- LIGHT: 星と小さな粒。写真の明暗・反射を主に使う。
+- MIX: 分割された円・線・星。色、模様、光を組み合わせる。
+- 選択時は従来どおり白地へ反転する。生成規則、3案、試着機能は変更していない。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushに成功し、GitHub Pagesで`mobile50`のHTMLを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=4a85e95-mobile50`
