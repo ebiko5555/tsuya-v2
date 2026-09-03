@@ -1441,7 +1441,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile51" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile52" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -3641,7 +3641,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile51';
+  const BUILD_VERSION='mobile52';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
@@ -3672,6 +3672,17 @@ updateCmpBadge();
     video.setAttribute('playsinline','');
     const attempt=video.play();
     if(attempt&&typeof attempt.catch==='function') attempt.catch(()=>{});
+  }
+  /* iPhone Safariでは、ページ遷移直後に最初のフレームだけ描かれる場合がある。
+     読み込み完了後にも再生を指示して、作品映像の静止を防ぐ。 */
+  function playWorkFilmWhenReady(){
+    if(!layer.classList.contains('open')) return;
+    const play=()=>{ if(layer.classList.contains('open')) playSilently(workFilm); };
+    if(workFilm.readyState>=2) play();
+    else{
+      workFilm.addEventListener('loadeddata',play,{once:true});
+      workFilm.addEventListener('canplay',play,{once:true});
+    }
   }
 
   function installArtworkLooks(){
@@ -3959,7 +3970,7 @@ updateCmpBadge();
     if(activeButton&&matchMedia('(max-width:819px)').matches){
       requestAnimationFrame(()=>index.scrollTo({left:Math.max(0,activeButton.offsetLeft-(index.clientWidth-activeButton.offsetWidth)/2),behavior:'smooth'}));
     }
-    playSilently(workFilm);
+    playWorkFilmWhenReady();
   }
   function closeWork(){
     if(document.body.classList.contains('art-page')){ location.href=homeRoute(); return; }
@@ -3972,6 +3983,8 @@ updateCmpBadge();
   });
   document.getElementById('workClose').addEventListener('click',closeWork);
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&layer.classList.contains('open'))closeWork();});
+  window.addEventListener('pageshow',playWorkFilmWhenReady);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden) playWorkFilmWhenReady();});
 
   const started=new MutationObserver(()=>{
     if(overlay.style.display==='none' && mode==='live'){

@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作51）: `a3469d2` (`Publish mobile51 lock source try-on`)
+公開中のアプリ実装コミット（試作52）: 公開前
 
 現行公開版: `試作51 / mobile51`（SOURCE試着の固定化）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作52 / mobile52`（作品動画の再生再試行・公開前）
 
-アプリ実装コミット: `a3469d2` (`Publish mobile51 lock source try-on`)
+アプリ実装コミット: 公開前
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -874,3 +874,11 @@
 - インラインJavaScriptの構文検査と`git diff --check`を通過した。
 - `origin main`へのpushに成功し、GitHub Pagesで`mobile51`のHTMLを確認した。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=a3469d2-mobile51`
+
+## 35. 作品映像の静止を防ぐ（試作52）
+
+2026-09-03、`試作52 / mobile52`として、トップから作品ページへ遷移した直後に作品映像が最初のフレームで止まることがある問題を調整した。
+
+- 作品映像のsrcを差し替えた直後だけでなく、`loadeddata`と`canplay`の後にも再生を指示する。
+- ページを表示し直した時・別タブから戻った時も、開いている作品映像の再生を再試行する。
+- 映像ファイル、作品内容、MediaPipe、試着機能は変更していない。
