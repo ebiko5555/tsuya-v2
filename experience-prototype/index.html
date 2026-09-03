@@ -1072,20 +1072,49 @@
   }
   body.hub-mode .bigbtn::after,body.hub-mode .make-link::after{content:"→"; font-size:15px; font-weight:300}
   body.hub-mode .make-link{border-color:rgba(255,255,255,.16); color:rgba(255,255,255,.76)}
-  body.custom-mode #startOverlay{padding-bottom:calc(54px + env(safe-area-inset-bottom))}
-  body.custom-mode .opening-actions{width:min(100%,340px); flex-direction:column; align-items:stretch; gap:9px}
-  body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
-  body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
-  body.work-tryon .opening-steps{display:none}
-  body.custom-mode .opening-steps{display:grid; grid-template-columns:repeat(3,1fr); width:min(100%,340px); margin-top:22px; border-top:1px solid rgba(255,255,255,.14)}
-  body.work-tryon .make-link{display:none}
-  body.work-tryon .opening-guide{margin-bottom:17px}
+  body.custom-mode #startOverlay{
+    padding-bottom:calc(54px + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  }
+  body.custom-mode .opening-mark{
+    position:relative; top:auto; left:auto; margin-bottom:14px;
+    font-size:11.5px; line-height:1.6; letter-spacing:.22em; text-align:center; color:rgba(255,255,255,.65);
+  }
+  body.custom-mode #startOverlay .invite{
+    text-align:center; margin:0 auto 16px; font-size:clamp(36px,10vw,48px);
+    letter-spacing:.22em; text-indent:.22em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:400;
+  }
   body.custom-mode .opening-guide{
-    max-width:320px; margin:0 auto 20px;
-    font-size:11.5px; line-height:1.75; color:rgba(255,255,255,.82);
-    letter-spacing:.08em; text-align:center;
+    max-width:340px; margin:0 auto 28px;
+    font-size:14.5px; line-height:1.85; color:rgba(255,255,255,.94);
+    letter-spacing:.06em; text-align:center;
     font-family:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   }
+  body.custom-mode .opening-actions{
+    width:min(100%,340px); flex-direction:column; align-items:stretch; gap:12px;
+  }
+  body.custom-mode .bigbtn,body.custom-mode .make-link{
+    box-sizing:border-box; width:100%; min-height:54px; padding:0 20px;
+    font-size:15px; font-weight:500; letter-spacing:.16em; text-indent:.16em;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+  }
+  body.custom-mode .bigbtn{background:rgba(255,255,255,.96); color:var(--ink); border-color:transparent}
+  body.custom-mode .make-link{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.32); color:#fff}
+  body.work-tryon .opening-steps{display:none}
+  body.custom-mode .opening-steps{
+    display:grid; grid-template-columns:repeat(3,1fr); width:min(100%,340px);
+    margin:28px auto 0; padding-top:16px; border-top:1px solid rgba(255,255,255,.18);
+  }
+  body.custom-mode .opening-steps span{
+    padding:10px 4px 0; color:rgba(255,255,255,.76);
+    font-size:12px; line-height:1.55; letter-spacing:.06em; text-align:center;
+  }
+  body.custom-mode .opening-steps b{
+    display:block; margin-bottom:5px; color:#e5bfa7; font-size:13px; font-weight:600;
+  }
+  body.work-tryon .make-link{display:none}
+  body.work-tryon .opening-guide{margin-bottom:17px}
   .work-close{
     display:flex; align-items:center; gap:8px; left:14px!important; right:auto!important;
     min-height:40px; padding:0 12px!important; font-size:8px!important;
@@ -1224,14 +1253,14 @@
       scrollbar-width:none;
     }
     body.art-page .work-copy::-webkit-scrollbar{display:none}
-    body.art-page .work-code{font-size:7px; letter-spacing:.16em}
+    body.art-page .work-code{font-size:11.5px; letter-spacing:.2em; color:rgba(255,255,255,.65)}
     body.art-page .work-title{
       margin:8px 0 10px; font-size:clamp(38px,12vw,52px); line-height:1; letter-spacing:.035em;
     }
     body.art-page .work-title::after{width:32px; left:calc(100% + 12px)}
     body.art-page .work-text{
-      max-width:none; margin:0; color:rgba(242,241,237,.78);
-      font-size:12px; line-height:1.75; letter-spacing:.04em;
+      max-width:none; margin:0; color:rgba(242,241,237,.88);
+      font-size:13.5px; line-height:1.85; letter-spacing:.04em;
     }
     body.art-page #workNails{height:58px; gap:7px; margin-top:25px}
     body.art-page #workNails canvas{width:24px; height:48px}
@@ -1445,16 +1474,16 @@
   body.custom-mode.source-planning .source-frame{display:block; margin:0}
   body.custom-mode.source-planning #sourcePreview{display:none}
   body.custom-mode.source-planning .source-large-image{display:block; width:100%; height:46svh; object-fit:contain; background:#111216}
-  body.custom-mode.source-planning .source-meta{display:flex; justify-content:space-between; gap:10px; padding:8px 2px 0; font-size:7px; line-height:1.4}
-  body.custom-mode.source-planning .source-meta strong{margin:0; font-size:9px}
-  body.custom-mode.source-planning .source-modes{display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:12px; overflow:visible}
-    body.custom-mode.source-planning .source-mode{min-width:0; min-height:56px; padding:5px 2px 4px; flex-direction:column; gap:3px; font-size:7px; letter-spacing:.06em}
+  body.custom-mode.source-planning .source-meta{display:flex; justify-content:space-between; gap:10px; padding:8px 2px 0; font-size:11px; line-height:1.45}
+  body.custom-mode.source-planning .source-meta strong{margin:0; font-size:12.5px}
+  body.custom-mode.source-planning .source-modes{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:12px; overflow:visible}
+    body.custom-mode.source-planning .source-mode{min-width:0; min-height:58px; padding:6px 3px 5px; flex-direction:column; gap:4px; font-size:11px; letter-spacing:.08em}
     body.custom-mode.source-planning .source-mode svg{width:26px; height:26px}
   body.custom-mode.source-planning .source-sets{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px}
-  body.custom-mode.source-planning .source-set{display:flex; flex-direction:column; min-width:0; min-height:0; padding:7px 5px 6px; gap:4px; text-align:center}
-  body.custom-mode.source-planning .source-set-code{align-self:flex-start; font-size:7px}
+  body.custom-mode.source-planning .source-set{display:flex; flex-direction:column; min-width:0; min-height:0; padding:8px 6px 7px; gap:5px; text-align:center}
+  body.custom-mode.source-planning .source-set-code{align-self:flex-start; font-size:11px; font-weight:600; color:#d7b39e}
   body.custom-mode.source-planning .source-set canvas{width:100%; height:auto; aspect-ratio:200/76}
-  body.custom-mode.source-planning .source-set-name{font-size:7px}
+  body.custom-mode.source-planning .source-set-name{font-size:11.5px}
 
   .source-confirm{overflow:hidden; padding-left:16px; padding-right:16px}
   .source-confirm-head{justify-content:flex-end}
@@ -3855,7 +3884,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile65';
+  const BUILD_VERSION='mobile66';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4293,7 +4322,7 @@ updateCmpBadge();
     }else{
       document.querySelector('.opening-mark').innerHTML='SOURCE · 光の採集<br>HAND &amp; LIGHT ATELIER';
     }
-    document.querySelector('#startOverlay .invite').textContent='光と色を手元へ';
+    document.querySelector('#startOverlay .invite').textContent='CUSTOM';
     document.getElementById('openingGuide').innerHTML=
       '日常の景色や身のまわりの光を1枚写してください。<br>抽出された色と質感から、あなただけのネイルが立ち現れます。';
     document.getElementById('startBtn').textContent='カメラで景色を写す';
