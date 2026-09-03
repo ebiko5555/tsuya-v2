@@ -1361,6 +1361,52 @@
     bottom:calc(34px + env(safe-area-inset-bottom)); gap:34px;
   }
   body.custom-mode.source-camera-capture .shutter{background:rgba(8,9,12,.26); border-color:#fff}
+
+  /* 試作47：入口の視認性、作品の横移動、SOURCEの選択をスマホで読み取れる密度にする。 */
+  @media (max-width:819px){
+    body.art-page .work-index{
+      top:calc(50svh + 2px); height:80px; gap:8px;
+      padding:25px 16px 7px;
+    }
+    body.art-page .work-index::before{
+      top:7px; color:rgba(255,255,255,.72); font-size:8px; letter-spacing:.13em;
+    }
+    body.art-page .work-index button{
+      flex-basis:100px; width:100px; height:46px; gap:8px; padding:0 10px;
+    }
+    body.art-page .work-index .work-nav-no{font-size:11px}
+    body.art-page .work-index .work-nav-title{font-size:8px; letter-spacing:.07em; opacity:.82}
+    body.art-page .work-copy{top:calc(50svh + 82px)}
+
+    body.custom-mode .opening-actions{gap:10px}
+    body.custom-mode .bigbtn,body.custom-mode .make-link{
+      min-height:52px; padding:0 18px; font-size:11px; letter-spacing:.1em;
+    }
+    body.custom-mode .make-link{
+      display:flex; align-items:center; justify-content:center;
+      border-color:rgba(255,255,255,.38); color:rgba(255,255,255,.9); background:rgba(8,9,12,.28);
+    }
+
+    body.custom-mode.source-planning .panel{padding:12px}
+    body.custom-mode.source-planning .source-frame{
+      display:grid; grid-template-columns:78px minmax(0,1fr); gap:11px; align-items:center;
+      margin:0 0 10px;
+    }
+    body.custom-mode.source-planning .source-large-image{display:none}
+    body.custom-mode.source-planning #sourcePreview{display:block; width:78px; height:78px; background:#111216}
+    body.custom-mode.source-planning .source-meta{font-size:9px; line-height:1.55}
+    body.custom-mode.source-planning .source-meta strong{font-size:11px}
+    body.custom-mode.source-planning .source-modes{gap:7px; margin-top:10px}
+    body.custom-mode.source-planning .source-mode{min-height:44px; font-size:9px; letter-spacing:.04em}
+    body.custom-mode.source-planning .source-sets{grid-template-columns:1fr; gap:8px; margin-top:12px}
+    body.custom-mode.source-planning .source-set{
+      display:grid; grid-template-columns:30px minmax(0,1fr) auto; align-items:center;
+      min-height:88px; padding:8px 10px; gap:9px; text-align:left;
+    }
+    body.custom-mode.source-planning .source-set-code{align-self:center; font-size:9px}
+    body.custom-mode.source-planning .source-set canvas{width:190px; max-width:100%; height:72px; aspect-ratio:auto}
+    body.custom-mode.source-planning .source-set-name{font-size:10px; letter-spacing:.09em}
+  }
 </style>
 </head>
 <body>
@@ -1373,7 +1419,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">WORKS</span>
 </a>
-<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile46" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../top-prototype/?v=mobile47" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1382,9 +1428,9 @@
 
   <div id="startOverlay">
     <div class="opening-films" aria-hidden="true">
-      <video class="opening-film a" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline preload="auto"></video>
-      <video class="opening-film b" src="art-assets/surface-gold.mp4" muted loop autoplay playsinline preload="auto"></video>
-      <video class="opening-film c" src="art-assets/hand-drawing.mp4" muted loop autoplay playsinline preload="metadata"></video>
+      <video class="opening-film a" muted loop playsinline preload="none"></video>
+      <video class="opening-film b" muted loop playsinline preload="none"></video>
+      <video class="opening-film c" muted loop playsinline preload="none"></video>
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite"></p>
@@ -3134,15 +3180,21 @@ function renderSourceSets(){
   });
   selectedSourceSet=null;
 }
-function ingestSource(input,label){
+  function ingestSource(input,label){
   const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
   const ow=input.videoWidth||input.naturalWidth||input.width||sampled.width;
   const oh=input.videoHeight||input.naturalHeight||input.height||sampled.height;
   const preview=$('sourcePreview'), pc=preview.getContext('2d');
   pc.fillStyle='#09090b'; pc.fillRect(0,0,preview.width,preview.height);
-  const previewScale=Math.min(preview.width/ow,preview.height/oh);
-  const previewW=ow*previewScale, previewH=oh*previewScale;
-  pc.drawImage(input,(preview.width-previewW)/2,(preview.height-previewH)/2,previewW,previewH);
+    const previewScale=Math.min(preview.width/ow,preview.height/oh);
+    const previewW=ow*previewScale, previewH=oh*previewScale;
+    pc.drawImage(input,(preview.width-previewW)/2,(preview.height-previewH)/2,previewW,previewH);
+    /* 表示画像のうち、実際に分析する中央正方形だけを細い枠で示す。 */
+    const analysisSide=Math.min(previewW,previewH);
+    pc.save();
+    pc.strokeStyle='rgba(242,241,237,.9)'; pc.lineWidth=2;
+    pc.strokeRect((preview.width-analysisSide)/2+1,(preview.height-analysisSide)/2+1,analysisSide-2,analysisSide-2);
+    pc.restore();
   const display=document.createElement('canvas'), maxSide=640, ratio=Math.min(1,maxSide/Math.max(ow,oh));
   display.width=Math.max(1,Math.round(ow*ratio)); display.height=Math.max(1,Math.round(oh*ratio));
   display.getContext('2d').drawImage(input,0,0,display.width,display.height);
@@ -3566,7 +3618,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile46';
+  const BUILD_VERSION='mobile47';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);

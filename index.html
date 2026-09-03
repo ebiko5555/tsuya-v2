@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<!-- 試作47: 作品の正式入口をルートへ統一する。旧単体試着は ?legacy=1 で保持。 -->
+<script>
+  if(new URLSearchParams(location.search).get('legacy')!=='1'){
+    location.replace('top-prototype/?v=mobile47');
+  }
+</script>
 <title>艶 II — 手と光のアトリエ</title>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
         onerror="window.__mpFailed=true"></script>

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&text=%E8%89%B6&display=swap" rel="stylesheet">
 <style>
-  :root{ --ink:#2a2522; --sub:#8f8378; --faint:#b5a99d; --accent:#a4735c; }
+  :root{ --ink:#2a2522; --sub:#6f6258; --faint:#a99d92; --accent:#a4735c; }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   body{
@@ -32,14 +32,17 @@
   }
   .rule{
     position:absolute; left:50%; bottom:calc(112px + env(safe-area-inset-bottom));
-    width:0; height:1px; background:var(--ink); opacity:.3;
+    width:0; height:1px; background:var(--ink); opacity:.38;
     transform:translateX(-50%); pointer-events:none;
   }
   .sub{
     position:absolute; left:0; right:0; bottom:calc(84px + env(safe-area-inset-bottom));
-    text-align:center; font-size:9.5px; letter-spacing:.38em; text-indent:.38em;
+    text-align:center; font-size:12px; font-weight:500; letter-spacing:.25em; text-indent:.25em;
     color:var(--sub); pointer-events:none; opacity:0;
   }
+  #stage:not(.leaving) .rule{animation:entry-rule-breathe 2.8s ease-in-out 1.7s infinite alternate}
+  @keyframes entry-rule-breathe{from{opacity:.3}to{opacity:.58}}
+  @media (prefers-reduced-motion:reduce){#stage:not(.leaving) .rule{animation:none}}
 
   #veil{
     position:fixed; inset:0; background:#f4efe9; opacity:0; pointer-events:none;
@@ -48,7 +51,7 @@
 </style>
 </head>
 <body>
-<a id="stage" href="../experience-prototype/?v=mobile46" aria-label="触れて作品へ">
+<a id="stage" href="../experience-prototype/?v=mobile47" aria-label="触れて作品へ">
   <canvas id="glyph"></canvas>
   <div class="over" id="over">HAND &amp; LIGHT / 2026</div>
   <div class="rule" id="rule"></div>
@@ -216,7 +219,7 @@ function chrome(t, ex){
   const r = Math.min(1, Math.max(0, (t-1.05)/0.9));
   $('rule').style.width = (ease(r)*38*(1-ex)).toFixed(1)+'px';
   const sv = Math.min(1, Math.max(0, (t-1.5)/1.0));
-  $('sub').style.opacity = (sv*0.85*fade*(0.72+0.28*Math.sin(t*1.6))).toFixed(3);
+  $('sub').style.opacity = (sv*fade*(0.9+0.1*Math.sin(t*1.6))).toFixed(3);
 }
 
 /* ---------- ループ ---------- */
