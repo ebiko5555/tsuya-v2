@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作48）: `800f25b` (`Publish mobile48 enlarge source photo`)
+公開中のアプリ実装コミット（試作49）: 公開前
 
 現行公開版: `試作48 / mobile48`（SOURCE写真の再拡大）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作49 / mobile49`（SOURCE情報表示の削除・公開前）
 
-アプリ実装コミット: `800f25b` (`Publish mobile48 enlarge source photo`)
+アプリ実装コミット: 公開前
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -221,11 +221,10 @@
 - SOURCE入口動画は過去に「動いていない」と利用者から報告され、その後も `source-process-loop-v1.mp4` を暫定利用している。最新実機での再生状態は要確認。
 - `top-prototype/index.html` の `go()` と退場フェードは通常クリックへ接続済み。variant 1/2は未使用で、現行の初期値は光沢案の`0`。粒子案を現行仕様と誤認しない。
 - ブラウザ自動試験環境には実カメラがなく、カメラ許可・MediaPipe追跡・撮影系は完全自動確認できない。
-- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。ローカルの内部 `BUILD_VERSION` は現在 `mobile47`。確認時は公開URLへコミットID等の `v` クエリを付ける。
+- iPhone SafariはGitHub PagesのHTMLを強くキャッシュすることがある。確認時は公開URLへコミットID等の `v` クエリを付ける。
 - SMB/macOS由来の未追跡 `._*` が多数存在し、Gitが `non-monotonic index` 警告を出す。2026-08-31時点ではコミット・push自体は成功している。AppleDoubleをGitへ追加しないこと。
 - ルート公開URL `/tsuya-v2/` は試作47から統合作品トップへ遷移する正式入口である。旧単体試着は`/tsuya-v2/?legacy=1`へ残す。
-- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは`mobile47`に統一した。
-- SOURCEの小さな全体プレビューには、実際に分析する中央正方形の細い枠を表示する。縦長・横長画像で分析範囲が分からなくなる問題を避けるためである。
+- `top-prototype/index.html`内のリンク、アプリ本体の`BUILD_VERSION`、HOMEは現行版番号に統一する。
 
 ## 7. 次に着手すべき作業
 
@@ -839,3 +838,11 @@
 実機要確認:
 
 - iPhone Safariで写真選択後、縦長・横長写真が切れずに大きく表示され、3案へ無理なくスクロールできること。
+
+## 32. SOURCEの技術情報を消す（試作49）
+
+2026-09-03、`試作49 / mobile49`として、写真から作る画面を素材とネイル案だけへ整理した。
+
+- 写真右下の分析範囲小窓を非表示にした。
+- `IMG_...`、`8 COLORS`、`LINE`、`LIGHT`など、素材分析の途中値を示す文字を非表示にした。
+- 大きい選択写真、4方式、縦に並ぶ3案、分析・背景抑制・生成規則、試着機能は変更していない。
