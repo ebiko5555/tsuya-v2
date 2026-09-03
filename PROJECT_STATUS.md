@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作54）: `a4e1d52` (`Publish mobile54 fix hub video playback`)
+公開中のアプリ実装コミット（試作56）: `543b7ef` (`Set mobile56 app version`)
 
-現行公開版: `試作54 / mobile54`（作品一覧映像の再生修正）
+現行公開版: `試作56 / mobile56`（作品ページ映像の自動再生修正）
 
-現行ローカル改善版: `試作56 / mobile56`（作品ページ映像の自動再生を修正中、未公開）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 試作56をローカルで実装中（未コミット・未公開）
+アプリ実装コミット: `543b7ef` (`Set mobile56 app version`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -929,4 +929,7 @@
 - `loadeddata`待ちだけにせず、作品ページを開いた直後に必ず`play()`を呼ぶ以前の動作へ戻した。
 - 読み込み完了後の再生指示と、既存の180ms・700ms・1500ms後の再試行は残す。
 - `muted`、`playsinline`、`webkit-playsinline`を再生直前にも明示して、iPhoneの画面内・無音自動再生条件を満たす。
-- MediaPipe、カメラ、作品映像ファイルそのものは変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。
+- MediaPipe、カメラ、作品映像ファイルそのものは変更していない。
+- `origin main`へのpushに成功し、GitHub Pagesが`mobile56`を返すことを確認した。
+- 公開URLの作品ページ（`COLOR`）で、5秒後も動画が停止せず `currentTime` が約4.8秒まで進んでいることを確認した。iPhone Safari実機での最終確認は要確認。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=543b7ef-mobile56`
