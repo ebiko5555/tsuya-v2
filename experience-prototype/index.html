@@ -1076,9 +1076,16 @@
   body.custom-mode .opening-actions{width:min(100%,340px); flex-direction:column; align-items:stretch; gap:9px}
   body.custom-mode .bigbtn,body.custom-mode .make-link{box-sizing:border-box; width:100%; text-align:center}
   body.custom-mode .make-link{padding:13px 16px; border:1px solid rgba(255,255,255,.16)}
-  body.work-tryon .opening-steps,body.custom-mode .opening-steps{display:none}
+  body.work-tryon .opening-steps{display:none}
+  body.custom-mode .opening-steps{display:grid; grid-template-columns:repeat(3,1fr); width:min(100%,340px); margin-top:22px; border-top:1px solid rgba(255,255,255,.14)}
   body.work-tryon .make-link{display:none}
-  body.work-tryon .opening-guide,body.custom-mode .opening-guide{margin-bottom:17px}
+  body.work-tryon .opening-guide{margin-bottom:17px}
+  body.custom-mode .opening-guide{
+    max-width:320px; margin:0 auto 20px;
+    font-size:11.5px; line-height:1.75; color:rgba(255,255,255,.82);
+    letter-spacing:.08em; text-align:center;
+    font-family:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
   .work-close{
     display:flex; align-items:center; gap:8px; left:14px!important; right:auto!important;
     min-height:40px; padding:0 12px!important; font-size:8px!important;
@@ -4267,7 +4274,7 @@ updateCmpBadge();
 
   function prepareCustomPage(){
     document.body.classList.add('custom-mode');
-    document.title='HAND & LIGHT — 自分で作る';
+    document.title='HAND & LIGHT — 光と色の採集';
     const sourceHero=document.querySelector('.opening-film.a');
     sourceHero.src='source-assets/source-process-loop-v1.mp4';
     sourceHero.load(); playSilently(sourceHero);
@@ -4282,19 +4289,24 @@ updateCmpBadge();
         applyArtworkPreset(fromKey);
         document.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active'));
       };
-      document.querySelector('.opening-mark').innerHTML='FROM '+origin.no+' / '+fromKey+'<br>ARTWORK → SOURCE → HAND';
+      document.querySelector('.opening-mark').innerHTML='SOURCE · 光の採集<br>FROM '+origin.no+' · '+origin.title;
     }else{
-      document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
+      document.querySelector('.opening-mark').innerHTML='SOURCE · 光の採集<br>HAND &amp; LIGHT ATELIER';
     }
-    document.querySelector('#startOverlay .invite').textContent='CUSTOM';
-    document.getElementById('openingGuide').textContent=origin?(origin.title+' / 身のまわりから採集する'):'身のまわりから採集する';
-    document.getElementById('startBtn').textContent='カメラから作る';
+    document.querySelector('#startOverlay .invite').textContent='光と色を手元へ';
+    document.getElementById('openingGuide').innerHTML=
+      '日常の景色や身のまわりの光を1枚写してください。<br>抽出された色と質感から、あなただけのネイルが立ち現れます。';
+    document.getElementById('startBtn').textContent='カメラで景色を写す';
     document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';
     const backHref=origin?route('work',fromKey):homeRoute();
     const workBack=document.getElementById('tryWorkBack'); workBack.textContent=origin?'WORK':'WORKS'; workBack.href=backHref;
     const link=document.querySelector('.make-link');
-    link.textContent='写真から作る'; link.href='#';
+    link.textContent='保存した写真から選ぶ'; link.href='#';
     link.onclick=ev=>{ev.preventDefault(); document.getElementById('sourceInput').click();};
+    const steps=document.querySelector('.opening-steps');
+    if(steps){
+      steps.innerHTML='<span><b>01 採集</b>景色を1枚写す</span><span><b>02 生成</b>ネイルが立ち現れる</span><span><b>03 試着</b>手にかざして纏う</span>';
+    }
     document.getElementById('globalBack').href=backHref;
     document.getElementById('globalBackText').textContent='BACK';
   }
