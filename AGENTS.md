@@ -172,7 +172,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 このリポジトリのアプリ実装に伴うcommit、push、GitHub Pages公開は、利用者が「やって」または「公開して」と指示した時点で明示的に許可されたものとして扱う。「まだ公開しないで」と指示された場合だけローカルで止める。
 
-改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。現在のローカル改善版は試作59 / `mobile59`。公開版は `PROJECT_STATUS.md` の冒頭を正本とする。
+改善版には `試作番号 / mobile番号` の連番を付ける。`BUILD_VERSION`、トップやHOMEを含む内部リンク、`PROJECT_STATUS.md` を同じ番号へ揃える。現在のローカル改善版は試作60 / `mobile60`。公開版は `PROJECT_STATUS.md` の冒頭を正本とする。
 
 GitHub Pagesは常に `main` の最新版1つだけを現行公開版として扱う。過去版を別の公開先へ複製したり、旧版URLを利用者向けの選択肢として並べたりしない。公開報告では最新版の作品トップURLを先頭に1つ提示する。`?v=コミットID-mobile番号` はiPhone等のキャッシュを避けて同じ最新版を読み直すための値であり、過去版を残すURLではない。
 

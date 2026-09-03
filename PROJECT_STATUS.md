@@ -8,9 +8,9 @@
 
 現行公開版: `試作58 / mobile58`（最初の一覧映像をHTML読込時からボタンなしで自動再生）
 
-現行ローカル改善版: `試作59 / mobile59`（COLORの作品映像をHTML読込時からボタンなしで自動再生、未公開）
+現行ローカル改善版: `試作60 / mobile60`（WebKitメディアコントロール完全非表示とタッチ即時再生復帰）
 
-アプリ実装コミット: 試作59をローカルで実装中（未コミット・未公開）
+アプリ実装コミット: 試作60をローカルで実装中
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -965,4 +965,15 @@
 - 個別作品ページの最初の映像（COLOR）も、JavaScriptで後から設定せず、`video`要素の`src`属性としてHTMLに直接記述した。
 - `controls`属性は置かず、JavaScriptでも明示的に無効化する。再生を求めるボタンは出さない。
 - `muted`、`autoplay`、`playsinline`、`webkit-playsinline`をHTML読込時から揃え、ページ表示と同時に再生する。
-- 他の作品は既存の作品切替時に同じ`video`要素へ映像を読み込む。MediaPipe、カメラ、作品ファイルは変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。
+- 他の作品は既存の作品切替時に同じ`video`要素へ映像を読み込む。MediaPipe、カメラ、作品ファイルは変更していない。
+
+## 43. 再生ボタン表示の完全防止と画面タッチ時即時再生（試作60・ローカル改善）
+
+2026-09-04、トップから入った直後の作品一覧（および作品ページ）で、動画が静止してSafari等の再生ボタンが表示されてしまう現象に対応した。
+
+- CSSでWebKit標準の再生ボタン・メディアコントロール（`video::-webkit-media-controls-start-playback-button` 等）を完全に非表示化・ポインター無効化し、再生ボタンの出現を物理的に防止。
+- 最初の一覧映像だけでなく、待機用の`opening-film b`（SURFACE）にも事前に`src`属性を記述。
+- 動画要素に`disablepictureinpicture`、`disableremoteplayback`を明示。
+- モバイルブラウザで初期自動再生がブロックされた場合の対策として、画面タッチ（`pointerdown`/`touchstart`）時に停止中の動画があれば即座に無音再生を開始する復帰処理を追加。
+- 作品一覧の映像切り替え時（`showHubWork`）に、`src`設定直後と読込完了時（`loadeddata`/`canplay`）の双方で再生指示を二重化。
+- MediaPipe、試着機能、作品データは変更していない。

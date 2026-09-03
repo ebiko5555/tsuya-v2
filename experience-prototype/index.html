@@ -612,6 +612,18 @@
     border:0; border-radius:0; background:#08090c; box-shadow:none;
   }
   #canvas{filter:saturate(.78) contrast(1.04)}
+  /* Safari等で自動再生待機時に再生ボタンがオーバーレイ表示されるのを完全に消去 */
+  video::-webkit-media-controls,
+  video::-webkit-media-controls-start-playback-button,
+  video::-webkit-media-controls-play-button,
+  video::-webkit-media-controls-panel,
+  video::-webkit-media-controls-enclosure {
+    display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   #startOverlay{
     overflow:hidden; align-items:stretch; justify-content:flex-end; padding:0 22px calc(122px + env(safe-area-inset-bottom));
     color:#f2f1ed; background:#08090c;
@@ -622,7 +634,7 @@
     background:linear-gradient(180deg,rgba(8,9,12,.12),rgba(8,9,12,.18) 45%,#08090c 90%),
       radial-gradient(circle at 50% 38%,transparent 12%,rgba(8,9,12,.44) 82%);
   }
-  .opening-film{position:absolute; display:block; object-fit:cover; filter:saturate(.62) contrast(1.12)}
+  .opening-film{position:absolute; display:block; object-fit:cover; filter:saturate(.62) contrast(1.12); pointer-events:none}
   .opening-film.a{
     left:-9%; top:6%; width:56%; height:47%;
     clip-path:polygon(0 5%,86% 0,100% 76%,28% 100%); opacity:.78;
@@ -1459,9 +1471,9 @@
 
   <div id="startOverlay">
     <div class="opening-films" aria-hidden="true">
-      <video class="opening-film a" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
-      <video class="opening-film b" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
-      <video class="opening-film c" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
+      <video class="opening-film a" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
+      <video class="opening-film b" src="art-assets/surface-gold.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
+      <video class="opening-film c" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite"></p>
@@ -1662,7 +1674,7 @@
 </div>
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
-  <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+  <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>試着へ戻る</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
@@ -3687,7 +3699,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile59';
+  const BUILD_VERSION='mobile60';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -3724,6 +3736,9 @@ updateCmpBadge();
     video.playsInline=true;
     video.setAttribute('muted','');
     video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+    video.setAttribute('disablepictureinpicture','');
+    video.setAttribute('disableremoteplayback','');
     const attempt=video.play();
     if(attempt&&typeof attempt.catch==='function') attempt.catch(()=>{});
   }
@@ -3733,12 +3748,7 @@ updateCmpBadge();
     if(!layer.classList.contains('open')) return;
     workFilm.controls=false;
     workFilm.removeAttribute('controls');
-    workFilm.muted=true;
-    workFilm.defaultMuted=true;
-    workFilm.playsInline=true;
-    workFilm.setAttribute('muted','');
-    workFilm.setAttribute('playsinline','');
-    workFilm.setAttribute('webkit-playsinline','');
+    playSilently(workFilm);
     const play=()=>{ if(layer.classList.contains('open')) playSilently(workFilm); };
     /* iPhoneではloadeddataを待つだけだと、先頭フレームで停止することがある。
        srcを差し替えた直後のplay()が「読み込み後に再生する予約」になるため、
@@ -4166,10 +4176,14 @@ updateCmpBadge();
         activeFilm=nextFilm;
       };
       if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
-      /* 作品一覧は、srcを入れた直後に再生を予約する元の方式を使う。
-         iPhoneでは読込完了を待ってから呼ぶと、先頭フレームで止まることがある。 */
+      /* 作品一覧は、srcを入れた直後と読込完了時の両方で再生を指示し、静止を防ぐ */
       playSilently(video);
-      if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
+      const onReady=()=>{ playSilently(video); reveal(); };
+      if(video.readyState>=2) reveal();
+      else{
+        video.addEventListener('canplay',onReady,{once:true});
+        video.addEventListener('loadeddata',onReady,{once:true});
+      }
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
       enter.href=route('work',key);
@@ -4197,6 +4211,15 @@ updateCmpBadge();
     event.preventDefault();
     location.href=globalBack.href;
   });
+
+  // モバイルで自動再生がブロックされた場合の保険：画面タッチ時に停止中の動画があれば即時再生
+  function unlockMediaPlayback(){
+    const hubVideos=[...document.querySelectorAll('.opening-film')].slice(0,2);
+    hubVideos.forEach(v=>{ if(v&&v.paused) playSilently(v); });
+    if(layer.classList.contains('open') && workFilm.paused) playSilently(workFilm);
+  }
+  document.addEventListener('pointerdown',unlockMediaPlayback,{passive:true,capture:true});
+  document.addEventListener('touchstart',unlockMediaPlayback,{passive:true,capture:true});
 
   // スマホ操作と画面収録で、触れた位置を静かに可視化する。
   document.addEventListener('pointerdown',event=>{
