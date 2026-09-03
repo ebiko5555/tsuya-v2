@@ -1450,9 +1450,9 @@
 
   <div id="startOverlay">
     <div class="opening-films" aria-hidden="true">
-      <video class="opening-film a" muted loop playsinline preload="none"></video>
-      <video class="opening-film b" muted loop playsinline preload="none"></video>
-      <video class="opening-film c" muted loop playsinline preload="none"></video>
+      <video class="opening-film a" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
+      <video class="opening-film b" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
+      <video class="opening-film c" muted loop autoplay playsinline webkit-playsinline preload="auto"></video>
     </div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite"></p>
@@ -3641,7 +3641,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile53';
+  const BUILD_VERSION='mobile54';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4079,7 +4079,19 @@ updateCmpBadge();
     const code=document.getElementById('openingWorkCode');
     const title=document.getElementById('openingWorkTitle');
     const progress=document.getElementById('openingProgress');
-    let hubIndex=0, activeFilm=0, timer=null;
+    let hubIndex=0, activeFilm=0, timer=null, hubTapStarted=false;
+
+    function playHubFilmWhenReady(video){
+      if(!video) return;
+      video.muted=true; video.defaultMuted=true; video.playsInline=true;
+      video.setAttribute('muted',''); video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
+      const play=()=>playSilently(video);
+      if(video.readyState>=2) play();
+      else{
+        video.addEventListener('loadeddata',play,{once:true});
+        video.addEventListener('canplay',play,{once:true});
+      }
+    }
 
     function restartProgress(){
       progress.classList.add('restart');
@@ -4096,7 +4108,8 @@ updateCmpBadge();
         activeFilm=nextFilm;
       };
       if(video.getAttribute('src')!==work.film){video.src=work.film; video.load();}
-      playSilently(video);
+      playHubFilmWhenReady(video);
+      [180,700,1500].forEach(delay=>setTimeout(()=>playHubFilmWhenReady(video),delay));
       if(video.readyState>=2) reveal(); else video.addEventListener('canplay',reveal,{once:true});
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
@@ -4105,6 +4118,17 @@ updateCmpBadge();
       restartProgress();
     }
     showHubWork(0,true);
+    /* 低電力モード等で自動再生が止められた時だけ、最初のタップを再生開始に使う。
+       通常に動いている時は従来どおり、そのまま作品ページへ進む。 */
+    enter.addEventListener('click',event=>{
+      const video=films[activeFilm];
+      if(!hubTapStarted&&video&&video.paused){
+        event.preventDefault();
+        hubTapStarted=true;
+        playHubFilmWhenReady(video);
+        [120,500,1100].forEach(delay=>setTimeout(()=>playHubFilmWhenReady(video),delay));
+      }
+    });
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
       timer=setInterval(()=>showHubWork(hubIndex+1),5200);
       document.addEventListener('visibilitychange',()=>{

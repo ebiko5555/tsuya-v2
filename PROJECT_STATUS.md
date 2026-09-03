@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作53）: `d315d39` (`Publish mobile53 strengthen iPhone artwork video`)
+公開中のアプリ実装コミット（試作54）: 公開前
 
 現行公開版: `試作53 / mobile53`（iPhone向け作品映像再生強化）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作54 / mobile54`（一覧映像の再生強化・公開前）
 
-アプリ実装コミット: `d315d39` (`Publish mobile53 strengthen iPhone artwork video`)
+アプリ実装コミット: 公開前
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -897,3 +897,12 @@
 - インラインJavaScriptの構文検査と`git diff --check`を通過した。
 - `origin main`へのpushに成功し、GitHub Pagesで`webkit-playsinline`を含む試作53のHTMLを確認した。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=d315d39-mobile53`
+
+## 37. 作品一覧の映像再生を修正（試作54）
+
+2026-09-03、`試作54 / mobile54`として、利用者の録画で確認した「トップ直後の作品一覧で、作品動画が静止画のように見える」問題を対象に修正した。
+
+- 一覧用の2本の動画に`autoplay`、`webkit-playsinline`、`preload=auto`を設定した。
+- 各作品映像の読込完了後と、180ms・700ms・1500ms後に再生を指示する。
+- iPhoneの低電力モード等で自動再生が止められた場合のみ、最初の画面タップで映像を開始する。通常再生中は従来どおり、そのタップで作品ページへ進む。
+- 個別作品ページ・MediaPipe・試着機能には変更を加えていない。
