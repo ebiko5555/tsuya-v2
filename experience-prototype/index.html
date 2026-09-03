@@ -1760,7 +1760,7 @@ let currentLook = 'onecolor';
 let smoothed = [];
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
-const TRY_LENGTHS={short:112,long:164};
+const TRY_LENGTHS={short:102,long:164};
 function normalizeTryLength(value,fallback='short'){
   return value==='long'||value==='short'?value:fallback;
 }
@@ -3204,7 +3204,7 @@ function drawLargeSourceSetPreview(canvas,set,length){
   c.clearRect(0,0,canvas.width,canvas.height);
   const keepPalette=sourceProfile&&sourceProfile.palette;
   if(sourceProfile&&set.sourcePalette) sourceProfile.palette=set.sourcePalette;
-  const lengthScale=normalizeTryLength(length,inferTryLength(set.tune))==='long'?1.18:.76;
+  const lengthScale=normalizeTryLength(length,inferTryLength(set.tune))==='long'?1.18:.68;
   const heights=[126,146,158,146,130].map(h=>h*lengthScale), widths=[54,60,64,60,54];
   withVars(set.vars,()=>set.looks.forEach((look,i)=>{
     const w=widths[i],h=heights[i],x=60+i*125,y=150,baseY=h*.28;
@@ -3699,7 +3699,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile60';
+  const BUILD_VERSION='mobile61';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -3958,7 +3958,7 @@ updateCmpBadge();
   function renderNailPreview(key,targetId,length){
     const box=document.getElementById(targetId); if(!box) return; box.innerHTML='';
     const p=works[key].preset;
-    const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.76;
+    const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.68;
     withVars(p.vars,()=>p.looks.forEach((look,i)=>{
       const cv=document.createElement('canvas'); cv.width=56; cv.height=104;
       cv.dataset.look=look; cv.title=LOOKS[look]?.name||look;
