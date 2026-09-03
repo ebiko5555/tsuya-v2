@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作51）: 公開前
+公開中のアプリ実装コミット（試作51）: `a3469d2` (`Publish mobile51 lock source try-on`)
 
-現行公開版: `試作50 / mobile50`（SOURCE方式アイコンの追加）
+現行公開版: `試作51 / mobile51`（SOURCE試着の固定化）
 
-現行ローカル改善版: `試作51 / mobile51`（SOURCE試着の固定化・公開前）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 公開前
+アプリ実装コミット: `a3469d2` (`Publish mobile51 lock source try-on`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -871,3 +871,6 @@
 - 試着中は通常の「デザイン／カラー／質感／スカルプ／光」操作パネルを表示しない。
 - これにより、案選択後に別のデザイン操作が現れて選択内容が分かりにくくなる状態をなくす。
 - MediaPipe、カメラ、写真解析、ネイル描画規則、撮影・保存は変更していない。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushに成功し、GitHub Pagesで`mobile51`のHTMLを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=a3469d2-mobile51`
