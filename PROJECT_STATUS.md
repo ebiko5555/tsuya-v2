@@ -4,13 +4,13 @@
 
 引継文書最終監査: 2026-08-31
 
-公開中のアプリ実装コミット（試作53）: 公開前
+公開中のアプリ実装コミット（試作53）: `d315d39` (`Publish mobile53 strengthen iPhone artwork video`)
 
-現行公開版: `試作52 / mobile52`（作品動画の再生再試行）
+現行公開版: `試作53 / mobile53`（iPhone向け作品映像再生強化）
 
-現行ローカル改善版: `試作53 / mobile53`（iPhone向け作品映像再生強化・公開前）
+現行ローカル改善版: 公開版と同じ
 
-アプリ実装コミット: 公開前
+アプリ実装コミット: `d315d39` (`Publish mobile53 strengthen iPhone artwork video`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -894,3 +894,6 @@
 - 作品ページを開いた後、180ms・700ms・1500msにも再生を再試行する。
 - 作品画面への最初のタップでも再生を再試行する。自動再生が端末の省電力設定などで拒否された時の保険である。
 - 映像はPCブラウザで、作品ページ表示から5秒後に再生中・約4.9秒進行していることを確認した。iPhone Safariでの最終確認は要確認。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushに成功し、GitHub Pagesで`webkit-playsinline`を含む試作53のHTMLを確認した。
+- 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=d315d39-mobile53`
