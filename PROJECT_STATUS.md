@@ -8,9 +8,9 @@
 
 現行公開版: `試作54 / mobile54`（作品一覧映像の再生修正）
 
-現行ローカル改善版: `試作55 / mobile55`（SHORT / LONG の二択を試着前に追加、未公開）
+現行ローカル改善版: `試作55 / mobile55`（SHORT / LONG の二択を試着前に追加、GitHubへ送信済み。Pages反映は要確認）
 
-アプリ実装コミット: 試作55をローカルで実装中（未コミット・未公開）
+アプリ実装コミット: `8b634df` (`Publish mobile55 add short long try-on`)
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -918,4 +918,6 @@
 - `TRY ON` は選んだ長さをURLパラメータで固定試着画面へ渡す。作品側のネイル柄・色・質感は従来の作品別プリセットを維持する。
 - 写真から作る画面では、5本セットを選んだ後の確認画面に同じ二択を置いた。中央の大きい5本プレビューも選択に追随し、選択した長さを実カメラ試着へ反映する。
 - `SHORT` はスカルプ長 `112`、`LONG` は `164` とし、従来のスライダー範囲（100〜220）内に収めて既存の手の追跡・描画処理を変更していない。
-- インラインJavaScriptの構文検査と`git diff --check`を通過した。iPhone Safariでの最終確認、GitHubへのpush、GitHub Pagesの反映確認は未実施。
+- インラインJavaScriptの構文検査と`git diff --check`を通過した。
+- `origin main`へのpushは成功し、GitHub本体で`mobile55`のソースを確認した。
+- 2026-09-03の確認時点でGitHub Pagesはキャッシュによりまだ`mobile54`を返していたため、公開反映とiPhone Safariでの最終確認は要確認。
