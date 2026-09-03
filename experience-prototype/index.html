@@ -129,17 +129,39 @@
     50% { opacity:.92; transform:scale(1.02); }
   }
   /* カメラから作る（素材撮影）時のガイド表示 */
-  body.source-camera-capture .guide-silhouette{display:none!important}
-  body.source-camera-capture #guide{
-    justify-content:flex-start;
-    padding-top:calc(78px + env(safe-area-inset-top));
+  body.source-camera-capture #guide{display:none!important}
+  .source-guide-card{
+    position:absolute; top:calc(68px + env(safe-area-inset-top)); left:50%;
+    transform:translateX(-50%); z-index:10;
+    display:none; flex-direction:column; align-items:center;
+    padding:13px 22px; border-radius:18px;
+    background:radial-gradient(120% 120% at 50% 0%, rgba(38,30,26,.84) 0%, rgba(14,12,11,.88) 100%);
+    border:1px solid rgba(235,212,192,.38);
+    box-shadow:0 12px 36px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.2);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    pointer-events:none; transition:opacity .35s ease, transform .35s ease;
+    width:min(calc(100% - 44px), 360px); box-sizing:border-box; text-align:center;
+    animation:cardFloat 3.8s ease-in-out infinite;
   }
-  body.source-camera-capture .guide-text{
-    background:rgba(12,10,9,.72);
-    padding:11px 22px; border-radius:999px;
-    border:1px solid rgba(255,255,255,.32);
-    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-    font-size:12px; letter-spacing:.18em; text-indent:.18em;
+  body.source-camera-capture .source-guide-card{display:flex}
+  .sg-head{display:flex; align-items:center; gap:6px; margin-bottom:5px}
+  .sg-spark{color:#d7b39e; font-size:12px; animation:sparkGlow 2.4s ease-in-out infinite}
+  .sg-tag{font:500 8.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.22em; color:rgba(255,255,255,.68)}
+  .sg-title{
+    color:#fffdfa; font:300 15px/1.38 "Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+    letter-spacing:.14em; text-indent:.14em; margin-bottom:4px;
+    text-shadow:0 2px 10px rgba(0,0,0,.6);
+  }
+  .sg-sub{
+    color:rgba(255,255,255,.7); font-size:9.5px; letter-spacing:.12em; line-height:1.45;
+  }
+  @keyframes cardFloat{
+    0%, 100%{transform:translateX(-50%) translateY(0)}
+    50%{transform:translateX(-50%) translateY(-3px)}
+  }
+  @keyframes sparkGlow{
+    0%, 100%{opacity:.55; transform:scale(.92)}
+    50%{opacity:1; transform:scale(1.15); filter:drop-shadow(0 0 6px rgba(215,179,158,.8))}
   }
   /* 撮影直後の確認画面：撮った写真とキャプションを画面内に収めて全体を見せる */
   body.photo-frozen #canvas{
@@ -263,6 +285,27 @@
   .snap-status span{display:block; margin-top:4px; color:rgba(255,255,255,.7); font-size:9px; line-height:1.5; letter-spacing:.04em}
   .snap-status.ok{border-color:rgba(215,179,158,.72)}
   .snap-status.warn{border-color:rgba(240,173,110,.72)}
+
+  /* 撮影確認モード（photo-frozen）：ステータスを画面上部へ浮遊させ、写真・キャプションへの被りをゼロにする */
+  body.photo-frozen .snap-status{
+    position:fixed; top:calc(60px + env(safe-area-inset-top)); left:50%;
+    transform:translateX(-50%); z-index:80;
+    width:auto; max-width:calc(100% - 40px); box-sizing:border-box;
+    margin:0; padding:8px 20px; border-radius:999px;
+    background:rgba(18,15,13,.88); border:1px solid rgba(255,255,255,.32);
+    box-shadow:0 6px 24px rgba(0,0,0,.45);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    pointer-events:none;
+  }
+  body.photo-frozen .snap-status strong{
+    display:inline; font-size:11.5px; letter-spacing:.14em;
+  }
+  body.photo-frozen .snap-status span{
+    display:inline; margin-top:0; margin-left:6px; font-size:10px; color:rgba(255,255,255,.8); letter-spacing:.06em;
+  }
+  body.photo-frozen .snap-status span::before{
+    content:"— "; opacity:.6;
+  }
   .snap-actions{display:flex; justify-content:center; gap:10px}
   #snapBar .pill{
     border:none; border-radius:999px; padding:13px 26px; font-size:12px;
@@ -1522,6 +1565,14 @@
     </div>
     <div class="guide-text">枠に手をかざしてください</div>
   </div>
+  <div class="source-guide-card" id="sourceGuideCard" aria-hidden="true">
+    <div class="sg-head">
+      <span class="sg-spark">✦</span>
+      <span class="sg-tag">SOURCE / 光の採集</span>
+    </div>
+    <div class="sg-title">心惹かれる光や色を、写しとる</div>
+    <div class="sg-sub">身のまわりの光・質感・景色にかざしてください</div>
+  </div>
   <div id="countdown"></div>
 
   <div id="startOverlay">
@@ -1944,7 +1995,9 @@ async function startCamera(){
     $('liveBtns').style.display='flex';
     $('snapBar').style.display='none';
     const isSourceCap=document.body.classList.contains('source-camera-capture');
-    setGuide(isSourceCap ? 'お気に入りのものを写真に撮ってください' : '枠に手をかざしてください');
+    setGuide(isSourceCap ? '' : '枠に手をかざしてください');
+    const sg = $('sourceGuideCard');
+    if(sg) sg.style.display = isSourceCap ? 'flex' : 'none';
     $('guide')?.classList.remove('hand-detected');
     setStatus('');
     startLoops();
@@ -2028,6 +2081,8 @@ $('flipBtn').onclick = () => { facing = facing==='environment' ? 'user' : 'envir
 /* ================= 撮影 ================= */
 function captureSourcePhoto(){
   setGuide('');
+  const sg = $('sourceGuideCard');
+  if(sg) sg.style.display = 'none';
   if(video.readyState<2) return;
   const frame=document.createElement('canvas');
   frame.width=video.videoWidth||1280; frame.height=video.videoHeight||720;
@@ -2086,8 +2141,8 @@ function doCapture(){
   setGuide('');
   $('guide')?.classList.add('hand-detected');
   const stored=keepShot();       /* 撮ったら自動で比較用に残す(4枚まで) */
-  if(stored) setSnapStatus('撮影しました','アプリ内の「比べる」に保存済みです。端末保存は下のボタンです。','ok');
-  else setSnapStatus('撮影しました','比較への保存に失敗しました。必要なら端末に保存してください。','warn');
+  if(stored) setSnapStatus('撮影しました','アプリ内に保存済み','ok');
+  else setSnapStatus('撮影しました','端末に保存してください','warn');
 }
 
 /* ================= 撮ったものを残して比べる ================= */
@@ -2169,21 +2224,19 @@ $('retryBtn').onclick = () => {
   setSnapStatus('撮影しました','アプリ内の「比べる」に保存されています','');
 };
 $('saveBtn').onclick = async () => {
-  /* iOS は Web ページから写真ライブラリへ直接書き込めない。
-     ダウンロードの確認ではなく共有シートを出せば「"写真"に保存」が1タップで済む。 */
-  setSnapStatus('保存メニューを開いています','「画像を保存」または保存先を選んでください。','');
+  setSnapStatus('保存メニュー','「画像を保存」を選んでください','');
   const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
-  if(!blob){ setSnapStatus('端末へ保存できませんでした','撮影画像はアプリ内の「比べる」に残っています。','warn'); return; }
+  if(!blob){ setSnapStatus('保存失敗','端末へ保存できませんでした','warn'); return; }
   const file = new File([blob], 'tsuya.jpg', {type:'image/jpeg'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{
       await navigator.share({files:[file]});
-      setSnapStatus('保存操作が完了しました','写真アプリまたは選んだ保存先で確認してください。','ok');
+      setSnapStatus('保存完了','写真アプリで確認できます','ok');
       return;
     }
     catch(e){
       if(e && e.name === 'AbortError'){
-        setSnapStatus('端末保存を中止しました','撮影画像はアプリ内の「比べる」に残っています。','');
+        setSnapStatus('保存をキャンセルしました','','');
         return;
       }
     }
@@ -3815,7 +3868,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile63';
+  const BUILD_VERSION='mobile64';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
