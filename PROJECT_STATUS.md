@@ -8,9 +8,9 @@
 
 現行公開版: `試作57 / mobile57`（作品一覧映像の自動再生を元の方式へ復帰）
 
-現行ローカル改善版: 公開版と同じ
+現行ローカル改善版: `試作58 / mobile58`（最初の一覧映像をHTML読込時から自動再生、未公開）
 
-アプリ実装コミット: `e472e40` (`Publish mobile57 restore hub video autoplay`)
+アプリ実装コミット: 試作58をローカルで実装中（未コミット・未公開）
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -945,3 +945,12 @@
 - `origin main`へのpushに成功し、GitHub Pagesが`mobile57`を返すことを確認した。
 - 公開URLの作品一覧で、5秒後も表示中の映像が停止せず `currentTime` が約5.0秒まで進んでいることを確認した。画面タップがそのまま作品ページへ遷移することも確認した。iPhone Safari実機での最終確認は要確認。
 - 公開確認URL: `https://ebiko5555.github.io/tsuya-v2/top-prototype/?v=e472e40-mobile57`
+
+## 41. 最初の一覧映像をボタンなしで即時再生する（試作58・公開前）
+
+2026-09-03、一覧画面で再生待ちのボタンを出さず、最初から映像を表示・再生するための変更を行った。
+
+- 最初に表示する映像（COLOR）をJavaScriptで後から設定せず、`video`要素の`src`属性としてHTMLに直接記述した。
+- これによりiPhone Safariもページの読込み時点から、`autoplay`・`muted`・`playsinline`を認識して映像を再生できる。
+- 一覧から作品ページへ入る画面全体のタップは残すが、再生開始のためのボタン・タップ待ちは設けない。
+- MediaPipe、カメラ、作品映像ファイル、作品ページの構成は変更していない。iPhone Safariでの最終確認、GitHubへのpush、Pages反映は未実施。
