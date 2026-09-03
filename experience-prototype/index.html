@@ -102,10 +102,27 @@
     min-height:14px; transition:opacity .3s;
   }
   #guide{
-    position:absolute; top:16px; left:0; right:0; text-align:center; z-index:4;
-    font-size:11px; letter-spacing:.25em; text-indent:.25em; color:#fff;
-    text-shadow:0 1px 8px rgba(0,0,0,.5); pointer-events:none;
-    transition:opacity .5s;
+    position:absolute; inset:0; z-index:4;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    pointer-events:none; transition:opacity .45s ease;
+    color:#fff;
+  }
+  .guide-silhouette{
+    width:140px; height:195px;
+    color:rgba(255,255,255,.58);
+    filter:drop-shadow(0 2px 12px rgba(0,0,0,.55));
+    animation:guidePulse 2.8s ease-in-out infinite;
+  }
+  .guide-silhouette svg{width:100%; height:100%; display:block}
+  .guide-text{
+    margin-top:16px; font-size:11.5px; letter-spacing:.26em; text-indent:.26em;
+    color:rgba(255,255,255,.9);
+    text-shadow:0 2px 10px rgba(0,0,0,.75);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+  }
+  @keyframes guidePulse{
+    0%, 100% { opacity:.48; transform:scale(0.97); }
+    50% { opacity:.9; transform:scale(1.02); }
   }
   #countdown{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
@@ -1062,9 +1079,18 @@
     bottom:calc(38px + env(safe-area-inset-bottom)); pointer-events:none;
   }
   .opening-work-code{color:rgba(255,255,255,.58); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
-  .opening-work-title{margin-top:10px; color:#fff; font:300 clamp(34px,11vw,58px)/1.06 "Times New Roman","Yu Mincho",serif; letter-spacing:.06em}
-  .opening-work-cue{display:flex; align-items:center; justify-content:space-between; margin-top:20px; padding-top:13px; border-top:1px solid rgba(255,255,255,.28); color:rgba(255,255,255,.76); font-size:9px; letter-spacing:.13em}
-  .opening-work-cue::after{content:"→"; font-size:17px; font-weight:300}
+  .opening-work-cue{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:16px; padding-top:11px;
+    border-top:1px solid rgba(255,255,255,.24);
+    color:rgba(255,255,255,.86); font-size:10px; letter-spacing:.22em;
+    animation:cueBreathe 3.4s ease-in-out infinite;
+  }
+  .opening-work-cue::after{content:"→"; font-size:16px; font-weight:300}
+  @keyframes cueBreathe{
+    0%, 100%{opacity:.62; transform:translateX(0)}
+    50%{opacity:1; transform:translateX(3px)}
+  }
   .opening-progress{height:1px; margin-top:13px; overflow:hidden; background:rgba(255,255,255,.18)}
   .opening-progress::after{content:""; display:block; width:100%; height:100%; background:#d7b39e; transform-origin:left; animation:hubProgress 5.2s linear both}
   .opening-progress.restart::after{animation:none}
@@ -1466,7 +1492,14 @@
 
 <div class="stage">
   <canvas id="canvas"></canvas>
-  <div id="guide" style="opacity:0">手をかざしてください</div>
+  <div id="guide" style="opacity:0">
+    <div class="guide-silhouette" aria-hidden="true">
+      <svg viewBox="0 0 160 220" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M48 215 C46 185 40 160 35 142 C30 128 22 118 20 102 C18 84 27 75 35 83 C41 89 45 106 50 120 C50 105 49 68 52 45 C54 28 66 28 68 45 C70 65 71 98 71 108 C73 90 75 42 78 24 C80 10 93 10 95 24 C97 45 98 90 98 106 C100 88 105 52 108 38 C111 24 122 25 124 38 C126 58 123 98 122 118 C125 108 131 88 137 82 C145 74 153 82 148 98 C141 120 132 155 128 178 C125 195 122 208 120 215" stroke-dasharray="4 4"/>
+      </svg>
+    </div>
+    <div class="guide-text">枠に手をかざしてください</div>
+  </div>
   <div id="countdown"></div>
 
   <div id="startOverlay">
@@ -1489,6 +1522,7 @@
     <div class="opening-work-meta" aria-live="polite">
       <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
       <div class="opening-work-title" id="openingWorkTitle">色</div>
+      <div class="opening-work-cue"><span>触れて、作品へ</span></div>
       <div class="opening-progress" id="openingProgress"></div>
     </div>
     <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
@@ -1783,7 +1817,10 @@ const $ = id => document.getElementById(id);
 function setStatus(t){ $('status').textContent = t || ''; }
 function setGuide(t){
   const g = $('guide');
-  g.textContent = t || '';
+  if(!g) return;
+  const txt = g.querySelector('.guide-text');
+  if(txt) txt.textContent = t || '枠に手をかざしてください';
+  else g.textContent = t || '';
   g.style.opacity = t ? 1 : 0;
 }
 
@@ -1967,9 +2004,45 @@ function captureSourcePhoto(){
   document.body.classList.remove('camera-started','controls-collapsed','source-camera-capture');
   ingestSource(frame,'CAMERA');
 }
+function stampArtCaption(c, w, h){
+  c.save();
+  const isCustom = document.body.classList.contains('custom-mode');
+  const work = typeof works!=='undefined'&&works[current]?works[current]:null;
+  const scale = Math.min(w, h) / 380;
+  const fontSizeMain = Math.max(9, Math.round(8.5 * scale));
+  const fontSizeSub = Math.max(11, Math.round(11 * scale));
+  const padX = Math.round(18 * scale);
+  const padBottom = Math.round(20 * scale);
+
+  const gradH = Math.round(62 * scale);
+  const g = c.createLinearGradient(0, h - gradH, 0, h);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(10,8,7,0.64)');
+  c.fillStyle = g;
+  c.fillRect(0, h - gradH, w, gradH);
+
+  c.textAlign = 'left';
+  c.textBaseline = 'alphabetic';
+
+  c.font = `500 ${fontSizeMain}px ui-monospace,SFMono-Regular,Menlo,monospace`;
+  c.fillStyle = 'rgba(255,255,255,0.72)';
+  c.shadowColor = 'rgba(0,0,0,0.6)';
+  c.shadowBlur = 4;
+  c.letterSpacing = '0.18em';
+  const line1 = 'TSUYA II — HAND & LIGHT / 2026';
+  c.fillText(line1, padX, h - padBottom - fontSizeSub * 1.35);
+
+  c.font = `300 ${fontSizeSub}px "Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif`;
+  c.fillStyle = 'rgba(255,255,255,0.95)';
+  const line2 = isCustom ? 'MY TRACE / 自作ネイル' : (work ? `${work.no} ${current} · ${work.title}` : 'HAND & LIGHT');
+  c.fillText(line2, padX, h - padBottom);
+
+  c.restore();
+}
 function doCapture(){
   if(document.body.classList.contains('source-camera-capture')){captureSourcePhoto();return;}
   mode = 'frozen';
+  stampArtCaption(ctx, canvas.width, canvas.height);
   $('liveBtns').style.display='none';
   $('snapBar').style.display='flex';
   setGuide('');
@@ -3699,7 +3772,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile61';
+  const BUILD_VERSION='mobile62';
   document.getElementById('siteHome').href='../top-prototype/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
