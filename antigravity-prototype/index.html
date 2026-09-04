@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ANTIGRAVITY — Resonant Orbit</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #06070a;
+    color: #f2f5fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+
+  #universe {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
+  }
+
+  /* 浮遊するHUD（最小限の深度・状態インジケータ） */
+  .hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .brand-glyph {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    color: rgba(242, 245, 250, 0.45);
+    text-transform: uppercase;
+  }
+
+  .system-state {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(140, 190, 255, 0.7);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .system-state::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #5ea4ff;
+    box-shadow: 0 0 8px #5ea4ff;
+    animation: pulse 2s infinite ease-in-out;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .hud-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .field-guide {
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    color: rgba(242, 245, 250, 0.55);
+    font-weight: 400;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .active-node-title {
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    color: #ffffff;
+    min-height: 28px;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
+    transition: opacity 0.3s;
+  }
+
+  /* 没入ダイブ時の光波エフェクト */
+  #warp {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+    background: radial-gradient(circle at center, transparent 0%, #06070a 100%);
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="universe"></canvas>
+
+<div class="hud">
+  <div class="hud-top">
+    <div class="brand-glyph">ANTIGRAVITY // 0.1</div>
+    <div class="system-state" id="sysState">ZERO-G FIELD</div>
+  </div>
+  <div class="hud-bottom">
+    <div class="active-node-title" id="nodeTitle"></div>
+    <div class="field-guide" id="fieldGuide">空間を撫でて星界を回す · 光核に触れて共鳴</div>
+  </div>
+</div>
+
+<div id="warp"></div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('universe');
+  const ctx = canvas.getContext('2d');
+  const sysState = document.getElementById('sysState');
+  const nodeTitle = document.getElementById('nodeTitle');
+  const fieldGuide = document.getElementById('fieldGuide');
+  const warp = document.getElementById('warp');
+
+  let W = 0, H = 0, DPR = 1;
+  let centerX = 0, centerY = 0;
+
+  // 10の作品世界を象徴する光の天体（Celestial Art Orbs）
+  const celestialNodes = [
+    { id: 'COLOR',    name: 'COLOR',     color: '#ff4864', radius: 32, orbit: 170, speed: 0.0006,  angle: 0.2 },
+    { id: 'SURFACE',  name: 'SURFACE',   color: '#e5b452', radius: 28, orbit: 240, speed: -0.00045, angle: 1.1 },
+    { id: 'SCULPT',   name: 'SCULPT',    color: '#34d399', radius: 34, orbit: 310, speed: 0.00035,  angle: 2.3 },
+    { id: 'LIGHT',    name: 'LIGHT',     color: '#60a5fa', radius: 36, orbit: 210, speed: -0.00055, angle: 3.2 },
+    { id: 'HAND',     name: 'HAND',      color: '#f472b6', radius: 30, orbit: 370, speed: 0.00028,  angle: 4.1 },
+    { id: 'TRACE',    name: 'TRACE',     color: '#a78bfa', radius: 26, orbit: 140, speed: -0.0007,  angle: 5.0 },
+    { id: 'SPACE',    name: 'SPACE',     color: '#38bdf8', radius: 38, orbit: 430, speed: 0.00022,  angle: 0.9 },
+    { id: 'THINKING', name: 'THINKING',  color: '#c084fc', radius: 30, orbit: 280, speed: -0.0004,  angle: 2.8 },
+    { id: 'ORB',      name: 'WHITE ORB', color: '#f8fafc', radius: 32, orbit: 350, speed: 0.00032,  angle: 4.6 },
+    { id: 'FRAME',    name: 'FRAME',     color: '#fb923c', radius: 28, orbit: 190, speed: -0.0006,  angle: 5.7 }
+  ];
+
+  // 無重力空間に浮遊する背景微粒子
+  const spaceDust = [];
+  const DUST_COUNT = 90;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.width = Math.round(window.innerWidth * DPR);
+    H = canvas.height = Math.round(window.innerHeight * DPR);
+    centerX = W / 2;
+    centerY = H / 2;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // 微粒子の初期化
+  for (let i = 0; i < DUST_COUNT; i++) {
+    spaceDust.push({
+      x: (Math.random() - 0.5) * W * 1.5,
+      y: (Math.random() - 0.5) * H * 1.5,
+      z: Math.random() * 800 + 100,
+      size: Math.random() * 1.8 + 0.5,
+      alpha: Math.random() * 0.5 + 0.2
+    });
+  }
+
+  // 慣性・反重力物理制御
+  let rotX = 0.35, rotY = 0;
+  let velRotX = 0, velRotY = 0.0012;
+  let isDragging = false;
+  let lastTouchX = 0, lastTouchY = 0;
+  let activeNode = null;
+  let resonanceFactor = 0; // 近接共鳴度
+  let diving = false;
+
+  // タッチ/ポインター操作：空間を物理的に回転・撫でる
+  window.addEventListener('pointerdown', e => {
+    isDragging = true;
+    lastTouchX = e.clientX;
+    lastTouchY = e.clientY;
+    velRotX = 0;
+    velRotY = 0;
+  });
+
+  window.addEventListener('pointermove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastTouchX;
+    const dy = e.clientY - lastTouchY;
+    lastTouchX = e.clientX;
+    lastTouchY = e.clientY;
+
+    velRotY = dx * 0.003;
+    velRotX = -dy * 0.003;
+    rotY += velRotY;
+    rotX += velRotX;
+  });
+
+  window.addEventListener('pointerup', () => {
+    isDragging = false;
+  });
+
+  // ノード選択と没入ダイブ
+  window.addEventListener('click', e => {
+    if (diving) return;
+    const rect = canvas.getBoundingClientRect();
+    const clickX = (e.clientX - rect.left) * DPR;
+    const clickY = (e.clientY - rect.top) * DPR;
+
+    // 最も手前にありタップされた天体を特定
+    let target = null;
+    let maxZ = -Infinity;
+
+    celestialNodes.forEach(node => {
+      if (node.screenX === undefined) return;
+      const dist = Math.hypot(clickX - node.screenX, clickY - node.screenY);
+      if (dist < node.renderedRadius * 1.6 && node.projZ > maxZ) {
+        maxZ = node.projZ;
+        target = node;
+      }
+    });
+
+    if (target) {
+      diveIntoNode(target);
+    }
+  });
+
+  function diveIntoNode(node) {
+    diving = true;
+    sysState.textContent = `DIVING // ${node.id}`;
+    nodeTitle.textContent = node.name;
+    fieldGuide.textContent = '重力を超えて共鳴中...';
+    warp.style.opacity = '1';
+
+    // 空間を加速させて作品体験（experience-prototype）へワープ
+    setTimeout(() => {
+      window.location.href = `../experience-prototype/?work=${node.id}&v=antigravity`;
+    }, 750);
+  }
+
+  // レンダリングループ
+  function loop(time) {
+    requestAnimationFrame(loop);
+
+    // 減速・慣性浮遊
+    if (!isDragging) {
+      velRotY *= 0.96;
+      velRotX *= 0.96;
+      if (Math.abs(velRotY) < 0.0008) velRotY = 0.0008; // 永久自転
+      rotY += velRotY;
+      rotX += velRotX;
+    }
+
+    // 傾きの安定制御
+    rotX = Math.max(-0.9, Math.min(0.9, rotX));
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 背景の微細な重力グリッド・ダスト描画
+    ctx.save();
+    spaceDust.forEach(p => {
+      p.z -= 0.6;
+      if (p.z <= 10) p.z = 800;
+      const k = 400 / p.z;
+      const px = centerX + p.x * k;
+      const py = centerY + p.y * k;
+      if (px > 0 && px < W && py > 0 && py < H) {
+        ctx.fillStyle = `rgba(200, 220, 255, ${p.alpha * (1 - p.z / 800)})`;
+        ctx.fillRect(px, py, p.size * k, p.size * k);
+      }
+    });
+    ctx.restore();
+
+    // 中央核（コアシンボル）：空間全体の重心
+    const coreGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 120 * DPR);
+    coreGlow.addColorStop(0, 'rgba(100, 160, 255, 0.2)');
+    coreGlow.addColorStop(0.5, 'rgba(60, 100, 200, 0.05)');
+    coreGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = coreGlow;
+    ctx.fillRect(centerX - 120 * DPR, centerY - 120 * DPR, 240 * DPR, 240 * DPR);
+
+    // コアシンボル（艶 II を幾何学的な光核として抽象化）
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 7 * DPR, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#80b5ff';
+    ctx.shadowBlur = 18;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // 天体の3D軌道計算
+    let closestNode = null;
+    let closestZ = -Infinity;
+
+    celestialNodes.forEach(node => {
+      node.angle += node.speed;
+
+      // 軌道上の直交座標
+      const ox = Math.cos(node.angle) * node.orbit * DPR;
+      const oz = Math.sin(node.angle) * node.orbit * DPR;
+      const oy = Math.sin(node.angle * 2.5) * 18 * DPR; // 揺らぎ波
+
+      // 3D回転変換 (rotX, rotY)
+      // Y軸回転
+      const x1 = ox * Math.cos(rotY) + oz * Math.sin(rotY);
+      const z1 = -ox * Math.sin(rotY) + oz * Math.cos(rotY);
+      // X軸回転
+      const y2 = oy * Math.cos(rotX) - z1 * Math.sin(rotX);
+      const z2 = oy * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+      // 透視投影
+      const cameraDist = 650 * DPR;
+      const fov = cameraDist / (cameraDist + z2);
+
+      node.screenX = centerX + x1 * fov;
+      node.screenY = centerY + y2 * fov;
+      node.projZ = z2;
+      node.renderedRadius = node.radius * fov * DPR * (diving ? 2.5 : 1);
+
+      // 最前面（鑑賞者に最も近い）ノードの判定
+      if (z2 > closestZ && z2 > 0) {
+        closestZ = z2;
+        closestNode = node;
+      }
+    });
+
+    // 深度順（奥から手前）ソート
+    const sorted = [...celestialNodes].sort((a, b) => a.projZ - b.projZ);
+
+    // 軌道リングの描画（微かな重力線）
+    ctx.save();
+    ctx.lineWidth = 1;
+    [170, 240, 310, 370].forEach(r => {
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, r * DPR * Math.abs(Math.cos(rotY)), r * DPR * Math.abs(Math.sin(rotX)), rotY, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    // 天体ノードの描画
+    sorted.forEach(node => {
+      const isFront = node === closestNode;
+      const glowScale = isFront ? 1.4 : 1.0;
+
+      // 外部オーラ
+      const grad = ctx.createRadialGradient(
+        node.screenX, node.screenY, 0,
+        node.screenX, node.screenY, node.renderedRadius * 2.2 * glowScale
+      );
+      grad.addColorStop(0, node.color);
+      grad.addColorStop(0.35, node.color + '44');
+      grad.addColorStop(1, 'transparent');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(node.screenX, node.screenY, node.renderedRadius * 2.2 * glowScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 天体核
+      ctx.beginPath();
+      ctx.arc(node.screenX, node.screenY, node.renderedRadius * 0.75, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      // ノード名表示（手前の主要天体のみ）
+      if (node.projZ > 50) {
+        ctx.font = `300 ${Math.max(10, Math.round(12 * DPR))}px -apple-system, sans-serif`;
+        ctx.fillStyle = isFront ? '#ffffff' : 'rgba(240, 245, 255, 0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText(node.name, node.screenX, node.screenY + node.renderedRadius * 1.5 + 12 * DPR);
+      }
+    });
+
+    // 状態更新
+    if (closestNode && !diving) {
+      if (activeNode !== closestNode) {
+        activeNode = closestNode;
+        nodeTitle.textContent = activeNode.name;
+        nodeTitle.style.color = activeNode.color;
+      }
+    }
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
