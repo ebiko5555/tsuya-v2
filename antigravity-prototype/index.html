@@ -26,7 +26,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #050608;
+    background: #06070a;
     color: #f2f5fa;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   }
@@ -49,7 +49,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: calc(20px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+    padding: calc(22px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom));
   }
 
   .hud-top {
@@ -74,10 +74,10 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 6px 14px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .system-state::before {
     content: "";
@@ -108,8 +108,8 @@
     letter-spacing: 0.25em;
     color: #ffffff;
     min-height: 30px;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
-    transition: color 0.3s;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    transition: color 0.4s;
   }
 
   .field-guide {
@@ -125,7 +125,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 20;
-    background: radial-gradient(circle at center, transparent 0%, #050608 100%);
+    background: radial-gradient(circle at center, transparent 0%, #06070a 100%);
     opacity: 0;
     transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -137,8 +137,8 @@
 
 <div class="hud">
   <div class="hud-top">
-    <div class="brand-glyph">ANTIGRAVITY // 3D OBJECTS</div>
-    <div class="system-state" id="sysState">ZERO-G FIELD</div>
+    <div class="brand-glyph">ANTIGRAVITY // 4 OBJECTS</div>
+    <div class="system-state" id="sysState">ZERO-G RESONANCE</div>
   </div>
   <div class="hud-bottom">
     <div class="active-node-title" id="nodeTitle">...</div>
@@ -160,209 +160,156 @@ const warp = document.getElementById('warp');
 
 // 1. Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x050608, 0.0016);
+scene.fog = new THREE.FogExp2(0x06070a, 0.0015);
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-camera.position.set(0, 25, 230);
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 2000);
+camera.position.set(0, 20, 220);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.25;
+renderer.toneMappingExposure = 1.35;
 container.appendChild(renderer.domElement);
 
 // 2. Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
 scene.add(ambientLight);
 
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.5);
-dirLight1.position.set(60, 100, 120);
+const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.8);
+dirLight1.position.set(80, 120, 140);
 scene.add(dirLight1);
 
-const dirLight2 = new THREE.DirectionalLight(0x88bbff, 1.8);
-dirLight2.position.set(-80, -60, -80);
+const dirLight2 = new THREE.DirectionalLight(0x88bbff, 2.0);
+dirLight2.position.set(-100, -80, -100);
 scene.add(dirLight2);
 
-// 3. Central Core: 呼吸する光核
-const coreGeo = new THREE.SphereGeometry(3.2, 32, 32);
-const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-scene.add(coreMesh);
-
-const ringGeo = new THREE.RingGeometry(5.5, 5.9, 64);
-const ringMat = new THREE.MeshBasicMaterial({ color: 0x5ea4ff, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
-const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-ringMesh.rotation.x = Math.PI / 2;
-scene.add(ringMesh);
-
-// 4. 背景浮遊スターダスト
-const dustCount = 400;
+// 3. 背景の微細なスターダスト（余計な球体は一切入れず、微細な塵のみ）
+const dustCount = 350;
 const dustGeo = new THREE.BufferGeometry();
 const dustPositions = new Float32Array(dustCount * 3);
 for(let i = 0; i < dustCount * 3; i += 3) {
-  dustPositions[i] = (Math.random() - 0.5) * 800;
-  dustPositions[i+1] = (Math.random() - 0.5) * 800;
-  dustPositions[i+2] = (Math.random() - 0.5) * 800;
+  dustPositions[i] = (Math.random() - 0.5) * 750;
+  dustPositions[i+1] = (Math.random() - 0.5) * 750;
+  dustPositions[i+2] = (Math.random() - 0.5) * 750;
 }
 dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-const dustMat = new THREE.PointsMaterial({ size: 1.5, color: 0xa8ccff, transparent: true, opacity: 0.6 });
+const dustMat = new THREE.PointsMaterial({ size: 1.4, color: 0x88b5ff, transparent: true, opacity: 0.45 });
 const dustParticles = new THREE.Points(dustGeo, dustMat);
 scene.add(dustParticles);
 
-// 5. 天体群グループ（公転軌道）
+// 4. 天体群グループ（公転軌道）
 const orbitGroup = new THREE.Group();
 scene.add(orbitGroup);
 
-// 10の作品世界データ
-const worksData = [
-  { id: 'COLOR',    name: '01 COLOR',    color: 0xff3b56, orbit: 60,  speed: 0.0055, angle: 0.2 },
-  { id: 'SURFACE',  name: '02 SURFACE',  color: 0xe5b452, orbit: 85,  speed: -0.0042, angle: 1.1 },
-  { id: 'SCULPT',   name: '03 SCULPT',   color: 0x34d399, orbit: 115, speed: 0.0035, angle: 2.0 },
-  { id: 'LIGHT',    name: '04 LIGHT',    color: 0x60a5fa, orbit: 75,  speed: -0.0048, angle: 2.9 },
-  { id: 'HAND',     name: '05 HAND',     color: 0xf472b6, orbit: 135, speed: 0.0028, angle: 3.7 },
-  { id: 'TRACE',    name: '06 TRACE',    color: 0xa78bfa, orbit: 50,  speed: -0.0065, angle: 4.4 },
-  { id: 'SPACE',    name: '07 SPACE',    color: 0x38bdf8, orbit: 155, speed: 0.0022, angle: 5.1 },
-  { id: 'THINKING', name: '08 THINKING', color: 0xc084fc, orbit: 100, speed: -0.0038, angle: 1.6 },
-  { id: 'ORB',      name: '09 ORB',      color: 0xf8fafc, orbit: 125, speed: 0.0031, angle: 2.5 },
-  { id: 'FRAME',    name: '10 FRAME',    color: 0xfb923c, orbit: 70,  speed: -0.0052, angle: 5.8 }
+// 4つのGLBモデル定義
+const modelsConfig = [
+  {
+    id: 'COLOR',
+    name: '01 NAIL POLISH',
+    file: 'assets/bottle.glb',
+    orbit: 65,
+    height: 24,
+    speed: 0.0008,
+    angle: 0,
+    color: '#ff4864'
+  },
+  {
+    id: 'SURFACE',
+    name: '02 FRIENTIRIP',
+    file: 'assets/frientirip.glb',
+    orbit: 85,
+    height: 26,
+    speed: -0.00065,
+    angle: Math.PI * 0.5,
+    color: '#e5b452'
+  },
+  {
+    id: 'HAND',
+    name: '05 WIREFRAME HAND',
+    file: 'assets/hand.glb',
+    orbit: 105,
+    height: 28,
+    speed: 0.0005,
+    angle: Math.PI,
+    color: '#34d399'
+  },
+  {
+    id: 'SPACE',
+    name: '07 JISAKU HAND',
+    file: 'assets/jisakuhand.glb',
+    orbit: 125,
+    height: 30,
+    speed: -0.0004,
+    angle: Math.PI * 1.5,
+    color: '#60a5fa'
+  }
 ];
 
-const celestialObjects = [];
-
-// 軌道リングの描画（微かな重力ライン）
-[50, 75, 100, 125, 155].forEach(r => {
-  const lineGeo = new THREE.BufferGeometry();
-  const points = [];
-  for (let i = 0; i <= 64; i++) {
-    const theta = (i / 64) * Math.PI * 2;
-    points.push(new THREE.Vector3(Math.cos(theta) * r, 0, Math.sin(theta) * r));
-  }
-  lineGeo.setFromPoints(points);
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05 });
-  const orbitLine = new THREE.Line(lineGeo, lineMat);
-  orbitGroup.add(orbitLine);
-});
-
-// GLTFローダーでボトル・ハンドのGLBモデルを読み込み
-const loader = new GLTFLoader();
-let bottleMeshGroup = null;
-let handMeshGroup = null;
-
-// モデル正規化ヘルパー
+// 3Dモデル正規化（原点中心化＆統一スケール）
 function normalizeModel(model, targetHeight) {
   const box = new THREE.Box3().setFromObject(model);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-  model.position.sub(center); // 原点中心に移動
+  model.position.sub(center);
   const maxDim = Math.max(size.x, size.y, size.z);
   const scale = targetHeight / (maxDim || 1);
-  const wrapper = new THREE.Group();
   model.scale.set(scale, scale, scale);
+  const wrapper = new THREE.Group();
   wrapper.add(model);
   return wrapper;
 }
 
-// 読み込み完了後に全天体を3Dオブジェクトとして初期化
-let loadedCount = 0;
-function onModelReady() {
-  loadedCount++;
-  if (loadedCount >= 2) {
-    buildScene();
-  }
-}
+const celestialObjects = [];
+const loader = new GLTFLoader();
+let loadedModels = 0;
 
-loader.load('assets/bottle.glb', gltf => {
-  bottleMeshGroup = normalizeModel(gltf.scene, 18);
-  onModelReady();
-}, undefined, () => onModelReady());
+modelsConfig.forEach(config => {
+  const pivot = new THREE.Group();
+  orbitGroup.add(pivot);
 
-loader.load('assets/hand.glb', gltf => {
-  handMeshGroup = normalizeModel(gltf.scene, 22);
-  onModelReady();
-}, undefined, () => onModelReady());
+  // タップ判定用不可視ヒットボックス
+  const hitGeo = new THREE.BoxGeometry(26, 26, 26);
+  const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+  const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+  hitMesh.userData = { parentConfig: config };
+  pivot.add(hitMesh);
 
-// 万が一GLBロードに時間がかかった場合のフォールバックタイマー
-setTimeout(() => {
-  if (celestialObjects.length === 0) buildScene();
-}, 2500);
+  // モデルの読み込み
+  loader.load(
+    config.file,
+    gltf => {
+      const visual = normalizeModel(gltf.scene, config.height);
+      pivot.add(visual);
 
-function buildScene() {
-  if (celestialObjects.length > 0) return;
-  sysState.textContent = '3D OBJECT ORBIT';
-
-  worksData.forEach((data, index) => {
-    const pivot = new THREE.Group();
-    orbitGroup.add(pivot);
-
-    let visual;
-    // 作品ごとにGLBモデルを配置（ボトル、ハンド、幾何立体など）
-    if (index % 2 === 0 && bottleMeshGroup) {
-      visual = bottleMeshGroup.clone(true);
-      // 色のバリエーション
-      visual.traverse(child => {
-        if (child.isMesh && child.material) {
-          child.material = child.material.clone();
-          if (child.material.color) {
-            child.material.color.lerp(new THREE.Color(data.color), 0.25);
-          }
-        }
+      celestialObjects.push({
+        config: config,
+        pivot: pivot,
+        visual: visual,
+        hitMesh: hitMesh,
+        angle: config.angle,
+        orbit: config.orbit,
+        speed: config.speed
       });
-    } else if (index % 2 === 1 && handMeshGroup) {
-      visual = handMeshGroup.clone(true);
-    } else {
-      // 幾何学3Dオブジェクト
-      const geo = (index % 3 === 0) ? new THREE.IcosahedronGeometry(7, 0)
-                : (index % 3 === 1) ? new THREE.TorusGeometry(6, 2.2, 16, 32)
-                : new THREE.OctahedronGeometry(7, 0);
-      const mat = new THREE.MeshStandardMaterial({
-        color: data.color,
-        roughness: 0.2,
-        metalness: 0.8,
-        emissive: data.color,
-        emissiveIntensity: 0.25
-      });
-      visual = new THREE.Mesh(geo, mat);
+
+      loadedModels++;
+      sysState.textContent = `LOADED ${loadedModels}/4`;
+      if (loadedModels === 4) {
+        sysState.textContent = '4 OBJECTS ACTIVE';
+      }
+    },
+    undefined,
+    error => {
+      console.warn('Failed loading GLB:', config.file, error);
     }
+  );
+});
 
-    // タップ判定を容易にする透明ヒットボックス（半径12）
-    const hitGeo = new THREE.SphereGeometry(12, 12, 12);
-    const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-    const hitMesh = new THREE.Mesh(hitGeo, hitMat);
-    hitMesh.userData = { parentData: data };
-    pivot.add(hitMesh);
-
-    // 反重力光輪（ワイヤーフレームオーラ）
-    const auraGeo = new THREE.SphereGeometry(10.5, 14, 14);
-    const auraMat = new THREE.MeshBasicMaterial({
-      color: data.color,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.28
-    });
-    const auraMesh = new THREE.Mesh(auraGeo, auraMat);
-    pivot.add(auraMesh);
-
-    pivot.add(visual);
-
-    celestialObjects.push({
-      data: data,
-      pivot: pivot,
-      visual: visual,
-      aura: auraMesh,
-      hitMesh: hitMesh,
-      angle: data.angle,
-      orbit: data.orbit,
-      speed: data.speed
-    });
-  });
-}
-
-// 6. タッチ＆慣性インタラクション
+// 5. タッチ＆慣性インタラクション（ゆったり滑らかな回転速度）
 let isDragging = false;
 let startX = 0, startY = 0;
 let prevX = 0, prevY = 0;
-let rotVelX = 0, rotVelY = 0.0016;
+let rotVelX = 0, rotVelY = 0.0004; // 初期回転も極めてゆったり
 let hasMoved = false;
 let diving = false;
 
@@ -387,21 +334,21 @@ window.addEventListener('pointermove', e => {
   prevX = e.clientX;
   prevY = e.clientY;
 
-  rotVelY = dx * 0.0038;
-  rotVelX = dy * 0.0038;
+  // 移動感度を以前の約半分（ゆったり重厚に回る）
+  rotVelY = dx * 0.0018;
+  rotVelX = dy * 0.0018;
   orbitGroup.rotation.y += rotVelY;
   orbitGroup.rotation.x += rotVelX;
 });
 
 window.addEventListener('pointerup', e => {
   isDragging = false;
-  // ドラッグではなくタップだった場合
   if (!hasMoved && !diving) {
     handleClick(e.clientX, e.clientY);
   }
 });
 
-// タップによる作品ページ遷移（Raycaster）
+// タップによる作品ページ遷移
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -415,24 +362,24 @@ function handleClick(clientX, clientY) {
   const intersects = raycaster.intersectObjects(hitMeshes);
 
   if (intersects.length > 0) {
-    const targetData = intersects[0].object.userData.parentData;
-    if (targetData) {
-      diveIntoWork(targetData);
+    const targetConfig = intersects[0].object.userData.parentConfig;
+    if (targetConfig) {
+      diveIntoWork(targetConfig);
     }
   }
 }
 
-function diveIntoWork(data) {
+function diveIntoWork(config) {
   diving = true;
-  sysState.textContent = `WARP // ${data.id}`;
-  nodeTitle.textContent = data.name;
-  nodeTitle.style.color = `#${data.color.toString(16).padStart(6, '0')}`;
+  sysState.textContent = `WARP // ${config.id}`;
+  nodeTitle.textContent = config.name;
+  nodeTitle.style.color = config.color;
   fieldGuide.textContent = '作品世界へダイブ中...';
   warp.style.opacity = '1';
 
   setTimeout(() => {
-    // experience-prototypeの作品ページへ遷移
-    window.location.href = `../experience-prototype/?work=${data.id}&v=antigravity`;
+    // 該当する作品ページへダイブ
+    window.location.href = `../experience-prototype/?work=${config.id}&v=antigravity`;
   }, 680);
 }
 
@@ -443,7 +390,7 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// 7. アニメーションループ
+// 6. アニメーションループ（極めてゆったりとした浮遊公転・自転）
 const clock = new THREE.Clock();
 
 function animate() {
@@ -452,27 +399,22 @@ function animate() {
   const delta = clock.getDelta();
   const time = clock.getElapsedTime();
 
-  // 慣性自転
+  // 慣性自転（極めてゆっくり）
   if (!isDragging) {
-    rotVelY *= 0.96;
-    rotVelX *= 0.96;
-    if (Math.abs(rotVelY) < 0.001) rotVelY = 0.0012; // 永久浮遊回転
+    rotVelY *= 0.975;
+    rotVelX *= 0.975;
+    if (Math.abs(rotVelY) < 0.0003) rotVelY = 0.0003; // ゆったりとした自転
     orbitGroup.rotation.y += rotVelY;
     orbitGroup.rotation.x += rotVelX;
   }
 
   // 上下の傾き安定リミット
-  orbitGroup.rotation.x = Math.max(-0.6, Math.min(0.6, orbitGroup.rotation.x));
+  orbitGroup.rotation.x = Math.max(-0.5, Math.min(0.5, orbitGroup.rotation.x));
 
-  // 背景ダストの回転
-  dustParticles.rotation.y = time * 0.018;
+  // 背景微粒子のゆったりとした流れ
+  dustParticles.rotation.y = time * 0.005;
 
-  // コアの呼吸
-  const coreScale = 1 + Math.sin(time * 2.8) * 0.16;
-  coreMesh.scale.set(coreScale, coreScale, coreScale);
-  ringMesh.rotation.z = time * 0.35;
-
-  // 各天体の軌道公転・自転
+  // 4つのGLBモデルの公転・自転
   let closestObj = null;
   let maxZ = -Infinity;
 
@@ -481,14 +423,14 @@ function animate() {
 
     const ox = Math.cos(obj.angle) * obj.orbit;
     const oz = Math.sin(obj.angle) * obj.orbit;
-    const oy = Math.sin(obj.angle * 2.2) * 10;
+    const oy = Math.sin(obj.angle * 1.5) * 8; // ゆるやかな上下浮遊波
 
     obj.pivot.position.set(ox, oy, oz);
-    obj.visual.rotation.y += 0.016;
-    obj.visual.rotation.x += 0.009;
-    obj.aura.rotation.z = time * 0.8;
+    // 各モデルの自転もゆったり優雅に
+    obj.visual.rotation.y += 0.004;
+    obj.visual.rotation.x += 0.002;
 
-    // カメラ視点での最も手前にある天体を判定
+    // 手前のオブジェクト判定
     const worldPos = new THREE.Vector3();
     obj.pivot.getWorldPosition(worldPos);
     worldPos.applyMatrix4(camera.matrixWorldInverse);
@@ -500,8 +442,8 @@ function animate() {
   });
 
   if (closestObj && !diving) {
-    nodeTitle.textContent = closestObj.data.name;
-    nodeTitle.style.color = `#${closestObj.data.color.toString(16).padStart(6, '0')}`;
+    nodeTitle.textContent = closestObj.config.name;
+    nodeTitle.style.color = closestObj.config.color;
   }
 
   renderer.render(scene, camera);
