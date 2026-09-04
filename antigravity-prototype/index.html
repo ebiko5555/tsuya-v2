@@ -80,26 +80,25 @@
   /* 画面下部：案内文 */
   .footer-ui {
     position: fixed;
-    bottom: calc(24px + env(safe-area-inset-bottom));
+    bottom: calc(28px + env(safe-area-inset-bottom));
     left: 0;
     right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     text-align: center;
     pointer-events: none;
     z-index: 10;
   }
 
-  .active-title {
-    font-size: 20px;
-    font-weight: 400;
-    letter-spacing: 0.2em;
+  .touch-hands-title {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
     color: #ffffff;
-    min-height: 26px;
-    text-shadow: 0 0 24px rgba(255, 255, 255, 0.5);
-    transition: color 0.3s;
+    text-shadow: 0 0 24px rgba(255, 255, 255, 0.6), 0 0 48px rgba(160, 200, 255, 0.3);
   }
 
   .action-pill {
@@ -140,13 +139,8 @@
 
 <div id="canvas-container"></div>
 
-<div class="header-ui">
-  <div class="header-main">TOUCH HANDS</div>
-  <div class="header-sub">HAND &amp; LIGHT ATELIER</div>
-</div>
-
 <div class="footer-ui">
-  <div class="active-title" id="activeTitle">読み込み中...</div>
+  <div class="touch-hands-title">TOUCH HANDS</div>
   <div class="action-pill">触れて、作品へ進む</div>
 </div>
 
@@ -191,7 +185,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const container = document.getElementById('canvas-container');
-const activeTitleEl = document.getElementById('activeTitle');
 const veil = document.getElementById('veil');
 
 // 1. Scene, Camera, Renderer
@@ -328,9 +321,6 @@ modelsConfig.forEach(config => {
       });
 
       loadedCount++;
-      if (loadedCount >= 4) {
-        activeTitleEl.textContent = '4つの作品が共鳴中';
-      }
     },
     undefined,
     err => console.error('Error loading:', config.file, err)
@@ -407,8 +397,6 @@ function handleTap(clientX, clientY) {
 function diveIntoWork(config) {
   if (navigating) return;
   navigating = true;
-  activeTitleEl.textContent = `WARP ➔ ${config.name}`;
-  activeTitleEl.style.color = config.color;
   veil.style.opacity = '1';
 
   setTimeout(() => {
@@ -471,11 +459,6 @@ function animate() {
       closestObj = obj;
     }
   });
-
-  if (closestObj && !navigating && loadedCount >= 4) {
-    activeTitleEl.textContent = closestObj.config.name;
-    activeTitleEl.style.color = closestObj.config.color;
-  }
 
   renderer.render(scene, camera);
 }
