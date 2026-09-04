@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ANTIGRAVITY — Resonant Orbit</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ANTIGRAVITY — Resonant 3D</title>
 <script type="importmap">
 {
   "imports": {
@@ -26,9 +28,11 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #06070a;
+    position: fixed;
+    touch-action: none; /* ピンチズームや不要なスクロールをブラウザレベルで完全防止 */
+    background: #07080c;
     color: #f2f5fa;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
   }
 
   #canvas-container {
@@ -40,94 +44,100 @@
     z-index: 1;
   }
 
-  /* 浮遊するHUD */
-  .hud {
+  /* 画面上部：ミニマルなタイトル */
+  .header-ui {
     position: fixed;
-    inset: 0;
+    top: calc(18px + env(safe-area-inset-top));
+    left: 0;
+    right: 0;
+    text-align: center;
     pointer-events: none;
     z-index: 10;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: calc(22px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom));
   }
 
-  .hud-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .brand-glyph {
+  .header-title {
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.35em;
+    letter-spacing: 0.38em;
     color: rgba(242, 245, 250, 0.45);
     text-transform: uppercase;
+    text-indent: 0.38em;
   }
 
-  .system-state {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: rgba(140, 190, 255, 0.85);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .system-state::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #5ea4ff;
-    box-shadow: 0 0 8px #5ea4ff;
-    animation: pulse 2s infinite ease-in-out;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.2); }
-  }
-
-  .hud-bottom {
+  /* 画面下部：スワイプ案内・オブジェクト名・タップ案内 */
+  .footer-ui {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     text-align: center;
+    pointer-events: none;
+    z-index: 10;
   }
 
-  .active-node-title {
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 0.25em;
-    color: #ffffff;
-    min-height: 30px;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    transition: color 0.4s;
-  }
-
-  .field-guide {
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    color: rgba(242, 245, 250, 0.65);
+  .object-name {
+    font-size: 20px;
     font-weight: 400;
+    letter-spacing: 0.2em;
+    color: #ffffff;
+    min-height: 26px;
+    text-shadow: 0 0 24px rgba(255, 255, 255, 0.5);
+    transition: opacity 0.3s;
   }
 
-  /* 没入ダイブ時の光波エフェクト */
-  #warp {
+  .action-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  .action-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d4a748;
+    box-shadow: 0 0 8px #d4a748;
+  }
+
+  /* ページ切り替えインジケータ（4つのドット） */
+  .dots {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.active {
+    background: #ffffff;
+    transform: scale(1.3);
+  }
+
+  /* 画面遷移時の暗転・光波ヴェール */
+  #veil {
     position: fixed;
     inset: 0;
-    pointer-events: none;
-    z-index: 20;
-    background: radial-gradient(circle at center, transparent 0%, #06070a 100%);
+    background: #07080c;
     opacity: 0;
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    z-index: 100;
+    transition: opacity 0.5s ease;
   }
 </style>
 </head>
@@ -135,262 +145,268 @@
 
 <div id="canvas-container"></div>
 
-<div class="hud">
-  <div class="hud-top">
-    <div class="brand-glyph">ANTIGRAVITY // 4 OBJECTS</div>
-    <div class="system-state" id="sysState">ZERO-G RESONANCE</div>
-  </div>
-  <div class="hud-bottom">
-    <div class="active-node-title" id="nodeTitle">...</div>
-    <div class="field-guide" id="fieldGuide">空間をスワイプして回す · 3Dオブジェクトをタップして作品へ</div>
+<div class="header-ui">
+  <div class="header-title">ANTIGRAVITY ATELIER</div>
+</div>
+
+<div class="footer-ui">
+  <div class="object-name" id="objectName">読み込み中...</div>
+  <div class="action-pill">タップして作品へ入る · 左右スワイプで切替</div>
+  <div class="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
   </div>
 </div>
 
-<div id="warp"></div>
+<div id="veil"></div>
 
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// ピンチズームや余計なスクロールをブラウザ全域で完全ブロック
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend', e => e.preventDefault());
+window.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+
 const container = document.getElementById('canvas-container');
-const sysState = document.getElementById('sysState');
-const nodeTitle = document.getElementById('nodeTitle');
-const fieldGuide = document.getElementById('fieldGuide');
-const warp = document.getElementById('warp');
+const objectNameEl = document.getElementById('objectName');
+const dots = document.querySelectorAll('.dot');
+const veil = document.getElementById('veil');
 
 // 1. Scene, Camera, Renderer
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x06070a, 0.0015);
 
-const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 2000);
-camera.position.set(0, 20, 220);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 110);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.35;
+renderer.toneMappingExposure = 1.3;
 container.appendChild(renderer.domElement);
 
-// 2. Lights
+// 2. Lights（モデルの質感と造形が最も際立つ照明）
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
 scene.add(ambientLight);
 
 const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.8);
-dirLight1.position.set(80, 120, 140);
+dirLight1.position.set(60, 90, 80);
 scene.add(dirLight1);
 
-const dirLight2 = new THREE.DirectionalLight(0x88bbff, 2.0);
-dirLight2.position.set(-100, -80, -100);
+const dirLight2 = new THREE.DirectionalLight(0xa5c8ff, 1.8);
+dirLight2.position.set(-60, -50, -60);
 scene.add(dirLight2);
 
-// 3. 背景の微細なスターダスト（余計な球体は一切入れず、微細な塵のみ）
-const dustCount = 350;
+// 3. 背景の微小ダスト（空間の広がりと浮遊感を演出）
+const dustCount = 280;
 const dustGeo = new THREE.BufferGeometry();
 const dustPositions = new Float32Array(dustCount * 3);
-for(let i = 0; i < dustCount * 3; i += 3) {
-  dustPositions[i] = (Math.random() - 0.5) * 750;
-  dustPositions[i+1] = (Math.random() - 0.5) * 750;
-  dustPositions[i+2] = (Math.random() - 0.5) * 750;
+for (let i = 0; i < dustCount * 3; i += 3) {
+  dustPositions[i] = (Math.random() - 0.5) * 400;
+  dustPositions[i + 1] = (Math.random() - 0.5) * 400;
+  dustPositions[i + 2] = (Math.random() - 0.5) * 400;
 }
 dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-const dustMat = new THREE.PointsMaterial({ size: 1.4, color: 0x88b5ff, transparent: true, opacity: 0.45 });
-const dustParticles = new THREE.Points(dustGeo, dustMat);
-scene.add(dustParticles);
+const dustMat = new THREE.PointsMaterial({ size: 1.2, color: 0x88aaff, transparent: true, opacity: 0.35 });
+const dustMesh = new THREE.Points(dustGeo, dustMat);
+scene.add(dustMesh);
 
-// 4. 天体群グループ（公転軌道）
-const orbitGroup = new THREE.Group();
-scene.add(orbitGroup);
-
-// 4つのGLBモデル定義
-const modelsConfig = [
+// 4. 4つのGLBモデル定義
+const models = [
   {
     id: 'COLOR',
     name: '01 NAIL POLISH',
     file: 'assets/bottle.glb',
-    orbit: 65,
-    height: 24,
-    speed: 0.0008,
-    angle: 0,
-    color: '#ff4864'
+    targetSize: 42,
+    baseRotY: 0
   },
   {
     id: 'SURFACE',
     name: '02 FRIENTIRIP',
     file: 'assets/frientirip.glb',
-    orbit: 85,
-    height: 26,
-    speed: -0.00065,
-    angle: Math.PI * 0.5,
-    color: '#e5b452'
+    targetSize: 44,
+    baseRotY: Math.PI * 0.25
   },
   {
     id: 'HAND',
     name: '05 WIREFRAME HAND',
     file: 'assets/hand.glb',
-    orbit: 105,
-    height: 28,
-    speed: 0.0005,
-    angle: Math.PI,
-    color: '#34d399'
+    targetSize: 45,
+    baseRotY: -Math.PI * 0.3
   },
   {
     id: 'SPACE',
     name: '07 JISAKU HAND',
     file: 'assets/jisakuhand.glb',
-    orbit: 125,
-    height: 30,
-    speed: -0.0004,
-    angle: Math.PI * 1.5,
-    color: '#60a5fa'
+    targetSize: 46,
+    baseRotY: 0
   }
 ];
 
-// 3Dモデル正規化（原点中心化＆統一スケール）
-function normalizeModel(model, targetHeight) {
+// モデル正規化（画面中央に正確にセンタリング＋適切な迫力サイズにスケーリング）
+function prepareModel(model, targetSize) {
+  model.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+
+  // 原点中心へ
   model.position.sub(center);
+
+  // 画面中央に大きく収まるサイズへ
   const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = targetHeight / (maxDim || 1);
+  const scale = targetSize / (maxDim || 1);
   model.scale.set(scale, scale, scale);
+
   const wrapper = new THREE.Group();
   wrapper.add(model);
   return wrapper;
 }
 
-const celestialObjects = [];
+const carouselGroup = new THREE.Group();
+scene.add(carouselGroup);
+
+const carouselItems = [];
+const SPACING = 95; // モデル同士の横間隔
 const loader = new GLTFLoader();
-let loadedModels = 0;
 
-modelsConfig.forEach(config => {
-  const pivot = new THREE.Group();
-  orbitGroup.add(pivot);
+let currentIndex = 0;
+let targetX = 0;
 
-  // タップ判定用不可視ヒットボックス
-  const hitGeo = new THREE.BoxGeometry(26, 26, 26);
+models.forEach((item, index) => {
+  const itemGroup = new THREE.Group();
+  itemGroup.position.x = index * SPACING;
+  carouselGroup.add(itemGroup);
+
+  // タップ判定用透明ヒットボックス（画面中央の広い領域でタップ可能に）
+  const hitGeo = new THREE.SphereGeometry(26, 16, 16);
   const hitMat = new THREE.MeshBasicMaterial({ visible: false });
   const hitMesh = new THREE.Mesh(hitGeo, hitMat);
-  hitMesh.userData = { parentConfig: config };
-  pivot.add(hitMesh);
+  hitMesh.userData = { index: index, data: item };
+  itemGroup.add(hitMesh);
 
-  // モデルの読み込み
   loader.load(
-    config.file,
+    item.file,
     gltf => {
-      const visual = normalizeModel(gltf.scene, config.height);
-      pivot.add(visual);
+      const visual = prepareModel(gltf.scene, item.targetSize);
+      visual.rotation.y = item.baseRotY;
+      itemGroup.add(visual);
 
-      celestialObjects.push({
-        config: config,
-        pivot: pivot,
+      carouselItems[index] = {
+        group: itemGroup,
         visual: visual,
-        hitMesh: hitMesh,
-        angle: config.angle,
-        orbit: config.orbit,
-        speed: config.speed
-      });
+        data: item,
+        hitMesh: hitMesh
+      };
 
-      loadedModels++;
-      sysState.textContent = `LOADED ${loadedModels}/4`;
-      if (loadedModels === 4) {
-        sysState.textContent = '4 OBJECTS ACTIVE';
+      if (index === 0) {
+        updateActiveUI(0);
       }
     },
     undefined,
-    error => {
-      console.warn('Failed loading GLB:', config.file, error);
-    }
+    err => console.error('Error loading GLB:', item.file, err)
   );
 });
 
-// 5. タッチ＆慣性インタラクション（ゆったり滑らかな回転速度）
-let isDragging = false;
-let startX = 0, startY = 0;
-let prevX = 0, prevY = 0;
-let rotVelX = 0, rotVelY = 0.0004; // 初期回転も極めてゆったり
+function updateActiveUI(idx) {
+  currentIndex = idx;
+  objectNameEl.textContent = models[idx].name;
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+}
+
+// 5. タッチ操作：左右スワイプでオブジェクト切替、タップで作品へダイブ
+let isTouching = false;
+let startTouchX = 0, startTouchY = 0;
+let lastTouchX = 0;
 let hasMoved = false;
-let diving = false;
+let navigating = false;
 
 window.addEventListener('pointerdown', e => {
-  isDragging = true;
+  if (navigating) return;
+  isTouching = true;
   hasMoved = false;
-  startX = e.clientX;
-  startY = e.clientY;
-  prevX = e.clientX;
-  prevY = e.clientY;
-  rotVelX = 0;
-  rotVelY = 0;
+  startTouchX = e.clientX;
+  startTouchY = e.clientY;
+  lastTouchX = e.clientX;
 });
 
 window.addEventListener('pointermove', e => {
-  if (!isDragging) return;
-  const dx = e.clientX - prevX;
-  const dy = e.clientY - prevY;
-  if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) {
+  if (!isTouching || navigating) return;
+  const dx = e.clientX - lastTouchX;
+  lastTouchX = e.clientX;
+
+  if (Math.abs(e.clientX - startTouchX) > 8) {
     hasMoved = true;
   }
-  prevX = e.clientX;
-  prevY = e.clientY;
 
-  // 移動感度を以前の約半分（ゆったり重厚に回る）
-  rotVelY = dx * 0.0018;
-  rotVelX = dy * 0.0018;
-  orbitGroup.rotation.y += rotVelY;
-  orbitGroup.rotation.x += rotVelX;
+  // ドラッグ中にカルーセルを追従移動
+  carouselGroup.position.x += dx * 0.25;
 });
 
 window.addEventListener('pointerup', e => {
-  isDragging = false;
-  if (!hasMoved && !diving) {
-    handleClick(e.clientX, e.clientY);
+  if (!isTouching || navigating) return;
+  isTouching = false;
+
+  const totalDeltaX = e.clientX - startTouchX;
+  const totalDist = Math.hypot(e.clientX - startTouchX, e.clientY - startTouchY);
+
+  if (hasMoved && Math.abs(totalDeltaX) > 35) {
+    // スワイプによるインデックス変更
+    if (totalDeltaX < 0 && currentIndex < models.length - 1) {
+      currentIndex++;
+    } else if (totalDeltaX > 0 && currentIndex > 0) {
+      currentIndex--;
+    }
+  } else if (!hasMoved || totalDist <= 8) {
+    // タップ判定
+    handleTap(e.clientX, e.clientY);
   }
+
+  snapToIndex(currentIndex);
 });
 
-// タップによる作品ページ遷移
+function snapToIndex(idx) {
+  targetX = -idx * SPACING;
+  updateActiveUI(idx);
+}
+
+// Raycasterによるタップ検知
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-function handleClick(clientX, clientY) {
+function handleTap(clientX, clientY) {
   mouse.x = (clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
 
-  const hitMeshes = celestialObjects.map(obj => obj.hitMesh);
-  const intersects = raycaster.intersectObjects(hitMeshes);
-
-  if (intersects.length > 0) {
-    const targetConfig = intersects[0].object.userData.parentConfig;
-    if (targetConfig) {
-      diveIntoWork(targetConfig);
-    }
+  // 現在表示中の中央モデル、またはヒットボックス判定
+  const activeItem = carouselItems[currentIndex];
+  if (activeItem) {
+    diveToWork(activeItem.data);
   }
 }
 
-function diveIntoWork(config) {
-  diving = true;
-  sysState.textContent = `WARP // ${config.id}`;
-  nodeTitle.textContent = config.name;
-  nodeTitle.style.color = config.color;
-  fieldGuide.textContent = '作品世界へダイブ中...';
-  warp.style.opacity = '1';
+function diveToWork(data) {
+  if (navigating) return;
+  navigating = true;
+  objectNameEl.textContent = `WARP ➔ ${data.name}`;
+  veil.style.opacity = '1';
 
   setTimeout(() => {
     // 該当する作品ページへダイブ
-    window.location.href = `../experience-prototype/?work=${config.id}&v=antigravity`;
-  }, 680);
+    window.location.href = `../experience-prototype/?work=${data.id}&v=antigravity`;
+  }, 450);
 }
 
-// リサイズ対応
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// 6. アニメーションループ（極めてゆったりとした浮遊公転・自転）
+// 6. アニメーションループ
 const clock = new THREE.Clock();
 
 function animate() {
@@ -399,57 +415,37 @@ function animate() {
   const delta = clock.getDelta();
   const time = clock.getElapsedTime();
 
-  // 慣性自転（極めてゆっくり）
-  if (!isDragging) {
-    rotVelY *= 0.975;
-    rotVelX *= 0.975;
-    if (Math.abs(rotVelY) < 0.0003) rotVelY = 0.0003; // ゆったりとした自転
-    orbitGroup.rotation.y += rotVelY;
-    orbitGroup.rotation.x += rotVelX;
+  // カルーセル位置の滑らかなイージング補正
+  if (!isTouching) {
+    carouselGroup.position.x += (targetX - carouselGroup.position.x) * 0.12;
   }
 
-  // 上下の傾き安定リミット
-  orbitGroup.rotation.x = Math.max(-0.5, Math.min(0.5, orbitGroup.rotation.x));
+  // 各モデルの優雅な無重力浮遊（上下の微小な波＋ゆっくりとした自転）
+  carouselItems.forEach((item, index) => {
+    if (!item || !item.visual) return;
 
-  // 背景微粒子のゆったりとした流れ
-  dustParticles.rotation.y = time * 0.005;
+    // 上下にゆったり浮遊
+    item.visual.position.y = Math.sin(time * 1.6 + index * 1.5) * 2.2;
 
-  // 4つのGLBモデルの公転・自転
-  let closestObj = null;
-  let maxZ = -Infinity;
-
-  celestialObjects.forEach(obj => {
-    obj.angle += obj.speed;
-
-    const ox = Math.cos(obj.angle) * obj.orbit;
-    const oz = Math.sin(obj.angle) * obj.orbit;
-    const oy = Math.sin(obj.angle * 1.5) * 8; // ゆるやかな上下浮遊波
-
-    obj.pivot.position.set(ox, oy, oz);
-    // 各モデルの自転もゆったり優雅に
-    obj.visual.rotation.y += 0.004;
-    obj.visual.rotation.x += 0.002;
-
-    // 手前のオブジェクト判定
-    const worldPos = new THREE.Vector3();
-    obj.pivot.getWorldPosition(worldPos);
-    worldPos.applyMatrix4(camera.matrixWorldInverse);
-
-    if (worldPos.z > maxZ) {
-      maxZ = worldPos.z;
-      closestObj = obj;
-    }
+    // 優雅な自転
+    item.visual.rotation.y += 0.007;
+    item.visual.rotation.z = Math.sin(time * 0.9 + index) * 0.05;
   });
 
-  if (closestObj && !diving) {
-    nodeTitle.textContent = closestObj.config.name;
-    nodeTitle.style.color = closestObj.config.color;
-  }
+  // 背景ダストの微細な浮動
+  dustMesh.rotation.y = time * 0.01;
 
   renderer.render(scene, camera);
 }
 
 animate();
+
+// リサイズ対応
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 </body>
 </html>
