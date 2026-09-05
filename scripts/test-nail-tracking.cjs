@@ -85,6 +85,13 @@ test('a resting nail holds its full pose against position, length and angle nois
   assert.equal(pose.x,300);assert.equal(pose.y,200);assert.equal(pose.len,40);assert.equal(pose.ang,1);
  }
 });
+test('a locked nail strongly restrains a slow one-directional camera drift before a real hand move',()=>{
+ let pose=stabilizeNail(null,{x:300,y:200,len:56,ang:1},1/60);
+ for(let i=1;i<120;i++)pose=stabilizeNail(pose,{x:300+i*.025,y:200,len:56+i*.01,ang:1+i*.0008},1/60);
+ assert.ok(pose.x<302.2);assert.equal(pose.y,200);
+ pose=stabilizeNail(pose,{x:312,y:200,len:56,ang:1},1/60);
+ assert.ok(pose.x>307);assert.equal(pose.moving,true);
+});
 test('nail stabilizer releases promptly for movement, slow drift and finger rotation',()=>{
  let pose=stabilizeNail(null,{x:300,y:200,len:40,ang:Math.PI-.01},1/60);
  pose=stabilizeNail(pose,{x:310,y:200,len:40,ang:-Math.PI+.01},1/60);
