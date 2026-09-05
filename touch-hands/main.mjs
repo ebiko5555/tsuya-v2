@@ -1,4 +1,4 @@
-import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile74';
+import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile75';
 const stage=document.getElementById('stage');
 const container=document.getElementById('canvas-container');
 const veil=document.getElementById('veil');
@@ -25,7 +25,9 @@ function layout(){
 }
 function placeLinks(){
   for(const item of entries){
-    let x=item.x,y=item.y,z=0;
+    const fallback=floatingPose(item,0,true,width,height);
+    const basePixels=height/(2*Math.tan(50*Math.PI/360)*distance);
+    let x=fallback.x/basePixels,y=fallback.y/basePixels,z=0;
     if(item.pivot){item.pivot.getWorldPosition(scratch.position);({x,y,z}=scratch.position);}
     const pixels=height/(2*Math.tan(50*Math.PI/360)*(distance-z));
     item.link.style.setProperty('--x',`${width/2+x*pixels}px`);
@@ -148,7 +150,9 @@ async function setup(){
     dust=new THREE.Points(geo,new THREE.PointsMaterial({size:.65,color:0x88aaff,transparent:true,opacity:.22,depthWrite:false}));scene.add(dust);
     raycaster=new THREE.Raycaster();scratch.pointer=new THREE.Vector2();scratch.position=new THREE.Vector3();
     for(const item of entries){
-      item.pivot=new THREE.Group();item.pivot.position.set(item.x,item.y,0);group.add(item.pivot);
+      item.pivot=new THREE.Group();
+      const pose=floatingPose(item,0,true,width,height),pixels=height/(2*Math.tan(50*Math.PI/360)*distance);
+      item.pivot.position.set(pose.x/pixels,pose.y/pixels,0);group.add(item.pivot);
       item.link.classList.add('is-loading');
     }
     container.appendChild(renderer.domElement);
@@ -209,13 +213,14 @@ function animate(now){
     const x=advanceRotation(rotX,velocityX,dt),y=advanceRotation(rotY,velocityY,dt);
     rotX=x.rotation;velocityX=x.velocity;rotY=y.rotation;velocityY=y.velocity;
   }
-  group.rotation.set(rotX+(motion.matches?0:time*.045),rotY+(motion.matches?0:time*.10),motion.matches?0:Math.sin(time*.17)*.12);
+  group.rotation.set(0,0,0);
   dust.rotation.y=motion.matches?0:time*.004;
   for(const item of entries){
-    const pose=floatingPose(item,time,motion.matches);
-    item.pivot.position.set(pose.x,pose.y,pose.z);
+    const pose=floatingPose(item,time,motion.matches,width,height);
+    const pixels=height/(2*Math.tan(50*Math.PI/360)*(distance-pose.z));
+    item.pivot.position.set(pose.x/pixels,pose.y/pixels,pose.z);
     if(item.visual){
-      item.visual.rotation.set(pose.rx,pose.ry,pose.rz);
+      item.visual.rotation.set(pose.rx+rotX,pose.ry+rotY,pose.rz);
       const t=item===selected?clamp((now-enterAt)/300,0,1):0;
       item.visual.scale.setScalar(1+(motion.matches?0:(1-Math.pow(1-t,3))*.12));
       if(item.pickVisual){item.pickVisual.rotation.copy(item.visual.rotation);item.pickVisual.scale.copy(item.visual.scale);}

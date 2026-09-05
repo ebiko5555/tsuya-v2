@@ -1,5 +1,5 @@
 // Geometry and gesture rules shared by the page and its regression checks.
-export const BUILD_VERSION = 'mobile74';
+export const BUILD_VERSION = 'mobile75';
 export const ASSET_VERSION = 'mobile71';
 export const MODEL_CONFIG = [
   {id:'COLOR', label:'色の作品へ', name:'bottle', size:50, x:0, y:17.55, phase:0},
@@ -8,14 +8,24 @@ export const MODEL_CONFIG = [
   {id:'SPACE', label:'宇宙と手の作品へ', name:'jisakuhand', size:56, x:-14.3, y:0, phase:Math.PI*1.5},
 ];
 export const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
-export function fitCamera(width, height) {
-  const w=Math.max(width,1),h=Math.max(height,1);
-  const padding=Math.min(20,w*.05,h*.05);
-  const tan=Math.tan(50*Math.PI/360);
-  const halfAngle=Math.atan(Math.min(tan*(1-2*padding/h),tan*(w/h)*(1-2*padding/w)));
-  // A sphere enclosing the floating centers and every possible model orientation.
-  return 66/Math.sin(halfAngle);
-
+// Bounding spheres measured from the normalized GLBs, allowing every rotation.
+export const MODEL_RADII = [27.75,35.25,42.55,31.75];
+function anchors(width,height){
+  if(width>height)return [[-.35,.16],[-.115,-.16],[.115,.16],[.35,-.16]].map(([x,y])=>[x*width,y*height]);
+  return [[-.16,.35],[.16,.115],[-.16,-.115],[.16,-.35]].map(([x,y])=>[x*width,y*height]);
+}
+export function fitCamera(width,height){
+  const w=Math.max(width,1),h=Math.max(height,1),points=anchors(w,h);
+  const jitter=Math.hypot(w*.025,h*.012),gap=14;
+  const focal=h/(2*Math.tan(50*Math.PI/360));
+  // Keep the enlarged appearance where space permits; reserve each moving silhouette.
+  let pixels=Math.min(w,h)*.00665;
+  points.forEach(([x,y],i)=>{
+    pixels=Math.min(pixels,(w/2-Math.abs(x)-w*.025-gap)/MODEL_RADII[i],(h/2-Math.abs(y)-h*.012-gap)/MODEL_RADII[i]);
+    for(let j=0;j<i;j++)pixels=Math.min(pixels,(Math.hypot(x-points[j][0],y-points[j][1])-2*jitter-gap)/(MODEL_RADII[i]+MODEL_RADII[j]));
+  });
+  // A perspective sphere projects slightly larger than its center-plane radius.
+  return focal/Math.max(.05,pixels)+50;
 }
 export function createGesture() {
   let state = null;
@@ -50,15 +60,15 @@ export function advanceRotation(rotation, velocity, dt) {
 }
 export const workURL = id => `../experience-prototype/?work=${encodeURIComponent(id)}&v=${BUILD_VERSION}`;
 
-export function floatingPose(config,time,reduced=false){
-  if(reduced)return {x:config.x,y:config.y,z:0,rx:0,ry:0,rz:0};
-  const a=config.phase+time*.13;
+export function floatingPose(config,time,reduced=false,width=390,height=744){
+  const i=MODEL_CONFIG.findIndex(item=>item.id===config.id),[x,y]=anchors(width,height)[i];
+  const t=reduced?0:time,p=config.phase;
   return {
-    x:(Math.sin(a)*26+Math.sin(time*.63+config.phase)*2.4)*.65,
-    y:(Math.cos(a)*29+Math.sin(time*.51+config.phase)*2.8)*.65,
-    z:Math.sin(time*.42+config.phase)*9*.65,
-    rx:time*(.24+config.phase*.014),
-    ry:time*(.42+config.phase*.018),
-    rz:Math.sin(time*.32+config.phase)*.32,
+    x:x+(reduced?0:Math.sin(t*.29+p)*width*.025),
+    y:y+(reduced?0:Math.sin(t*.37+p*1.3)*height*.012),
+    z:reduced?0:Math.sin(t*.31+p)*5,
+    rx:t*(.24+p*.014),
+    ry:t*(.42+p*.018),
+    rz:reduced?0:Math.sin(t*.32+p)*.32,
   };
 }
