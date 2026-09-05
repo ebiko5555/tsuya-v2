@@ -1,5 +1,5 @@
 // Geometry and gesture rules shared by the page and its regression checks.
-export const BUILD_VERSION = 'mobile77';
+export const BUILD_VERSION = 'mobile78';
 export const ASSET_VERSION = 'mobile71';
 export const MODEL_CONFIG = [
   {id:'COLOR', label:'色の作品へ', name:'bottle', size:50, x:0, y:17.55, phase:0},

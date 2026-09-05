@@ -823,10 +823,11 @@
     color:#f2f1ed; background:#08090c;
   }
   .work-layer.open{display:block}
-  .work-film{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.74}
+  .work-film{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.74; cursor:pointer; touch-action:manipulation}
+  .work-film:focus-visible{outline:2px solid var(--work-accent); outline-offset:-5px}
   .work-layer::after{
     content:""; position:absolute; inset:0;
-    background:linear-gradient(90deg,rgba(8,9,12,.7),transparent 56%),linear-gradient(180deg,rgba(8,9,12,.1),rgba(8,9,12,.88) 82%);
+    pointer-events:none; background:linear-gradient(90deg,rgba(8,9,12,.7),transparent 56%),linear-gradient(180deg,rgba(8,9,12,.1),rgba(8,9,12,.88) 82%);
   }
   .work-close{
     position:absolute; z-index:3; top:max(18px,env(safe-area-inset-top)); right:16px;
@@ -1541,7 +1542,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile77" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile78" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1766,7 +1767,7 @@
 </div>
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
-  <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
+  <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="0" role="button" aria-label="作品ネイルを試着する"></video>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>BACK</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
@@ -1778,10 +1779,7 @@
       <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
         <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
       </div>
-      <button type="button" class="work-try" id="workTryBtn">
-        <span class="work-try-label">TRY ON</span>
-      </button>
-      <a class="work-custom" href="?mode=custom">CREATE</a>
+      <a class="work-custom" href="?mode=custom" aria-label="写真からネイルを作る">PHOTO</a>
     </div>
   </div>
 </section>
@@ -1839,7 +1837,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile77"></script>
+<script src="./tracking-core.js?v=mobile78"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3829,7 +3827,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile77';
+  const BUILD_VERSION='mobile78';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4332,7 +4330,11 @@ updateCmpBadge();
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
-  document.getElementById('workTryBtn').addEventListener('click',()=>{ location.href=tryRoute(current,artworkTryLength); });
+  const startArtworkTryOn=()=>{ location.href=tryRoute(current,artworkTryLength); };
+  workFilm.addEventListener('click',startArtworkTryOn);
+  workFilm.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){ event.preventDefault(); startArtworkTryOn(); }
+  });
 
   const globalBack=document.getElementById('globalBack');
   globalBack.addEventListener('click',event=>{
