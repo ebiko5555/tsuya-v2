@@ -2,374 +2,49 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07080c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>TOUCH HANDS</title>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: fixed;
-    touch-action: none;
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: auto;
-    background: #07080c;
-    color: #f2f5fa;
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
-  }
-
-  #canvas-container {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    z-index: 1;
-    touch-action: none;
-  }
-
-  /* 画面上の唯一の文字：TOUCH HANDS のみ */
-  .touch-hands-title {
-    position: fixed;
-    bottom: calc(36px + env(safe-area-inset-bottom));
-    left: 0;
-    right: 0;
-    text-align: center;
-    pointer-events: none;
-    z-index: 10;
-    font-size: 26px;
-    font-weight: 300;
-    letter-spacing: 0.35em;
-    text-indent: 0.35em;
-    color: #ffffff;
-    text-shadow: 0 0 24px rgba(255, 255, 255, 0.6), 0 0 48px rgba(160, 200, 255, 0.3);
-  }
-
-  /* 画面遷移時の暗転ヴェール */
-  #veil {
-    position: fixed;
-    inset: 0;
-    background: #07080c;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 100;
-    transition: opacity 0.5s ease;
-  }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07080c;color:#f2f5fa;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+#stage{position:fixed;inset:env(safe-area-inset-top,0px) 0 calc(100px + env(safe-area-inset-bottom,0px));touch-action:none;isolation:isolate}
+#canvas-container{position:absolute;inset:0;pointer-events:none}
+canvas{display:block;width:100%;height:100%}
+#works{position:absolute;inset:0}
+.work{position:absolute;display:block;left:var(--x);top:var(--y);width:var(--size);height:var(--size);transform:translate(-50%,-50%);border-radius:50%;outline-offset:5px;touch-action:none}
+.work img{width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:opacity .55s ease,filter .2s ease;filter:drop-shadow(0 0 8px #a5c8ff18)}
+.work:focus-visible{outline:1px solid #e7d4a6;background:#e7d4a609}
+.work:active img{filter:drop-shadow(0 0 12px #e7d4a655)}
+.work.is-ready img{opacity:0}
+.work.is-loading::after{content:"";position:absolute;inset:18%;border:1px solid #b9d0ef24;border-top-color:#d7e4f37a;border-radius:50%;animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.3;transform:scale(.94)}}
+.touch-hands-title{position:fixed;margin:0;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;pointer-events:none;font-size:clamp(20px,5.9vw,26px);font-weight:300;letter-spacing:.35em;text-indent:.35em;color:#fff;text-shadow:0 0 24px #ffffff66}
+#touch-ring{position:fixed;width:36px;height:36px;border:1px solid #fff;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;z-index:20;box-shadow:0 0 16px #ffffff26}
+#touch-ring::after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;transform:translate(-50%,-50%);border-radius:50%;background:#d5b574}
+#veil{position:fixed;inset:0;background:#07080c;opacity:0;pointer-events:none;z-index:30;transition:opacity .25s ease}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media(max-height:480px){#stage{bottom:calc(64px + env(safe-area-inset-bottom,0px))}.touch-hands-title{bottom:calc(18px + env(safe-area-inset-bottom,0px));font-size:20px}}
 </style>
 </head>
 <body>
-
-<div id="canvas-container"></div>
-
-<div class="touch-hands-title">TOUCH HANDS</div>
-
-<div id="veil"></div>
-
-<script>
-// ピンチズーム・ダブルタップズームを完全遮断
-document.addEventListener('touchstart', function(e) {
-  if (e.touches.length > 1) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
-document.addEventListener('touchmove', function(e) {
-  if (e.touches.length > 1) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  lastTouchEnd = now;
-}, { passive: false });
-
-document.addEventListener('gesturestart', function(e) {
-  e.preventDefault();
-});
-document.addEventListener('gesturechange', function(e) {
-  e.preventDefault();
-});
-document.addEventListener('gestureend', function(e) {
-  e.preventDefault();
-});
-</script>
-
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-const container = document.getElementById('canvas-container');
-const veil = document.getElementById('veil');
-
-// 1. Scene, Camera, Renderer
-const scene = new THREE.Scene();
-
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 105);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.35;
-container.appendChild(renderer.domElement);
-
-// 2. Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
-scene.add(ambientLight);
-
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.8);
-dirLight1.position.set(60, 100, 100);
-scene.add(dirLight1);
-
-const dirLight2 = new THREE.DirectionalLight(0xa5c8ff, 1.8);
-dirLight2.position.set(-60, -80, -60);
-scene.add(dirLight2);
-
-// 3. 背景微小ダスト
-const dustCount = 280;
-const dustGeo = new THREE.BufferGeometry();
-const dustPositions = new Float32Array(dustCount * 3);
-for (let i = 0; i < dustCount * 3; i += 3) {
-  dustPositions[i] = (Math.random() - 0.5) * 450;
-  dustPositions[i + 1] = (Math.random() - 0.5) * 450;
-  dustPositions[i + 2] = (Math.random() - 0.5) * 450;
-}
-dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-const dustMat = new THREE.PointsMaterial({ size: 1.2, color: 0x88aaff, transparent: true, opacity: 0.35 });
-const dustMesh = new THREE.Points(dustGeo, dustMat);
-scene.add(dustMesh);
-
-// 4. 同一画面に4つのオブジェクトを同時に浮遊配置するグループ
-const universeGroup = new THREE.Group();
-scene.add(universeGroup);
-
-// 4つのGLBモデル定義
-const modelsConfig = [
-  {
-    id: 'COLOR',
-    file: 'assets/bottle.glb',
-    targetSize: 25,
-    pos: new THREE.Vector3(0, 26, 0),
-    floatPhase: 0
-  },
-  {
-    id: 'SURFACE',
-    file: 'assets/frientirip.glb',
-    targetSize: 26,
-    pos: new THREE.Vector3(22, 0, 0),
-    floatPhase: Math.PI * 0.5
-  },
-  {
-    id: 'HAND',
-    file: 'assets/hand.glb',
-    targetSize: 27,
-    pos: new THREE.Vector3(0, -26, 0),
-    floatPhase: Math.PI
-  },
-  {
-    id: 'SPACE',
-    file: 'assets/jisakuhand.glb',
-    targetSize: 28,
-    pos: new THREE.Vector3(-22, 0, 0),
-    floatPhase: Math.PI * 1.5
-  }
-];
-
-function prepareModel(model, targetSize) {
-  model.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(model);
-  const center = box.getCenter(new THREE.Vector3());
-  const size = box.getSize(new THREE.Vector3());
-
-  model.position.sub(center);
-
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = targetSize / (maxDim || 1);
-  model.scale.set(scale, scale, scale);
-
-  const wrapper = new THREE.Group();
-  wrapper.add(model);
-  return wrapper;
-}
-
-const objects = [];
-const loader = new GLTFLoader();
-
-modelsConfig.forEach(config => {
-  const pivot = new THREE.Group();
-  pivot.position.copy(config.pos);
-  universeGroup.add(pivot);
-
-  // タップ判定用ヒットボックス
-  const hitGeo = new THREE.SphereGeometry(16, 16, 16);
-  const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-  const hitMesh = new THREE.Mesh(hitGeo, hitMat);
-  hitMesh.userData = { config: config };
-  pivot.add(hitMesh);
-
-  loader.load(
-    config.file,
-    gltf => {
-      const visual = prepareModel(gltf.scene, config.targetSize);
-      pivot.add(visual);
-
-      objects.push({
-        pivot: pivot,
-        visual: visual,
-        hitMesh: hitMesh,
-        config: config,
-        basePos: config.pos.clone(),
-        phase: config.floatPhase
-      });
-    },
-    undefined,
-    err => console.error('Error loading:', config.file, err)
-  );
-});
-
-// 5. タッチ操作：指で空間全体を撫でてゆっくり回す ＆ タップで作品へダイブ
-let isDragging = false;
-let startX = 0, startY = 0;
-let prevX = 0, prevY = 0;
-let rotVelX = 0, rotVelY = 0.0006;
-let hasMoved = false;
-let navigating = false;
-
-window.addEventListener('pointerdown', e => {
-  if (navigating || e.isPrimary === false) return;
-  isDragging = true;
-  hasMoved = false;
-  startX = e.clientX;
-  startY = e.clientY;
-  prevX = e.clientX;
-  prevY = e.clientY;
-  rotVelX = 0;
-  rotVelY = 0;
-});
-
-window.addEventListener('pointermove', e => {
-  if (!isDragging || navigating) return;
-  const dx = e.clientX - prevX;
-  const dy = e.clientY - prevY;
-  if (Math.hypot(e.clientX - startX, e.clientY - startY) > 6) {
-    hasMoved = true;
-  }
-  prevX = e.clientX;
-  prevY = e.clientY;
-
-  rotVelY = dx * 0.0028;
-  rotVelX = dy * 0.0028;
-  universeGroup.rotation.y += rotVelY;
-  universeGroup.rotation.x += rotVelX;
-});
-
-window.addEventListener('pointerup', e => {
-  if (!isDragging || navigating) return;
-  isDragging = false;
-
-  const totalDist = Math.hypot(e.clientX - startX, e.clientY - startY);
-  if (!hasMoved || totalDist <= 6) {
-    handleTap(e.clientX, e.clientY);
-  }
-});
-
-// Raycasterによるタップ検知
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-function handleTap(clientX, clientY) {
-  mouse.x = (clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const hitMeshes = objects.map(o => o.hitMesh);
-  const intersects = raycaster.intersectObjects(hitMeshes);
-
-  if (intersects.length > 0) {
-    const targetConfig = intersects[0].object.userData.config;
-    if (targetConfig) {
-      diveIntoWork(targetConfig);
-    }
-  }
-}
-
-function diveIntoWork(config) {
-  if (navigating) return;
-  navigating = true;
-  veil.style.opacity = '1';
-
-  setTimeout(() => {
-    window.location.href = `../experience-prototype/?work=${config.id}&v=antigravity`;
-  }, 480);
-}
-
-// リサイズ対応
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// 6. アニメーションループ
-const clock = new THREE.Clock();
-
-function animate() {
-  requestAnimationFrame(animate);
-
-  const time = clock.getElapsedTime();
-
-  // 空間全体のゆっくりとした慣性回転
-  if (!isDragging) {
-    rotVelY *= 0.98;
-    rotVelX *= 0.98;
-    if (Math.abs(rotVelY) < 0.0004) rotVelY = 0.0004;
-    universeGroup.rotation.y += rotVelY;
-    universeGroup.rotation.x += rotVelX;
-  }
-
-  universeGroup.rotation.x = Math.max(-0.45, Math.min(0.45, universeGroup.rotation.x));
-
-  dustMesh.rotation.y = time * 0.01;
-
-  // 4つのオブジェクトそれぞれの自律浮遊
-  objects.forEach(obj => {
-    if (!obj.visual) return;
-    obj.pivot.position.y = obj.basePos.y + Math.sin(time * 1.5 + obj.phase) * 2.8;
-    obj.pivot.position.x = obj.basePos.x + Math.cos(time * 1.2 + obj.phase) * 1.5;
-    obj.visual.rotation.y += 0.008;
-    obj.visual.rotation.x += 0.004;
-  });
-
-  renderer.render(scene, camera);
-}
-
-animate();
-</script>
+<main id="stage" aria-label="４つの造形に触れて作品へ。なでると空間が動きます。">
+  <div id="canvas-container" aria-hidden="true"></div>
+  <nav id="works" aria-label="作品を選ぶ">
+    <a class="work" data-work="COLOR" href="../experience-prototype/?work=COLOR&amp;v=mobile71" aria-label="色の作品へ" style="--x:50%;--y:22%;--size:130px"><img src="assets/mobile71/bottle.webp" alt="" width="384" height="384" fetchpriority="high"></a>
+    <a class="work" data-work="SURFACE" href="../experience-prototype/?work=SURFACE&amp;v=mobile71" aria-label="表面の作品へ" style="--x:76%;--y:50%;--size:130px"><img src="assets/mobile71/frientirip.webp" alt="" width="384" height="384"></a>
+    <a class="work" data-work="HAND" href="../experience-prototype/?work=HAND&amp;v=mobile71" aria-label="手の作品へ" style="--x:50%;--y:78%;--size:130px"><img src="assets/mobile71/hand.webp" alt="" width="384" height="384"></a>
+    <a class="work" data-work="SPACE" href="../experience-prototype/?work=SPACE&amp;v=mobile71" aria-label="宇宙と手の作品へ" style="--x:24%;--y:50%;--size:130px"><img src="assets/mobile71/jisakuhand.webp" alt="" width="384" height="384"></a>
+  </nav>
+</main>
+<h1 class="touch-hands-title">TOUCH HANDS</h1>
+<p class="sr-only" role="status" id="load-status">作品の入口を表示しています。</p>
+<div id="touch-ring" aria-hidden="true"></div>
+<div id="veil" aria-hidden="true"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="./main.mjs?v=mobile71"></script>
 </body>
 </html>
