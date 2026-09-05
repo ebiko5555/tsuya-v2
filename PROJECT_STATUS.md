@@ -4,7 +4,7 @@
 
 引継文書最終監査: 2026-09-05（TOUCH HANDS の今回の変更範囲）
 
-現行公開版: `試作78 / mobile78`（作品動画から試着、写真からの制作入口をPHOTOへ。公開反映確認済み）
+現行公開版: `試作79 / mobile79`（作品名を動画内の透かしへ、写真からの制作入口をFROM PHOTOへ。公開反映確認済み）
 
 現行ローカル改善版: `試作79 / mobile79`（作品名を動画内の透かしへ、写真からの制作入口をFROM PHOTOへ）
 
@@ -1328,3 +1328,9 @@ GitHub Pages run 33976883906（1fdd410）がsuccessで完了。公開されたHT
 - チップ見本、SHORT/LONGの選択、写真から作る入口を、題名と重ならない独立した領域に配置。
 - 写真から作る入口の表示を`FROM PHOTO`へ変更。既存の写真由来のSOURCE制作ルートと読み上げ名は維持。
 - 390×844のHAND作品で、動画内の透かし、チップ、SHORT/LONG、FROM PHOTO、エラーログなしを確認。既存検証22件が合格。iPhone実機での見え方は要確認。
+
+### 試作79の公開確認
+
+GitHub Pages run 33978534363のbuild・deploy（ed664cc）がsuccessで完了。公開されたHTMLとモジュール６ファイルが検証済みファイルとSHA-256で一致。公開版HANDで、動画内の透かし、チップ、SHORT/LONG、FROM PHOTO、エラーログなしを確認。
+
+公開URL: https://ebiko5555.github.io/tsuya-v2/?v=ed664cc-mobile79
