@@ -4,11 +4,11 @@
 
 引継文書最終監査: 2026-09-05（TOUCH HANDS の今回の変更範囲）
 
-現行公開版: `試作71 / mobile71`（TOUCH HANDS。GitHub Pages公開反映確認済み）
+現行公開版: `試作72 / mobile72`（４つのGLBが正式HOME。GitHub Pages公開反映確認済み）
 
 現行ローカル改善版: `試作72 / mobile72`（４つのGLBを正式HOMEへ統一・公転と自由回転）
 
-アプリ実装コミット: `8218a56`（試作71、公開済み。公開確認時のmain: b742715）
+アプリ実装コミット: `27ecbde`（試作72、公開済み）
 ブランチ: `main`
 
 この文書は会話要約ではなく、`experience-prototype/index.html`、`top-prototype/index.html`、既存試作記録、Git履歴を照合した現在地点である。
@@ -1198,3 +1198,9 @@
 - 自動検証7件合格。往復ドラッグの誤タップ防止、慣性のフレームレート非依存、モデルの120秒分の移動・360度回転と画面内の収まり、ルートとHOMEの行き先を確認。
 - ブラウザー390×844でルート→４つのGLB、作品→HOME→４つのGLB、旧top-prototype→４つのGLBを確認。
 - 確認ブラウザーはWebGL無効なので画面確認はプレビュー代替表示。iPhone実機での3Dの回転・描画の滑らかさは要確認。
+
+### 試作72の公開確認
+
+利用者の追加の「おねがい」を受けて公開。GitHub Pages run 33947639052（コミット27ecbde）がsuccessで完了。公開先のルート・旧トップ転送ページ・作品本体・TOUCH HANDSのHTMLと２つのモジュールの全６ファイルが、ローカルの検証済みファイルとSHA-256で一致。
+
+公開URL: https://ebiko5555.github.io/tsuya-v2/?v=27ecbde-mobile72
