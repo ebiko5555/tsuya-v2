@@ -867,6 +867,11 @@
   .work-nails canvas{width:21px; height:42px; filter:drop-shadow(0 5px 7px rgba(0,0,0,.26))}
   .work-nails canvas:nth-child(1),.work-nails canvas:nth-child(5){height:35px}
   .work-nails canvas:nth-child(2),.work-nails canvas:nth-child(4){height:39px}
+  /* 作品ページでは、装着用の小アイコンではなくチップ標本として読める大きさにする。 */
+  body.art-page .work-nails{height:78px; gap:9px; margin-top:17px}
+  body.art-page .work-nails canvas{width:36px; height:72px}
+  body.art-page .work-nails canvas:nth-child(1),body.art-page .work-nails canvas:nth-child(5){height:59px}
+  body.art-page .work-nails canvas:nth-child(2),body.art-page .work-nails canvas:nth-child(4){height:66px}
   .work-actions{display:grid; gap:10px; margin-top:18px; max-width:310px}
   .work-try{
     display:grid; grid-template-columns:1fr; grid-template-rows:1fr;
@@ -1565,7 +1570,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile83" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile84" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1859,7 +1864,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile83"></script>
+<script src="./tracking-core.js?v=mobile84"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3875,7 +3880,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile83';
+  const BUILD_VERSION='mobile84';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4136,12 +4141,12 @@ updateCmpBadge();
     const p=works[key].preset;
     const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.68;
     withVars(p.vars,()=>p.looks.forEach((look,i)=>{
-      const cv=document.createElement('canvas'); cv.width=56; cv.height=104;
+      const cv=document.createElement('canvas'); cv.width=96; cv.height=160;
       cv.dataset.look=look; cv.title=LOOKS[look]?.name||look;
       cv.setAttribute('aria-label',(i+1)+'本目 '+(LOOKS[look]?.name||look));
-      const h=78*lengthScale;
-      const c=cv.getContext('2d'); c.translate(28,52); nailShape(c,36,h); c.clip();
-      paintByKey(c,look,36,h,p.colors[i],i); paintGelTip(c,36,h,i,.92); box.appendChild(cv);
+      const h=122*lengthScale, w=62;
+      const c=cv.getContext('2d'); c.translate(48,80); nailShape(c,w,h); c.clip();
+      paintByKey(c,look,w,h,p.colors[i],i); paintGelTip(c,w,h,i,.92); box.appendChild(cv);
     }));
   }
   installArtworkLooks();
