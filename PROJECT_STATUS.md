@@ -4,7 +4,7 @@
 
 引継文書最終監査: 2026-09-05（TOUCH HANDS の今回の変更範囲）
 
-現行公開版: `試作79 / mobile79`（作品名を動画内の透かしへ、写真からの制作入口をFROM PHOTOへ。公開反映確認済み）
+現行公開版: `試作80 / mobile80`（SOURCEカードを写真からの制作への入口として追加。公開反映確認済み）
 
 現行ローカル改善版: `試作80 / mobile80`（SOURCEカードを写真からの制作への入口として追加）
 
@@ -1342,3 +1342,9 @@ GitHub Pages run 33978534363のbuild・deploy（ed664cc）がsuccessで完了。
 - 文字リンクだった`FROM PHOTO`を撤去。写真の枠と小さな光の印、`SOURCE`、`写真からつくる`、矢印を含むカードへ置換。
 - チップとSHORT/LONGの選択から視覚的に分け、写真から作品由来のネイルを作る別の制作空間への入口として見せる。
 - HANDからSOURCEを押し、`?mode=custom&from=HAND`の写真制作画面へ進むこと、390×844の表示とエラーログなしを確認。既存検証22件に合格。iPhone実機での見え方は要確認。
+
+### 試作80の公開確認
+
+GitHub Pages run 33979747838（f1f7198）のbuild・report-build-status・deployがsuccessで完了。公開されたHTMLとモジュール６ファイルが検証済みファイルとSHA-256で一致。公開版HANDからSOURCEを押し、`?mode=custom&from=HAND&v=mobile80`へ移動することを確認。
+
+公開URL: https://ebiko5555.github.io/tsuya-v2/?v=f1f7198-mobile80
