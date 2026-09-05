@@ -6,7 +6,7 @@
 
 現行公開版: `試作79 / mobile79`（作品名を動画内の透かしへ、写真からの制作入口をFROM PHOTOへ。公開反映確認済み）
 
-現行ローカル改善版: `試作79 / mobile79`（作品名を動画内の透かしへ、写真からの制作入口をFROM PHOTOへ）
+現行ローカル改善版: `試作80 / mobile80`（SOURCEカードを写真からの制作への入口として追加）
 
 HOME実装コミット: `9a7d932`（試作76、公開済み）
 公開確認時のアプリHEAD: `abc5590`（試作77、チップ姿勢安定化）
@@ -1334,3 +1334,11 @@ GitHub Pages run 33976883906（1fdd410）がsuccessで完了。公開されたHT
 GitHub Pages run 33978534363のbuild・deploy（ed664cc）がsuccessで完了。公開されたHTMLとモジュール６ファイルが検証済みファイルとSHA-256で一致。公開版HANDで、動画内の透かし、チップ、SHORT/LONG、FROM PHOTO、エラーログなしを確認。
 
 公開URL: https://ebiko5555.github.io/tsuya-v2/?v=ed664cc-mobile79
+
+## 63. SOURCEを別の制作空間への入口にする（試作80 / mobile80）
+
+出典: このタスクの「FROM PHOTOはもっと違うところへの入り口のようなアイコンにしたい」「SOURCE」「やってみて」という指示。
+
+- 文字リンクだった`FROM PHOTO`を撤去。写真の枠と小さな光の印、`SOURCE`、`写真からつくる`、矢印を含むカードへ置換。
+- チップとSHORT/LONGの選択から視覚的に分け、写真から作品由来のネイルを作る別の制作空間への入口として見せる。
+- HANDからSOURCEを押し、`?mode=custom&from=HAND`の写真制作画面へ進むこと、390×844の表示とエラーログなしを確認。既存検証22件に合格。iPhone実機での見え方は要確認。

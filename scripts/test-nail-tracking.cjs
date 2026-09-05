@@ -98,12 +98,14 @@ test('the rendered nail uses stabilized translation as well as angle and length'
   assert.ok(html.includes('ctx.translate(st.x+Math.cos(ang)*pushOut, st.y+Math.sin(ang)*pushOut)'));
 });
 
-test('an artwork video starts the same fixed try-on route and FROM PHOTO opens source creation',()=>{
+test('an artwork video starts the same fixed try-on route and SOURCE opens photo creation',()=>{
   assert.ok(!html.includes('id="workTryBtn"'));
   assert.ok(html.includes('aria-label="作品ネイルを試着する"'));
   assert.ok(html.includes("workFilm.addEventListener('click',startArtworkTryOn)"));
   assert.ok(html.includes("location.href=tryRoute(current,artworkTryLength)"));
-  assert.match(html, /class="work-custom"[^>]*aria-label="写真からネイルを作る"[^>]*>FROM PHOTO<\/a>/);
+  assert.match(html, /class="source-entry"[^>]*aria-label="写真からネイルを作る"/);
+  assert.ok(html.includes('class="source-entry-title">SOURCE</span>'));
+  assert.ok(html.includes('class="source-entry-sub">写真からつくる</span>'));
   assert.ok(html.includes('id="workFilmCode"'));
   assert.ok(html.includes('id="workFilmTitle"'));
   assert.ok(!html.includes('id="workCode"'));

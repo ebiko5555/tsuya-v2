@@ -877,6 +877,18 @@
   .work-try-label{align-self:center; font:600 18px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; opacity:1}
   .work-try strong{align-self:end; font-size:11px; font-weight:500; letter-spacing:.08em}
   .work-custom{justify-self:start; border:0; border-bottom:1px solid rgba(255,255,255,.3); padding:8px 2px; color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.1em; text-decoration:none}
+  .source-entry{
+    display:grid; grid-template-columns:42px minmax(0,1fr) 18px; align-items:center; gap:11px;
+    width:100%; min-height:64px; padding:10px 12px; border:1px solid rgba(255,255,255,.34);
+    color:#f2f1ed; background:rgba(255,255,255,.045); text-decoration:none;
+  }
+  .source-entry-icon{position:relative; width:38px; height:38px; border:1px solid var(--work-accent); background:rgba(0,0,0,.16)}
+  .source-entry-icon::before{content:""; position:absolute; inset:7px; border:1px solid rgba(255,255,255,.74); border-radius:1px}
+  .source-entry-icon::after{content:"✦"; position:absolute; right:-8px; top:-9px; color:var(--work-accent); font:16px/1 Georgia,serif; text-shadow:0 0 10px rgba(255,255,255,.45)}
+  .source-entry-title{display:block; font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
+  .source-entry-sub{display:block; margin-top:5px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.08em}
+  .source-entry-arrow{font:300 20px/1 Georgia,serif; color:var(--work-accent)}
+  .source-entry:focus-visible{outline:2px solid var(--work-accent); outline-offset:3px}
   .opening-actions{position:relative; z-index:2; display:flex; align-items:center; gap:20px}
   .make-link{padding:10px 2px; border-bottom:1px solid rgba(255,255,255,.32); color:rgba(255,255,255,.72); font-size:9px; letter-spacing:.12em; text-decoration:none}
   .opening-index{
@@ -1294,6 +1306,7 @@
     body.art-page #workNails canvas{width:38px; height:74px}
     body.art-page #workNails canvas:nth-child(1),body.art-page #workNails canvas:nth-child(5){height:61px}
     body.art-page #workNails canvas:nth-child(2),body.art-page #workNails canvas:nth-child(4){height:68px}
+    body.art-page .source-entry{min-height:62px; border-radius:3px; text-align:left}
   }
 
   /* 試作39：スマホで見失わない大きさの発光アイコンと、目で追える粒子へ強化する。 */
@@ -1552,7 +1565,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile79" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile80" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1788,7 +1801,7 @@
       <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
         <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
       </div>
-      <a class="work-custom" href="?mode=custom" aria-label="写真からネイルを作る">FROM PHOTO</a>
+      <a class="source-entry" href="?mode=custom" aria-label="写真からネイルを作る"><span class="source-entry-icon" aria-hidden="true"></span><span><span class="source-entry-title">SOURCE</span><span class="source-entry-sub">写真からつくる</span></span><span class="source-entry-arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -1846,7 +1859,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile79"></script>
+<script src="./tracking-core.js?v=mobile80"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3836,7 +3849,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile79';
+  const BUILD_VERSION='mobile80';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4150,7 +4163,7 @@ updateCmpBadge();
     artworkTryLength=inferTryLength(work.preset.tune);
     renderNailPreview(key,'workNails',artworkTryLength);
     renderLengthChoice($('workLengthChoice'),artworkTryLength);
-    const customLink=document.querySelector('.work-custom');
+    const customLink=document.querySelector('.source-entry');
     const customHref=customRoute(key); customLink.href=customHref;
     customLink.onclick=event=>{
       event.preventDefault();
