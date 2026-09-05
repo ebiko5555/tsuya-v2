@@ -27,7 +27,7 @@ test('model bounds stay inside portrait and landscape stages at all allowed tilt
  for(const [w,h] of [[320,468],[390,744],[430,832],[844,326],[1440,800]]){
   const z=fitCamera(w,h),tan=Math.tan(50*Math.PI/360);
   for(let i=0;i<4;i++)for(const rx of [-.22,0,.22])for(const ry of [-.28,0,.28])for(const ox of [-.07,.07])for(const oy of [-.16,.16])for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1]){
-   let p=rotate(dimensions[i].map((v,j)=>v*.5*[sx,sy,sz][j]),ox,oy);
+   let p=rotate(dimensions[i].map((v,j)=>v*(MODEL_CONFIG[i].size/[25,26,27,28][i])*.5*[sx,sy,sz][j]),ox,oy);
    p[0]+=MODEL_CONFIG[i].x+Math.sign(MODEL_CONFIG[i].x)*.65;p[1]+=MODEL_CONFIG[i].y+Math.sign(MODEL_CONFIG[i].y)*.9;
    p=rotate(p,rx,ry);const scale=h/(2*tan*(z-p[2]));
    const px=w/2+p[0]*scale,py=h/2-p[1]*scale;
@@ -48,12 +48,12 @@ test('the four models travel in depth and complete full turns, including unrestr
   const positions=[];
   for(let t=0;t<=120;t+=.25){
    const p=floatingPose(config,t);
-   // 22 world units encloses even the wire hand under every local rotation.
-   assert.ok(Math.hypot(p.x,p.y,p.z)+22<58);
+   // 44 world units encloses the doubled wire hand under every local rotation.
+   assert.ok(Math.hypot(p.x,p.y,p.z)+44<66);
    positions.push(p);
   }
-  assert.ok(Math.max(...positions.map(p=>p.x))-Math.min(...positions.map(p=>p.x))>40);
-  assert.ok(Math.max(...positions.map(p=>p.z))-Math.min(...positions.map(p=>p.z))>15);
+  assert.ok(Math.max(...positions.map(p=>p.x))-Math.min(...positions.map(p=>p.x))>26);
+  assert.ok(Math.max(...positions.map(p=>p.z))-Math.min(...positions.map(p=>p.z))>9.75);
   assert.ok(positions.at(-1).rx>Math.PI*2&&positions.at(-1).ry>Math.PI*2);
   assert.deepEqual(floatingPose(config,100,true),{x:config.x,y:config.y,z:0,rx:0,ry:0,rz:0});
  }

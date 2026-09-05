@@ -1,11 +1,11 @@
 // Geometry and gesture rules shared by the page and its regression checks.
-export const BUILD_VERSION = 'mobile73';
+export const BUILD_VERSION = 'mobile74';
 export const ASSET_VERSION = 'mobile71';
 export const MODEL_CONFIG = [
-  {id:'COLOR', label:'色の作品へ', name:'bottle', size:25, x:0, y:27, phase:0},
-  {id:'SURFACE', label:'表面の作品へ', name:'frientirip', size:26, x:22, y:0, phase:Math.PI/2},
-  {id:'HAND', label:'手の作品へ', name:'hand', size:27, x:0, y:-27, phase:Math.PI},
-  {id:'SPACE', label:'宇宙と手の作品へ', name:'jisakuhand', size:28, x:-22, y:0, phase:Math.PI*1.5},
+  {id:'COLOR', label:'色の作品へ', name:'bottle', size:50, x:0, y:17.55, phase:0},
+  {id:'SURFACE', label:'表面の作品へ', name:'frientirip', size:52, x:14.3, y:0, phase:Math.PI/2},
+  {id:'HAND', label:'手の作品へ', name:'hand', size:54, x:0, y:-17.55, phase:Math.PI},
+  {id:'SPACE', label:'宇宙と手の作品へ', name:'jisakuhand', size:56, x:-14.3, y:0, phase:Math.PI*1.5},
 ];
 export const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 export function fitCamera(width, height) {
@@ -14,7 +14,7 @@ export function fitCamera(width, height) {
   const tan=Math.tan(50*Math.PI/360);
   const halfAngle=Math.atan(Math.min(tan*(1-2*padding/h),tan*(w/h)*(1-2*padding/w)));
   // A sphere enclosing the floating centers and every possible model orientation.
-  return 58/Math.sin(halfAngle);
+  return 66/Math.sin(halfAngle);
 
 }
 export function createGesture() {
@@ -54,9 +54,9 @@ export function floatingPose(config,time,reduced=false){
   if(reduced)return {x:config.x,y:config.y,z:0,rx:0,ry:0,rz:0};
   const a=config.phase+time*.13;
   return {
-    x:Math.sin(a)*26+Math.sin(time*.63+config.phase)*2.4,
-    y:Math.cos(a)*29+Math.sin(time*.51+config.phase)*2.8,
-    z:Math.sin(time*.42+config.phase)*9,
+    x:(Math.sin(a)*26+Math.sin(time*.63+config.phase)*2.4)*.65,
+    y:(Math.cos(a)*29+Math.sin(time*.51+config.phase)*2.8)*.65,
+    z:Math.sin(time*.42+config.phase)*9*.65,
     rx:time*(.24+config.phase*.014),
     ry:time*(.42+config.phase*.018),
     rz:Math.sin(time*.32+config.phase)*.32,
