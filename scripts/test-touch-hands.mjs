@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs';
-import {createGesture,advanceRotation,fitCamera,MODEL_RADII,MODEL_CONFIG,BUILD_VERSION,ASSET_VERSION,floatingPose,workURL} from '../touch-hands/touch-core.mjs';
+import {createGesture,advanceRotation,fitCamera,MODEL_RADII,createFloatWorld,MODEL_CONFIG,BUILD_VERSION,ASSET_VERSION,floatingPose,workURL} from '../touch-hands/touch-core.mjs';
 
 test('a small touch selects, but a drag returning to its origin never selects',()=>{
  const g=createGesture();g.start(1,50,50,0);g.move(1,53,52);assert.equal(g.end(1,53,52,120),true);
@@ -17,21 +17,26 @@ test('inertia has the same distance and speed at 30, 60 and 120 Hz',()=>{
  const simulate=hz=>{let r=0,v=.7;for(let i=0;i<hz;i++){const next=advanceRotation(r,v,1/hz);r=next.rotation;v=next.velocity;}return [r,v];};
  const a=simulate(30);for(const hz of [60,120])simulate(hz).forEach((v,i)=>assert.ok(Math.abs(v-a[i])<1e-10));
 });
-test('enlarged moving silhouettes remain separated and inside portrait and landscape screens',()=>{
+test('billiard bodies travel freely, rebound, and remain separate inside the screen',()=>{
  for(const [w,h] of [[320,468],[390,744],[430,832],[844,326],[1440,800]]){
-  const d=fitCamera(w,h),f=h/(2*Math.tan(50*Math.PI/360));
-  for(let t=0;t<=120;t+=.25){
-   const circles=MODEL_CONFIG.map((c,i)=>{
-    const p=floatingPose(c,t,false,w,h),r=MODEL_RADII[i];
-    // Conservative projected sphere radius, including off-axis perspective.
-    const z=d-p.z,worldOffset=Math.hypot(p.x,p.y)*z/f;
-    const radius=f*r*Math.sqrt(z*z+worldOffset*worldOffset-r*r)/(z*z-r*r);
-    assert.ok(Math.abs(p.x)+radius<w/2-10&&Math.abs(p.y)+radius<h/2-10);
-    return {...p,radius};
+  const world=createFloatWorld(w,h);
+  const travel=world.bodies.map(()=>0);let rebounds=0;
+  for(let k=0;k<7200;k++){
+   const before=world.bodies.map(b=>({...b}));world.step(1/60);
+   world.bodies.forEach((b,i)=>{
+    assert.ok(Math.abs(b.x)+b.wallRadius<=w/2-7.99&&Math.abs(b.y)+b.wallRadius<=h/2-7.99);
+    world.bodies.slice(0,i).forEach(a=>assert.ok(Math.hypot(a.x-b.x,a.y-b.y)>=a.radius+b.radius-.02));
+    travel[i]+=Math.hypot(b.x-before[i].x,b.y-before[i].y);
+    if(b.vx*before[i].vx<0||b.vy*before[i].vy<0)rebounds++;
    });
-   circles.forEach((c,i)=>circles.slice(0,i).forEach(b=>assert.ok(Math.hypot(c.x-b.x,c.y-b.y)>c.radius+b.radius+8)));
   }
+  assert.ok(rebounds>10);travel.forEach(d=>assert.ok(d>Math.min(w,h)));
  }
+});
+test('billiards have the same motion at 30, 60 and 120 Hz',()=>{
+ const simulate=hz=>{const world=createFloatWorld(390,744);for(let i=0;i<hz*10;i++)world.step(1/hz);return world.bodies;};
+ const reference=simulate(120);
+ for(const hz of [30,60])simulate(hz).forEach((b,i)=>['x','y','vx','vy'].forEach(k=>assert.ok(Math.abs(b[k]-reference[i][k])<1e-6)));
 });
 test('all four work routes and the application entry points use the current revision',()=>{
  const html=fs.readFileSync(new URL('../touch-hands/index.html',import.meta.url),'utf8');
@@ -44,7 +49,7 @@ test('all four work routes and the application entry points use the current revi
 test('each model floats independently and keeps full rotation and drag inertia',()=>{
  for(const config of MODEL_CONFIG){
   const positions=Array.from({length:481},(_,i)=>floatingPose(config,i*.25));
-  assert.ok(Math.max(...positions.map(p=>p.x))-Math.min(...positions.map(p=>p.x))>18);
+
   assert.ok(Math.max(...positions.map(p=>p.z))-Math.min(...positions.map(p=>p.z))>9);
   assert.ok(positions.at(-1).rx>Math.PI*2&&positions.at(-1).ry>Math.PI*2);
   assert.deepEqual(floatingPose(config,100,true),floatingPose(config,0,true));

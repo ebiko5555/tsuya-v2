@@ -1,4 +1,4 @@
-import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile75';
+import {BUILD_VERSION,ASSET_VERSION,floatingPose,createFloatWorld,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile76';
 const stage=document.getElementById('stage');
 const container=document.getElementById('canvas-container');
 const veil=document.getElementById('veil');
@@ -8,14 +8,17 @@ const motion=matchMedia('(prefers-reduced-motion: reduce)');
 const gesture=createGesture();
 const entries=MODEL_CONFIG.map(config=>({...config,link:document.querySelector(`[data-work="${config.id}"]`),visual:null,ready:false}));
 let THREE,renderer,scene,camera,group,dust,raycaster;
-let width=0,height=0,distance=0,frame=0,last=0,time=0;
+let width=0,height=0,distance=0,frame=0,last=0,time=0,floatWorld=null;
 let rotX=0,rotY=0,velocityX=0,velocityY=0;
 let pressed=null,selected=null,enterAt=0,navigating=false,rotationFrozen=false;
 let leaveTimer=0,fadeTimer=0,pointerSampleTime=0;
 const scratch={};
 
 function layout(){
-  const rect=stage.getBoundingClientRect(); width=rect.width;height=rect.height;
+  const rect=stage.getBoundingClientRect();
+  const changed=width!==rect.width||height!==rect.height;
+  width=rect.width;height=rect.height;
+  if(changed||!floatWorld)floatWorld=createFloatWorld(width,height);
   distance=fitCamera(width,height);
   if(renderer){
     camera.aspect=width/height;camera.position.set(0,0,distance);camera.updateProjectionMatrix();
@@ -25,7 +28,7 @@ function layout(){
 }
 function placeLinks(){
   for(const item of entries){
-    const fallback=floatingPose(item,0,true,width,height);
+    const fallback=floatingPose(item,0,true,width,height,floatWorld.bodies[entries.indexOf(item)]);
     const basePixels=height/(2*Math.tan(50*Math.PI/360)*distance);
     let x=fallback.x/basePixels,y=fallback.y/basePixels,z=0;
     if(item.pivot){item.pivot.getWorldPosition(scratch.position);({x,y,z}=scratch.position);}
@@ -151,7 +154,7 @@ async function setup(){
     raycaster=new THREE.Raycaster();scratch.pointer=new THREE.Vector2();scratch.position=new THREE.Vector3();
     for(const item of entries){
       item.pivot=new THREE.Group();
-      const pose=floatingPose(item,0,true,width,height),pixels=height/(2*Math.tan(50*Math.PI/360)*distance);
+      const pose=floatingPose(item,0,true,width,height,floatWorld.bodies[entries.indexOf(item)]),pixels=height/(2*Math.tan(50*Math.PI/360)*distance);
       item.pivot.position.set(pose.x/pixels,pose.y/pixels,0);group.add(item.pivot);
       item.link.classList.add('is-loading');
     }
@@ -209,14 +212,14 @@ function animate(now){
   const dt=last?Math.min((now-last)/1000,.05):0;last=now;
   const drifting=!motion.matches&&!gesture.active&&!rotationFrozen&&!navigating;
   if(drifting){
-    time+=dt;
+    time+=dt;floatWorld.step(dt);
     const x=advanceRotation(rotX,velocityX,dt),y=advanceRotation(rotY,velocityY,dt);
     rotX=x.rotation;velocityX=x.velocity;rotY=y.rotation;velocityY=y.velocity;
   }
   group.rotation.set(0,0,0);
   dust.rotation.y=motion.matches?0:time*.004;
   for(const item of entries){
-    const pose=floatingPose(item,time,motion.matches,width,height);
+    const pose=floatingPose(item,time,motion.matches,width,height,floatWorld.bodies[entries.indexOf(item)]);
     const pixels=height/(2*Math.tan(50*Math.PI/360)*(distance-pose.z));
     item.pivot.position.set(pose.x/pixels,pose.y/pixels,pose.z);
     if(item.visual){
