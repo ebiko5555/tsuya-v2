@@ -825,6 +825,13 @@
   .work-layer.open{display:block}
   .work-film{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.74; cursor:pointer; touch-action:manipulation}
   .work-film:focus-visible{outline:2px solid var(--work-accent); outline-offset:-5px}
+  .work-film-mark{
+    position:absolute; z-index:3; right:22px; bottom:28px; max-width:58vw;
+    color:rgba(255,255,255,.72); pointer-events:none; text-align:right;
+    text-shadow:0 2px 16px rgba(0,0,0,.72);
+  }
+  .work-film-code{font:500 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em; color:var(--work-accent)}
+  .work-film-title{margin-top:7px; font:300 clamp(27px,7vw,58px)/.95 "Times New Roman","Yu Mincho",serif; letter-spacing:.05em}
   .work-layer::after{
     content:""; position:absolute; inset:0;
     pointer-events:none; background:linear-gradient(90deg,rgba(8,9,12,.7),transparent 56%),linear-gradient(180deg,rgba(8,9,12,.1),rgba(8,9,12,.88) 82%);
@@ -981,6 +988,7 @@
     position:relative; inset:auto; display:block; width:100%; height:56svh;
     object-fit:contain; object-position:center; opacity:1; filter:none!important; background:#08090c;
   }
+  body.art-page .work-film-mark{right:calc(36% + 28px); bottom:30px}
   body.art-page .work-layer::after{
     top:0; bottom:auto; height:56svh; pointer-events:none;
     background:linear-gradient(180deg,rgba(8,9,12,.08),transparent 72%,rgba(8,9,12,.56));
@@ -1265,6 +1273,8 @@
   @media (max-width:819px){
     body.art-page .work-film{height:50svh}
     body.art-page .work-layer::after{height:50svh}
+    body.art-page .work-film-mark{right:18px; top:calc(50svh - 88px); bottom:auto; max-width:72vw}
+    body.art-page .work-film-title{font-size:clamp(28px,9vw,40px)}
     body.art-page .work-index{top:calc(50svh + 2px)}
     body.art-page .work-copy{
       top:calc(50svh + 72px);
@@ -1542,7 +1552,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile78" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile79" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1768,18 +1778,17 @@
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
   <video class="work-film" id="workFilm" src="art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="0" role="button" aria-label="作品ネイルを試着する"></video>
+  <div class="work-film-mark" aria-live="polite"><div class="work-film-code" id="workFilmCode">01 / COLOR</div><div class="work-film-title" id="workFilmTitle">色</div></div>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>BACK</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
-    <div class="work-code" id="workCode">01 / COLOR</div>
-    <h2 class="work-title" id="workTitle">色</h2>
     <p class="work-text" id="workText"></p>
     <div class="work-nails" id="workNails" aria-label="作品から作った5本のネイル"></div>
     <div class="work-actions">
       <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
         <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
       </div>
-      <a class="work-custom" href="?mode=custom" aria-label="写真からネイルを作る">PHOTO</a>
+      <a class="work-custom" href="?mode=custom" aria-label="写真からネイルを作る">FROM PHOTO</a>
     </div>
   </div>
 </section>
@@ -1837,7 +1846,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile78"></script>
+<script src="./tracking-core.js?v=mobile79"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3827,7 +3836,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile78';
+  const BUILD_VERSION='mobile79';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4135,8 +4144,8 @@ updateCmpBadge();
       history.replaceState(null,'',route('work',key));
       document.title='HAND & LIGHT — '+work.title;
     }
-    document.getElementById('workCode').textContent=work.no+' / '+key;
-    document.getElementById('workTitle').textContent=work.title;
+    document.getElementById('workFilmCode').textContent=work.no+' / '+key;
+    document.getElementById('workFilmTitle').textContent=work.title;
     document.getElementById('workText').textContent=work.text;
     artworkTryLength=inferTryLength(work.preset.tune);
     renderNailPreview(key,'workNails',artworkTryLength);
