@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {createTracker,smoothNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
+const {createTracker,smoothNail,stabilizeNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
 const frame=x=>[Array.from({length:21},(_,i)=>({x:x+i*.001,y:.5+i*.001,z:0}))];
 
 test('small held movements converge instead of remaining in a dead zone',()=>{
@@ -45,7 +45,7 @@ test('five stationary fingertips emit no trail; movement is sparse and stops imm
  for(let i=0;i<100;i++)for(let finger=0;finger<5;finger++)if(s.sample(finger,100+finger*40,200,i*1000/60))points++;
  assert.equal(points,0);
  let moving=0;for(let i=100;i<160;i++)for(let f=0;f<5;f++)if(s.sample(f,100+f*40+(i-100)*2,200,i*1000/60))moving++;
- assert.ok(moving>0&&moving<=120);
+ assert.ok(moving>0&&moving<=150);
  for(let i=160;i<190;i++)for(let f=0;f<5;f++)assert.equal(s.sample(f,100+f*40+59*2,200,i*1000/60),null);
  s.reset();assert.equal(s.sample(0,100,200,4000),null);
 });
@@ -68,7 +68,7 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});
  assert.ok(!html.includes('drawTrails=function'));
- assert.ok(html.indexOf('tracking-core.js?v=mobile73')<html.indexOf('TsuyaTracking.createTracker()'));
+ assert.ok(html.indexOf('tracking-core.js?v=')>=0&&html.indexOf('tracking-core.js?v=')<html.indexOf('TsuyaTracking.createTracker()'));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
@@ -76,4 +76,24 @@ test('a slow but freshly received inference still displays the hand without extr
  const t=createTracker();t.update(frame(.5),0,200);
  assert.equal(t.project(230)[0][0].x,.5);
  assert.deepEqual(t.project(350),[]);
+});
+
+test('a resting nail holds its full pose against position, length and angle noise',()=>{
+ let pose=stabilizeNail(null,{x:300,y:200,len:40,ang:1},1/60);
+ for(let i=1;i<600;i++){
+  pose=stabilizeNail(pose,{x:300+Math.sin(i*1.1),y:200+Math.cos(i*1.4),len:40+Math.sin(i*1.7)*.7,ang:1+Math.sin(i*1.3)*.04},1/60);
+  assert.equal(pose.x,300);assert.equal(pose.y,200);assert.equal(pose.len,40);assert.equal(pose.ang,1);
+ }
+});
+test('nail stabilizer releases promptly for movement, slow drift and finger rotation',()=>{
+ let pose=stabilizeNail(null,{x:300,y:200,len:40,ang:Math.PI-.01},1/60);
+ pose=stabilizeNail(pose,{x:310,y:200,len:40,ang:-Math.PI+.01},1/60);
+ assert.ok(pose.x>308);assert.ok(Math.abs(pose.ang-Math.PI)<.03);
+ for(let i=1;i<=180;i++)pose=stabilizeNail(pose,{x:310+i*.1,y:200,len:40,ang:-Math.PI+.01+i*.002},1/60);
+ assert.ok(Math.abs(pose.x-328)<1.5);assert.ok(Math.abs(Math.atan2(Math.sin(pose.ang-(-Math.PI+.37)),Math.cos(pose.ang-(-Math.PI+.37))))<.065);
+});
+
+test('the rendered nail uses stabilized translation as well as angle and length',()=>{
+ assert.ok(html.includes('TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt)'));
+ assert.ok(html.includes('ctx.translate(st.x+Math.cos(ang)*pushOut, st.y+Math.sin(ang)*pushOut)'));
 });

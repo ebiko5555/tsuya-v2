@@ -56,6 +56,22 @@
     const relative=Math.abs(length-previous.len)/Math.max(previous.len,1);
     return {len:previous.len+alpha(7+relative*24,dt)*(length-previous.len),ang:previous.ang+alpha(9+Math.abs(dAng)*20,dt)*dAng};
   }
+  // Stabilize the complete nail pose, so position, angle and length settle together.
+  function stabilizeNail(previous,target,dt){
+    const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+    if(!previous||!Number.isFinite(previous.x))return {...target,mean:{...target}};
+    const mean=previous.mean||previous;
+    const avg=alpha(2,clamp(dt,1/120,.1));
+    const nextMean={x:mean.x+(target.x-mean.x)*avg,y:mean.y+(target.y-mean.y)*avg,len:mean.len+(target.len-mean.len)*avg,ang:mean.ang+angleDelta(target.ang,mean.ang)*avg};
+    const positionNoise=Math.max(1.5,target.len*.05);
+    const lengthNoise=Math.max(.8,target.len*.035),angleNoise=.065;
+    const rawMove=Math.hypot(target.x-previous.x,target.y-previous.y);
+    const meanMove=Math.hypot(nextMean.x-previous.x,nextMean.y-previous.y);
+    const moving=rawMove>positionNoise*2||meanMove>positionNoise*.5||Math.abs(target.len-previous.len)>lengthNoise*2||Math.abs(nextMean.len-previous.len)>lengthNoise*.5||Math.abs(angleDelta(target.ang,previous.ang))>angleNoise*2||Math.abs(angleDelta(nextMean.ang,previous.ang))>angleNoise*.5;
+    if(!moving)return {...previous,mean:nextMean};
+    const follow=alpha(18+rawMove/Math.max(target.len,1)*25,dt);
+    return {x:previous.x+(target.x-previous.x)*follow,y:previous.y+(target.y-previous.y)*follow,len:previous.len+(target.len-previous.len)*follow,ang:previous.ang+angleDelta(target.ang,previous.ang)*follow,mean:nextMean};
+  }
   function createTrailSampler(){
     const tips=new Map();
     return {
@@ -72,7 +88,7 @@
       }
     };
   }
-  const api={createTracker,smoothNail,createTrailSampler};
+  const api={createTracker,smoothNail,stabilizeNail,createTrailSampler};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.TsuyaTracking=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
