@@ -1906,7 +1906,7 @@ function ensureLive(){
       if(pendingTrackingSession!==trackingSession||mode!=='live'){liveBusy=false;return;}
       const lms = res.multiHandLandmarks || [];
       if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms,trackingFrameAt); }
-      else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;trailSampler.reset();}
+      else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;lastTrailPositions.clear();}
       liveBusy = false;
     });
     liveReady = liveHands.initialize();
@@ -1956,7 +1956,7 @@ async function startCamera(){
     smoothed = [];
     nailState.length = 0;
     trails.length = 0;
-    trailSampler.reset();
+    lastTrailPositions.clear();
     $('startOverlay').style.display='none';
     $('liveBtns').style.display='flex';
     $('snapBar').style.display='none';
@@ -2012,7 +2012,7 @@ function startLoops(){
       }
       else{
         renderLandmarks=landmarkTracker.project(now);
-        if(!renderLandmarks.length){nailState.length=0;trailSampler.reset();}
+        if(!renderLandmarks.length){nailState.length=0;lastTrailPositions.clear();}
         recordTrails();
         drawTrails(dt);
         drawNails(dt);
@@ -2353,49 +2353,73 @@ function nailPath(w,h,shape){
 
 /* ================= 光の軌跡（アート表現） ================= */
 let trailOn = true;
-let trailIntensity = 24;
+let trailIntensity = 42;
 let trailHue = null; // null = ネイルカラーに追従
-const TRAIL_LIFE = 420; // ms
-const trails = []; // {x,y,born,color}
-const trailSampler=TsuyaTracking.createTrailSampler();
+const TRAIL_LIFE = 520; // ms
+const trails = []; // {x,y,born,color,fi}
+let lastTrailPositions = new Map();
 
 function currentTrailColor(){
   return trailHue || currentColor;
 }
 function recordTrails(){
-  const now=performance.now();
-  while(trails.length&&trails[0].born<now-TRAIL_LIFE)trails.shift();
-  if(!trailOn||!renderLandmarks.length){trailSampler.reset();return;}
-  const rect=canvas.getBoundingClientRect();
-  const displayScale=Math.max((rect.width||canvas.width)/canvas.width,(rect.height||canvas.height)/canvas.height);
-  const pixelsPerUnit=1/displayScale;
+  const now = performance.now();
+  const cutoff = now - TRAIL_LIFE;
+  while(trails.length && trails[0].born < cutoff) trails.shift();
+  if(!trailOn || !renderLandmarks.length){
+    lastTrailPositions.clear();
+    return;
+  }
   renderLandmarks.forEach((lm,hi)=>{
     FINGERS.forEach(([tip],fi)=>{
-      const [x,y]=lmXY(lm[tip]);
-      const point=trailSampler.sample(hi*5+fi,x,y,now,pixelsPerUnit);
-      if(point)trails.push({...point,color:trailHue||nailColors[fi]||currentColor,seed:fi+Math.floor(now/42),scale:pixelsPerUnit});
+      const [x,y] = lmXY(lm[tip]);
+      const key = hi * 5 + fi;
+      const prev = lastTrailPositions.get(key);
+      const col = trailHue || nailColors[fi] || currentColor;
+      if(!prev){
+        lastTrailPositions.set(key, {x, y, t: now});
+        return;
+      }
+      const dist = Math.hypot(x - prev.x, y - prev.y);
+      if(dist >= 3.5){
+        trails.push({x, y, born: now, color: col, fi, dist});
+        lastTrailPositions.set(key, {x, y, t: now});
+      }
     });
   });
-  if(trails.length>100)trails.splice(0,trails.length-100);
+  if(trails.length > 250) trails.splice(0, trails.length - 250);
 }
 function drawTrails(){
-  if(!trailOn||!trails.length)return;
-  const now=performance.now(),strength=trailIntensity/100;
-  if(strength<=0)return;
-  ctx.save();ctx.globalCompositeOperation='lighter';
+  if(!trailOn || !trails.length) return;
+  const now = performance.now();
+  const strength = trailIntensity / 100;
+  if(strength <= 0) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
   trails.forEach(pt=>{
-    const age=(now-pt.born)/TRAIL_LIFE;if(age<0||age>=1)return;
-    const life=1-age,fade=life*life,unit=pt.scale||1;
-    const radius=(1.8+life*4.2)*unit;
-    const glow=shade(pt.color,58);
-    const g=ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,radius);
-    g.addColorStop(0,hexA(glow,fade*.36*strength));
-    g.addColorStop(.45,hexA(pt.color,fade*.15*strength));g.addColorStop(1,hexA(pt.color,0));
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(pt.x,pt.y,radius,0,Math.PI*2);ctx.fill();
-    if(pt.seed%2===0){
-      const twinkle=Math.pow(Math.sin(Math.PI*age),1.6),r=(1.2+twinkle*2.2)*unit;
-      ctx.strokeStyle=hexA('#fff5e4',fade*twinkle*.55*strength);ctx.lineWidth=.7*unit;
-      ctx.beginPath();ctx.moveTo(pt.x-r,pt.y);ctx.lineTo(pt.x+r,pt.y);ctx.moveTo(pt.x,pt.y-r);ctx.lineTo(pt.x,pt.y+r);ctx.stroke();
+    const age = (now - pt.born) / TRAIL_LIFE;
+    if(age < 0 || age >= 1) return;
+    const life = 1 - age;
+    const fade = life * life;
+    const r = 2.5 + life * 10;
+    const g = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
+    const glow = shade(pt.color, 60);
+    g.addColorStop(0, hexA(glow, fade * 0.42 * strength));
+    g.addColorStop(0.48, hexA(pt.color, fade * 0.20 * strength));
+    g.addColorStop(1, hexA(pt.color, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
+    ctx.fill();
+    if(pt.fi % 2 === 0){
+      const twinkle = Math.pow(Math.sin(Math.PI * age), 1.8);
+      const crossR = 1.5 + twinkle * 3.5;
+      ctx.strokeStyle = hexA('#fff8ec', fade * twinkle * 0.65 * strength);
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(pt.x - crossR, pt.y); ctx.lineTo(pt.x + crossR, pt.y);
+      ctx.moveTo(pt.x, pt.y - crossR); ctx.lineTo(pt.x, pt.y + crossR);
+      ctx.stroke();
     }
   });
   ctx.restore();
@@ -2427,7 +2451,7 @@ function buildTrailSwatches(){
 $('trailSwitch').onclick = ()=>{
   trailOn = !trailOn;
   $('trailSwitch').classList.toggle('on', trailOn);
-  if(!trailOn){trails.length=0;trailSampler.reset();}
+  if(!trailOn){trails.length=0;lastTrailPositions.clear();}
 };
 $('trailIntensity').addEventListener('input', e=>{ trailIntensity = +e.target.value; });
 $('sculptLen').addEventListener('input', e=>{ tuneVals.sculptLen = +e.target.value; });
@@ -4190,7 +4214,7 @@ updateCmpBadge();
     const work=works[key]; if(!work) return;
     targetFinger=-1;
     applySet(work.preset);
-    trails.length=0;trailSampler.reset();
+    trails.length=0;lastTrailPositions.clear();
     trailOn=work.preset.trail.on;
     trailIntensity=work.preset.trail.intensity;
     trailHue=work.preset.trail.hue;

@@ -59,10 +59,10 @@ test('actual draw function uses reduced glow and a short-lived sparkle',()=>{
  let calls=0,strokes=0,maxAlpha=0;
  const context={save(){},restore(){},beginPath(){},arc(){},fill(){calls++;},moveTo(){},lineTo(){},stroke(){strokes++;},createRadialGradient(){return {addColorStop(){}};}};
  const code=html.slice(html.indexOf('function drawTrails(){'),html.indexOf("document.querySelectorAll('.swatch')",html.indexOf('function drawTrails(){')));
- const sandbox={ctx:context,trailOn:true,trailIntensity:24,trails:[{x:30,y:40,born:0,color:'#e8b8bb',seed:0,scale:1}],TRAIL_LIFE:420,performance:{now:()=>160},shade:x=>x,hexA:(color,a)=>{maxAlpha=Math.max(maxAlpha,a);return color;}};
+ const sandbox={ctx:context,trailOn:true,trailIntensity:42,trails:[{x:30,y:40,born:0,color:'#e8b8bb',fi:0}],TRAIL_LIFE:520,performance:{now:()=>160},shade:x=>x,hexA:(color,a)=>{maxAlpha=Math.max(maxAlpha,a);return color;}};
  vm.createContext(sandbox);vm.runInContext(code+'\ndrawTrails();',sandbox);
- assert.equal(calls,1);assert.equal(strokes,1);assert.ok(maxAlpha<.1);
- sandbox.performance.now=()=>430;vm.runInContext('drawTrails();',sandbox);assert.equal(calls,1);
+ assert.equal(calls,1);assert.equal(strokes,1);assert.ok(maxAlpha<.25);
+ sandbox.performance.now=()=>530;vm.runInContext('drawTrails();',sandbox);assert.equal(calls,1);
 });
 test('all ten artwork presets restore a restrained trail and no late override hides it',()=>{
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
