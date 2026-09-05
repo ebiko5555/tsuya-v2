@@ -2353,9 +2353,9 @@ function nailPath(w,h,shape){
 
 /* ================= 光の軌跡（アート表現） ================= */
 let trailOn = true;
-let trailIntensity = 42;
+let trailIntensity = 48;
 let trailHue = null; // null = ネイルカラーに追従
-const TRAIL_LIFE = 520; // ms
+const TRAIL_LIFE = 560; // ms
 const trails = []; // {x,y,born,color,fi}
 let lastTrailPositions = new Map();
 
@@ -2381,13 +2381,13 @@ function recordTrails(){
         return;
       }
       const dist = Math.hypot(x - prev.x, y - prev.y);
-      if(dist >= 3.5){
+      if(dist >= 3.0){
         trails.push({x, y, born: now, color: col, fi, dist});
         lastTrailPositions.set(key, {x, y, t: now});
       }
     });
   });
-  if(trails.length > 250) trails.splice(0, trails.length - 250);
+  if(trails.length > 320) trails.splice(0, trails.length - 320);
 }
 function drawTrails(){
   if(!trailOn || !trails.length) return;
@@ -2401,21 +2401,21 @@ function drawTrails(){
     if(age < 0 || age >= 1) return;
     const life = 1 - age;
     const fade = life * life;
-    const r = 2.5 + life * 10;
+    const r = 3.2 + life * 13;
     const g = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r);
-    const glow = shade(pt.color, 60);
-    g.addColorStop(0, hexA(glow, fade * 0.42 * strength));
-    g.addColorStop(0.48, hexA(pt.color, fade * 0.20 * strength));
+    const glow = shade(pt.color, 65);
+    g.addColorStop(0, hexA(glow, life * 0.45 * strength));
+    g.addColorStop(0.5, hexA(pt.color, life * 0.22 * strength));
     g.addColorStop(1, hexA(pt.color, 0));
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
     ctx.fill();
     if(pt.fi % 2 === 0){
-      const twinkle = Math.pow(Math.sin(Math.PI * age), 1.8);
-      const crossR = 1.5 + twinkle * 3.5;
-      ctx.strokeStyle = hexA('#fff8ec', fade * twinkle * 0.65 * strength);
-      ctx.lineWidth = 0.8;
+      const twinkle = Math.pow(Math.sin(Math.PI * age), 1.6);
+      const crossR = 2.0 + twinkle * 4.5;
+      ctx.strokeStyle = hexA('#fffbf0', fade * twinkle * 0.75 * strength);
+      ctx.lineWidth = 1.0;
       ctx.beginPath();
       ctx.moveTo(pt.x - crossR, pt.y); ctx.lineTo(pt.x + crossR, pt.y);
       ctx.moveTo(pt.x, pt.y - crossR); ctx.lineTo(pt.x, pt.y + crossR);
@@ -3772,52 +3772,52 @@ updateCmpBadge();
     COLOR:{
       no:'01',title:'色',tryTitle:'色彩',label:'COLOR / 色',accent:'#d14f78',film:'art-assets/color-pattern.mp4',motion:'art-assets/color-pattern.webp',
       text:'色を選ぶ行為から、身体の表面に模様が増殖する作品へ。爪の小さな面が、手全体の色彩へひらく。',
-      preset:{looks:['artColor','sheer','nuance','artColor','flash'],colors:['#d14f78','#477d6c','#e0b936','#795a9f','#c55d3d'],tune:{gloss:76,opacity:98,nailSize:98,sculptLen:138,sculptShape:'natural'},vars:{sheer:.38,flash:.44},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artColor','sheer','nuance','artColor','flash'],colors:['#d14f78','#477d6c','#e0b936','#795a9f','#c55d3d'],tune:{gloss:76,opacity:98,nailSize:98,sculptLen:138,sculptShape:'natural'},vars:{sheer:.38,flash:.44},trail:{on:true,intensity:48,hue:null}}
     },
     SURFACE:{
       no:'02',title:'表面',tryTitle:'表面',label:'SURFACE / 表面',accent:'#c99a45',film:'art-assets/surface-gold.mp4',motion:'art-assets/surface-gold.webp',
       text:'光沢、膜、液体、反射。触れられない画面のなかで、素材の重さと皮膚の距離を想像する。',
-      preset:{looks:['artSurface','sheer','chrome','artSurface','frenchmirror'],colors:['#8a5d25','#c18d3f','#1f7772','#d2aa63','#a97737'],tune:{gloss:100,opacity:100,nailSize:100,sculptLen:144,sculptShape:'round2'},vars:{sheer:.42,frenchmirror:.22},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artSurface','sheer','chrome','artSurface','frenchmirror'],colors:['#8a5d25','#c18d3f','#1f7772','#d2aa63','#a97737'],tune:{gloss:100,opacity:100,nailSize:100,sculptLen:144,sculptShape:'round2'},vars:{sheer:.42,frenchmirror:.22},trail:{on:true,intensity:48,hue:null}}
     },
     SCULPT:{
       no:'03',title:'FORMWORK',tryTitle:'FORMWORK',label:'SCULPT / FORMWORK',accent:'#d8b46a',film:'art-assets/sculpt-wire.mp4',motion:'art-assets/sculpt-wire.webp',
       text:'爪先を伸ばす操作から、線だけで立ち上がる手の構造へ。装飾は小さな彫刻へ変わる。',
-      preset:{looks:['artSculpt','milk','line','artSculpt','frenchmirror'],colors:['#e8ddd0','#d4c4b3','#f0e7dd','#b8d9d2','#e5d6c5'],tune:{gloss:42,opacity:88,nailSize:94,sculptLen:112,sculptShape:'natural'},vars:{milk:.56,line:.58,frenchmirror:.18},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artSculpt','milk','line','artSculpt','frenchmirror'],colors:['#e8ddd0','#d4c4b3','#f0e7dd','#b8d9d2','#e5d6c5'],tune:{gloss:42,opacity:88,nailSize:94,sculptLen:112,sculptShape:'natural'},vars:{milk:.56,line:.58,frenchmirror:.18},trail:{on:true,intensity:48,hue:null}}
     },
     LIGHT:{
       no:'04',title:'光',tryTitle:'光',label:'LIGHT / 光',accent:'#79c9c3',film:'art-assets/light-mandala.mp4',motion:'art-assets/light-mandala.webp',
       text:'指先に残る光が、手と球体をめぐる空間へ広がる。試着は見ることから、光で描くことへ逸脱する。',
-      preset:{looks:['mizuhikari','stardust','aurora','artLight','flash'],colors:['#173f4d','#202637','#447c86','#9c6681','#be4f77'],tune:{gloss:100,opacity:96,nailSize:102,sculptLen:156,sculptShape:'almond'},vars:{mizuhikari:.68,stardust:.72,aurora:.68,flash:.5},trail:{on:true,intensity:30,hue:'#b9e8df'}}
+      preset:{looks:['mizuhikari','stardust','aurora','artLight','flash'],colors:['#173f4d','#202637','#447c86','#9c6681','#be4f77'],tune:{gloss:100,opacity:96,nailSize:102,sculptLen:156,sculptShape:'almond'},vars:{mizuhikari:.68,stardust:.72,aurora:.68,flash:.5},trail:{on:true,intensity:52,hue:'#b9e8df'}}
     },
     HAND:{
       no:'05',title:'手',tryTitle:'手の記憶',label:'HAND / 手',accent:'#c6aaa0',film:'art-assets/hand-drawing.mp4',motion:'art-assets/hand-drawing.webp',
       text:'自分の手を入口に、祈り、思惟、労働、ケアの身振りへ入る。手は形であると同時に記憶でもある。',
-      preset:{looks:['artHand','sheer','line','artHand','french'],colors:['#b89c91','#e7d8cb','#6d5660','#8e7770','#314b6b'],tune:{gloss:30,opacity:82,nailSize:96,sculptLen:124,sculptShape:'natural'},vars:{sheer:.32,line:.2,french:.18},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artHand','sheer','line','artHand','french'],colors:['#b89c91','#e7d8cb','#6d5660','#8e7770','#314b6b'],tune:{gloss:30,opacity:82,nailSize:96,sculptLen:124,sculptShape:'natural'},vars:{sheer:.32,line:.2,french:.18},trail:{on:true,intensity:48,hue:null}}
     },
     TRACE:{
       no:'06',title:'痕跡',tryTitle:'痕跡',label:'TRACE / 痕跡',accent:'#d5d4cf',film:'art-assets/trace-dust.mp4',motion:'art-assets/trace-dust.webp',
       text:'動いたあとに残る粒子と影。完成した形ではなく、触れた時間と消えていく過程を見る。',
-      preset:{looks:['artTrace','matte','sheer','artTrace','stardust'],colors:['#313236','#202126','#b9b8b2','#777a80','#d5d4cf'],tune:{gloss:12,opacity:88,nailSize:98,sculptLen:132,sculptShape:'round2'},vars:{sheer:.2,stardust:.42},trail:{on:true,intensity:22,hue:'#d8d6cf'}}
+      preset:{looks:['artTrace','matte','sheer','artTrace','stardust'],colors:['#313236','#202126','#b9b8b2','#777a80','#d5d4cf'],tune:{gloss:12,opacity:88,nailSize:98,sculptLen:132,sculptShape:'round2'},vars:{sheer:.2,stardust:.42},trail:{on:true,intensity:45,hue:'#d8d6cf'}}
     },
     SPACE:{
       no:'07',title:'宇宙と手',tryTitle:'宇宙と手',label:'SPACE / 宇宙と手',accent:'#d8bd72',film:'art-assets/space-hand.mp4',motion:'art-assets/space-hand.webp',
       text:'暗い空間で、手が星や月のような球体へ伸びていく。触れる前の距離と、身体を越えて広がる想像を映す。',
-      preset:{looks:['artSpace','stardust','mizuhikari','artSpace','chrome'],colors:['#0d1934','#c9a54c','#dce8df','#4a335f','#8e743d'],tune:{gloss:96,opacity:96,nailSize:102,sculptLen:152,sculptShape:'almond'},vars:{stardust:.76,mizuhikari:.58},trail:{on:true,intensity:28,hue:'#e5cf89'}}
+      preset:{looks:['artSpace','stardust','mizuhikari','artSpace','chrome'],colors:['#0d1934','#c9a54c','#dce8df','#4a335f','#8e743d'],tune:{gloss:96,opacity:96,nailSize:102,sculptLen:152,sculptShape:'almond'},vars:{stardust:.76,mizuhikari:.58},trail:{on:true,intensity:50,hue:'#e5cf89'}}
     },
     THINKING:{
       no:'08',title:'思惟する手',tryTitle:'思惟する手',label:'THINKING / 思惟する手',accent:'#c7a9a6',film:'art-assets/thinking-hand.mp4',motion:'art-assets/thinking-hand.webp',
       text:'回転する手の線と淡い影が、考える時間をゆっくりと重ねる。手は道具ではなく、思考そのものの輪郭になる。',
-      preset:{looks:['artThinking','sheer','line','artThinking','matte'],colors:['#d7c5bf','#e9ddd6','#8c5d67','#b8a09c','#4a4448'],tune:{gloss:24,opacity:84,nailSize:96,sculptLen:120,sculptShape:'natural'},vars:{sheer:.28,line:.36},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artThinking','sheer','line','artThinking','matte'],colors:['#d7c5bf','#e9ddd6','#8c5d67','#b8a09c','#4a4448'],tune:{gloss:24,opacity:84,nailSize:96,sculptLen:120,sculptShape:'natural'},vars:{sheer:.28,line:.36},trail:{on:true,intensity:48,hue:null}}
     },
     ORB:{
       no:'09',title:'White Orb',tryTitle:'White Orb',label:'WHITE ORB',accent:'#d65052',film:'art-assets/nail-white-orb.mp4',motion:'art-assets/nail-white-orb.webp',
       text:'白い球体のまわりを、赤いネイルを持つ手が巡る。小さな装飾と大きな形が、互いのスケールを反転させる。',
-      preset:{looks:['artOrb','milk','flash','artOrb','french'],colors:['#c52d35','#f2eee5','#d94f62','#8f1827','#b92734'],tune:{gloss:100,opacity:100,nailSize:104,sculptLen:166,sculptShape:'round2'},vars:{milk:.62,flash:.64,french:.25},trail:{on:true,intensity:24,hue:null}}
+      preset:{looks:['artOrb','milk','flash','artOrb','french'],colors:['#c52d35','#f2eee5','#d94f62','#8f1827','#b92734'],tune:{gloss:100,opacity:100,nailSize:104,sculptLen:166,sculptShape:'round2'},vars:{milk:.62,flash:.64,french:.25},trail:{on:true,intensity:48,hue:null}}
     },
     FRAME:{
       no:'10',title:'二つの手の輪舞曲',tryTitle:'二つの手の輪舞曲',label:'FRAME / 二つの手の輪舞曲',accent:'#d9b8a8',film:'art-assets/frame-0001-0240.mp4',motion:'art-assets/frame-0001-0240.webp',
       text:'白い手、淡いピンクの面、金色の線。240のフレームのなかで、皮膚と膜と装飾の境界が組み替わる。',
-      preset:{looks:['artFrame','sheer','frenchmirror','artFrame','aurora'],colors:['#e2b9b2','#ead8cf','#caa75d','#f0cbc6','#d7cabd'],tune:{gloss:82,opacity:90,nailSize:100,sculptLen:148,sculptShape:'coffin'},vars:{sheer:.3,frenchmirror:.16,aurora:.38},trail:{on:true,intensity:24,hue:'#f0d4c8'}}
+      preset:{looks:['artFrame','sheer','frenchmirror','artFrame','aurora'],colors:['#e2b9b2','#ead8cf','#caa75d','#f0cbc6','#d7cabd'],tune:{gloss:82,opacity:90,nailSize:100,sculptLen:148,sculptShape:'coffin'},vars:{sheer:.3,frenchmirror:.16,aurora:.38},trail:{on:true,intensity:50,hue:'#f0d4c8'}}
     }
   };
   const order=Object.keys(works);
