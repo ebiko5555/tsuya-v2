@@ -1204,3 +1204,6 @@
 利用者の追加の「おねがい」を受けて公開。GitHub Pages run 33947639052（コミット27ecbde）がsuccessで完了。公開先のルート・旧トップ転送ページ・作品本体・TOUCH HANDSのHTMLと２つのモジュールの全６ファイルが、ローカルの検証済みファイルとSHA-256で一致。
 
 公開URL: https://ebiko5555.github.io/tsuya-v2/?v=27ecbde-mobile72
+
+
+公開後の追加確認: 接続し直したCodex内ブラウザーではWebGLが動作し、４つのGLBがすべて読み込み完了となること、実際の3Dの姿勢と位置が変化すること、390×844での3D表示を確認。エラーログなし。公開版の「色」からHOMEを押して `touch-hands/?v=mobile72` へ戻る動作も確認した。iPhone実機固有の描画性能は未確認。
