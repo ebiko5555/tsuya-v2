@@ -66,7 +66,7 @@
         const dt=(now-previous.time)/1000;
         const distance=Math.hypot(x-previous.x,y-previous.y)/pixelsPerUnit;
         // Test each finger separately: another finger must never count as movement.
-        if(dt<=0||distance/dt<18||distance>100||now-previous.born<42)return null;
+        if(dt<=0||distance/dt<9||distance>100||now-previous.born<28)return null;
         tips.get(key).born=now;
         return {x,y,born:now};
       }
