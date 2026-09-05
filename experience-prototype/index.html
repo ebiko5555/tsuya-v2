@@ -977,9 +977,9 @@
   .source-mode .mode-label{display:block}
   .source-mode.active{border-color:#fff; color:#08090c; background:#fff}
   .source-sets{display:grid; gap:7px; margin-top:10px}
-  .source-set{display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:8px; width:100%; min-height:72px; padding:8px 9px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:left}
+  .source-set{display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; width:100%; min-height:72px; padding:8px 11px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:left}
   .source-set.active{border-color:rgba(255,255,255,.7); background:rgba(255,255,255,.08)}
-  .source-set-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em; color:rgba(255,255,255,.52)}
+  .source-set-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; color:rgba(255,255,255,.52)}
   .source-set canvas{width:150px; height:57px}
   .source-set-name{font-size:9px; letter-spacing:.08em; color:rgba(255,255,255,.72); white-space:nowrap}
   .source-try{display:none; align-items:center; justify-content:space-between; width:100%; min-height:46px; margin-top:10px; padding:0 14px; border:0; color:#08090c; background:#fff; font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
@@ -1565,7 +1565,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile80" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile81" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1859,7 +1859,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile80"></script>
+<script src="./tracking-core.js?v=mobile81"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -2318,6 +2318,7 @@ function drawNails(dt=1/60){
       ctx.clip();
       ctx.globalAlpha = alpha;
       paintByKey(ctx,nailLooks[fi],w,h,nailColors[fi],hi*5+fi);
+      paintGelTip(ctx,w,h,hi*5+fi,gloss);
       ctx.globalAlpha = alpha*0.3;
       const rim = ctx.createRadialGradient(0,0,Math.min(w,h)*0.35, 0,0,Math.max(w,h)*0.75);
       rim.addColorStop(0,'rgba(0,0,0,0)');
@@ -2873,6 +2874,31 @@ function paintByKey(c,key,w,h,col,seed){
   }
   LOOKS[key].paint(c,w,h,col,seed,varOf(key));
 }
+/* 柄の上にだけ重ねる、チップの断面・甘皮側の影・ジェル反射。
+   呼び出し側で爪の形にクリップしてから使うため、柄の外へは出ない。 */
+function paintGelTip(c,w,h,seed,gloss=1){
+  const keep=c.globalAlpha, rnd=seeded(seed+71);
+  c.save();
+  const side=c.createLinearGradient(-w*.5,0,w*.5,0);
+  side.addColorStop(0,'rgba(29,17,18,.25)'); side.addColorStop(.10,'rgba(255,245,242,.055)');
+  side.addColorStop(.50,'rgba(255,255,255,0)'); side.addColorStop(.90,'rgba(255,246,241,.07)'); side.addColorStop(1,'rgba(29,17,18,.28)');
+  c.globalAlpha=keep*.72; c.fillStyle=side; c.fillRect(-w*.55,-h*.62,w*1.1,h*1.25);
+  const cuticle=c.createLinearGradient(0,h*.16,0,h*.58);
+  cuticle.addColorStop(0,'rgba(74,38,33,0)'); cuticle.addColorStop(1,'rgba(40,20,18,.30)');
+  c.globalAlpha=keep*.68; c.fillStyle=cuticle; c.fillRect(-w*.55,h*.12,w*1.1,h*.5);
+  const edge=c.createLinearGradient(0,-h*.58,0,-h*.26);
+  edge.addColorStop(0,'rgba(255,255,255,.22)'); edge.addColorStop(.55,'rgba(255,239,232,.055)'); edge.addColorStop(1,'rgba(255,255,255,0)');
+  c.globalAlpha=keep*.62; c.fillStyle=edge; c.fillRect(-w*.5,-h*.6,w,h*.38);
+  if(gloss>.04){
+    const shine=c.createLinearGradient(-w*.36,-h*.48,w*.28,h*.30);
+    shine.addColorStop(0,'rgba(255,255,255,0)'); shine.addColorStop(.38,'rgba(255,255,255,.05)');
+    shine.addColorStop(.52,'rgba(255,255,255,.31)'); shine.addColorStop(.64,'rgba(255,255,255,.045)'); shine.addColorStop(1,'rgba(255,255,255,0)');
+    c.globalAlpha=keep*Math.min(.55,.16+gloss*.34); c.fillStyle=shine; c.fillRect(-w*.5,-h*.58,w,h*1.14);
+    c.globalAlpha=keep*(.10+gloss*.16); c.fillStyle='rgba(255,255,255,.9)';
+    for(let i=0;i<2;i++){ const x=(rnd()-.5)*w*.48, y=(-.18+rnd()*.36)*h; c.fillRect(x,y,Math.max(.7,w*.018),Math.max(1.2,h*.035)); }
+  }
+  c.restore();
+}
 function activeLook(){ return targetFinger<0 ? nailLooks[2] : nailLooks[targetFinger]; }
 function activeColor(){ return targetFinger<0 ? nailColors[2] : nailColors[targetFinger]; }
 /* 色も「すべて」か指1本かで塗り分ける */
@@ -3320,26 +3346,10 @@ function analyzeSource(source){
 }
 function sourceRecipes(mode){
   const recipes={
-    COLOR:[
-      ['CHROMA',['nuance','sheer','grad','pearl','onecolor']],
-      ['TONE',['grad','milk','onecolor','aurora','matte']],
-      ['QUIET',['sheer','onecolor','nuance','pearl','onecolor']],
-    ],
-    PATTERN:[
-      ['流転',['sourceform','line','sourcefield','pearl','onecolor']],
-      ['景層',['sourcefield','sheer','sourceform','line','matte']],
-      ['TRACE',['sourceform','onecolor','sourcefield','shell','sheer']],
-    ],
-    LIGHT:[
-      ['残光',['sourceglow','mizuhikari','stardust','pearl','sheer']],
-      ['HALO',['aurora','pearl','sourceglow','stardust','onecolor']],
-      ['FLASH',['sourceglow','sheer','flash','mizuhikari','matte']],
-    ],
-    MIX:[
-      ['流転',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']],
-      ['景層',['sourceform','sheer','sourcefield','stardust','onecolor']],
-      ['残光',['sourcefield','line','sourceglow','pearl','matte']],
-    ],
+    COLOR:[['COLOR',['nuance','sheer','grad','pearl','onecolor']]],
+    PATTERN:[['PATTERN',['sourceform','line','sourcefield','pearl','onecolor']]],
+    LIGHT:[['LIGHT',['sourceglow','mizuhikari','stardust','pearl','sheer']]],
+    MIX:[['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']]],
   };
   return recipes[mode]||recipes.MIX;
 }
@@ -3367,7 +3377,7 @@ function drawSourceSetPreview(canvas,set){
     c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
     c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
     c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
-    paintByKey(c,look,24,heights[i],set.colors[i],i+11); c.restore();
+    paintByKey(c,look,24,heights[i],set.colors[i],i+11); paintGelTip(c,24,heights[i],i+11,.92); c.restore();
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
@@ -3385,7 +3395,7 @@ function drawLargeSourceSetPreview(canvas,set,length){
     c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
     c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
     c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
-    paintByKey(c,look,w,h,set.colors[i],i+21); c.restore();
+    paintByKey(c,look,w,h,set.colors[i],i+21); paintGelTip(c,w,h,i+21,.94); c.restore();
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
@@ -3412,17 +3422,16 @@ function renderSourceSets(){
       btn.dataset.paletteSaturation=set.paletteTuning.saturation.toFixed(6);
       btn.dataset.palette=set.sourcePalette.join(',');
     }
-    const code=document.createElement('span'); code.className='source-set-code'; code.textContent='0'+(idx+1);
+    const code=document.createElement('span'); code.className='source-set-code'; code.textContent='5 NAIL SET';
     const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
-    const name=document.createElement('span'); name.className='source-set-name'; name.textContent=set.name;
-    btn.append(code,cv,name);
+    btn.append(code,cv);
     btn.onclick=()=>{
       box.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); selectedSourceSet=set; applySet(set);
       openSourceConfirm(set);
     };
     box.appendChild(btn);
   });
-  selectedSourceSet=null;
+  selectedSourceSet=sourceSets[0]||null;
 }
   function ingestSource(input,label){
   const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
@@ -3678,6 +3687,7 @@ function paintExhibitNail(c,x,y,w,h,angle,index){
   c.save(); exhibitNailPath(c,w,h,tuneVals.sculptShape); c.clip();
   c.globalAlpha=tuneVals.opacity/100;
   withVars(Object.assign({},lookVar),()=>paintByKey(c,nailLooks[index],w,h,nailColors[index],index+31));
+  paintGelTip(c,w,h,index+31,tuneVals.gloss/100);
   const rim=c.createRadialGradient(0,0,Math.min(w,h)*.32,0,0,Math.max(w,h)*.76);
   rim.addColorStop(0,'rgba(0,0,0,0)'); rim.addColorStop(1,'rgba(45,22,18,.42)');
   c.globalAlpha=.25; c.fillStyle=rim; c.fillRect(-w,-h,w*2,h*2);
@@ -3849,7 +3859,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile80';
+  const BUILD_VERSION='mobile81';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
@@ -4115,7 +4125,7 @@ updateCmpBadge();
       cv.setAttribute('aria-label',(i+1)+'本目 '+(LOOKS[look]?.name||look));
       const h=78*lengthScale;
       const c=cv.getContext('2d'); c.translate(28,52); nailShape(c,36,h); c.clip();
-      paintByKey(c,look,36,h,p.colors[i],i); box.appendChild(cv);
+      paintByKey(c,look,36,h,p.colors[i],i); paintGelTip(c,36,h,i,.92); box.appendChild(cv);
     }));
   }
   installArtworkLooks();

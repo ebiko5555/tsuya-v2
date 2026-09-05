@@ -111,3 +111,24 @@ test('an artwork video starts the same fixed try-on route and SOURCE opens photo
   assert.ok(!html.includes('id="workCode"'));
   assert.ok(!html.includes('id="workTitle"'));
 });
+
+test('SOURCE keeps four modes but offers one completed five-nail set for each',()=>{
+  const start=html.indexOf('function sourceRecipes(mode){');
+  const end=html.indexOf('function makeSourceSets(mode){',start);
+  const sandbox={}; vm.createContext(sandbox); vm.runInContext(html.slice(start,end),sandbox);
+  ['COLOR','PATTERN','LIGHT','MIX'].forEach(mode=>{
+    const sets=sandbox.sourceRecipes(mode);
+    assert.equal(sets.length,1);
+    assert.equal(sets[0][0],mode);
+    assert.equal(sets[0][1].length,5);
+  });
+  assert.ok(!html.includes("['HALO'"));
+  assert.ok(!html.includes("['FLASH'"));
+});
+
+test('clipped nail renders add a gel-tip depth and reflection layer',()=>{
+  assert.ok(html.includes('function paintGelTip(c,w,h,seed,gloss=1)'));
+  assert.ok(html.includes('paintGelTip(ctx,w,h,hi*5+fi,gloss)'));
+  assert.ok(html.includes('paintGelTip(c,24,heights[i],i+11,.92)'));
+  assert.ok(html.includes('paintGelTip(c,w,h,index+31,tuneVals.gloss/100)'));
+});
