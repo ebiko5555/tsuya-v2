@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs';
-import {createGesture,advanceRotation,fitCamera,MODEL_CONFIG,BUILD_VERSION,workURL} from '../touch-hands/touch-core.mjs';
+import {createGesture,advanceRotation,fitCamera,MODEL_CONFIG,BUILD_VERSION,ASSET_VERSION,floatingPose,workURL} from '../touch-hands/touch-core.mjs';
 
 test('a small touch selects, but a drag returning to its origin never selects',()=>{
  const g=createGesture();g.start(1,50,50,0);g.move(1,53,52);assert.equal(g.end(1,53,52,120),true);
@@ -41,4 +41,31 @@ test('all four work routes and the application entry points use the current revi
  for(const path of ['../index.html','../top-prototype/index.html','../experience-prototype/index.html']){
   const text=fs.readFileSync(new URL(path,import.meta.url),'utf8');assert.ok(text.includes(BUILD_VERSION));
  }
+});
+
+test('the four models travel in depth and complete full turns, including unrestricted drag inertia',()=>{
+ for(const config of MODEL_CONFIG){
+  const positions=[];
+  for(let t=0;t<=120;t+=.25){
+   const p=floatingPose(config,t);
+   // 22 world units encloses even the wire hand under every local rotation.
+   assert.ok(Math.hypot(p.x,p.y,p.z)+22<58);
+   positions.push(p);
+  }
+  assert.ok(Math.max(...positions.map(p=>p.x))-Math.min(...positions.map(p=>p.x))>40);
+  assert.ok(Math.max(...positions.map(p=>p.z))-Math.min(...positions.map(p=>p.z))>15);
+  assert.ok(positions.at(-1).rx>Math.PI*2&&positions.at(-1).ry>Math.PI*2);
+  assert.deepEqual(floatingPose(config,100,true),{x:config.x,y:config.y,z:0,rx:0,ry:0,rz:0});
+ }
+ assert.ok(advanceRotation(7,1,1).rotation>7);
+});
+test('HOME, the root entry and the retired glyph URL all lead to the four models',()=>{
+ const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
+ const root=read('../index.html'),old=read('../top-prototype/index.html'),work=read('../experience-prototype/index.html');
+ assert.ok(root.includes("location.replace('touch-hands/?v="+BUILD_VERSION+"')"));
+ assert.ok(old.includes("location.replace('../touch-hands/?v="+BUILD_VERSION+"')"));
+ assert.ok(!old.includes('id="glyph"'));
+ assert.ok(work.includes("document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION"));
+ assert.ok(!work.includes('../top-prototype/'));
+ for(const config of MODEL_CONFIG)assert.ok(fs.existsSync(new URL('../touch-hands/assets/'+ASSET_VERSION+'/'+config.name+'.glb',import.meta.url)));
 });

@@ -1,4 +1,4 @@
-import {BUILD_VERSION,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile71';
+import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile72';
 const stage=document.getElementById('stage');
 const container=document.getElementById('canvas-container');
 const veil=document.getElementById('veil');
@@ -73,9 +73,9 @@ stage.addEventListener('pointermove',e=>{
   if(!move||!move.moved||navigating)return;
   pressed=null;
   const dt=Math.max((e.timeStamp-pointerSampleTime)/1000,1/120);pointerSampleTime=e.timeStamp;
-  const dx=move.dx*.0022,dy=move.dy*.0022;
-  rotY=clamp(rotY+dx,-.28,.28);rotX=clamp(rotX+dy,-.22,.22);
-  velocityY=clamp(dx/dt,-.7,.7);velocityX=clamp(dy/dt,-.7,.7);
+  const dx=move.dx*.0045,dy=move.dy*.0045;
+  rotY+=dx;rotX+=dy;
+  velocityY=clamp(dx/dt,-2.4,2.4);velocityX=clamp(dy/dt,-2.4,2.4);
   requestFrame();
 });
 stage.addEventListener('pointerup',e=>{
@@ -166,8 +166,8 @@ async function setup(){
         const item=queue.shift();
         try{
           const [gltf,pickGLTF]=await Promise.all([
-            loader.loadAsync(`assets/${BUILD_VERSION}/${item.name}.glb`),
-            item.name==='jisakuhand'?loader.loadAsync(`assets/${BUILD_VERSION}/${item.name}-pick.glb`).catch(()=>null):Promise.resolve(null)
+            loader.loadAsync(`assets/${ASSET_VERSION}/${item.name}.glb`),
+            item.name==='jisakuhand'?loader.loadAsync(`assets/${ASSET_VERSION}/${item.name}-pick.glb`).catch(()=>null):Promise.resolve(null)
           ]);
           if(!renderer)break;
           gltf.scene.updateMatrixWorld(true);
@@ -209,13 +209,13 @@ function animate(now){
     const x=advanceRotation(rotX,velocityX,dt),y=advanceRotation(rotY,velocityY,dt);
     rotX=x.rotation;velocityX=x.velocity;rotY=y.rotation;velocityY=y.velocity;
   }
-  group.rotation.set(clamp(rotX,-.22,.22),rotY,0);
+  group.rotation.set(rotX+(motion.matches?0:time*.045),rotY+(motion.matches?0:time*.10),motion.matches?0:Math.sin(time*.17)*.12);
   dust.rotation.y=motion.matches?0:time*.004;
   for(const item of entries){
-    const wave=motion.matches?0:time;
-    item.pivot.position.set(item.x+(motion.matches?0:Math.sin(wave*.45+item.phase)*.65),item.y+(motion.matches?0:Math.sin(wave*.65+item.phase)*.9),0);
+    const pose=floatingPose(item,time,motion.matches);
+    item.pivot.position.set(pose.x,pose.y,pose.z);
     if(item.visual){
-      item.visual.rotation.set(motion.matches?0:Math.sin(wave*.28+item.phase)*.07,motion.matches?0:Math.sin(wave*.35+item.phase)*.16,0);
+      item.visual.rotation.set(pose.rx,pose.ry,pose.rz);
       const t=item===selected?clamp((now-enterAt)/300,0,1):0;
       item.visual.scale.setScalar(1+(motion.matches?0:(1-Math.pow(1-t,3))*.12));
       if(item.pickVisual){item.pickVisual.rotation.copy(item.visual.rotation);item.pickVisual.scale.copy(item.visual.scale);}
