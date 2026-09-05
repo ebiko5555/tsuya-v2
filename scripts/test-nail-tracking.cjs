@@ -138,4 +138,6 @@ test('clipped nail renders add a gel-tip depth and reflection layer',()=>{
   assert.ok(html.includes('paintGelTip(ctx,w,h,hi*5+fi,gloss)'));
   assert.ok(html.includes('paintGelTip(c,24,heights[i],i+11,.92)'));
   assert.ok(html.includes('paintGelTip(c,w,h,index+31,tuneVals.gloss/100)'));
+  assert.ok(html.includes('透明なジェルの下に沈んだ極細線と箔を置く'));
+  assert.ok(html.includes('for(let i=0;i<7;i++)'));
 });

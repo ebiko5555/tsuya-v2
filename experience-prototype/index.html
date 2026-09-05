@@ -1565,7 +1565,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile82" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile83" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1859,7 +1859,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile82"></script>
+<script src="./tracking-core.js?v=mobile83"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -2897,6 +2897,22 @@ function paintGelTip(c,w,h,seed,gloss=1){
     c.globalAlpha=keep*(.10+gloss*.16); c.fillStyle='rgba(255,255,255,.9)';
     for(let i=0;i<2;i++){ const x=(rnd()-.5)*w*.48, y=(-.18+rnd()*.36)*h; c.fillRect(x,y,Math.max(.7,w*.018),Math.max(1.2,h*.035)); }
   }
+  /* 表面の反射とは別に、透明なジェルの下に沈んだ極細線と箔を置く。
+     seedを指ごとに変えるので、5本が同じ柄の複製にならない。 */
+  c.globalAlpha=keep*(.10+Math.min(.15,gloss*.12));
+  c.lineCap='round'; c.lineJoin='round'; c.lineWidth=Math.max(.42,w*.012);
+  for(let i=0;i<3;i++){
+    const x0=(rnd()-.5)*w*.82, y0=(rnd()-.5)*h*.88;
+    const x1=(rnd()-.5)*w*.72, y1=(rnd()-.5)*h*.82;
+    c.strokeStyle=i===1?'rgba(255,252,246,.9)':'rgba(214,178,111,.92)';
+    c.beginPath(); c.moveTo(x0,y0);
+    c.quadraticCurveTo((x0+x1)*.5+(rnd()-.5)*w*.25,(y0+y1)*.5+(rnd()-.5)*h*.18,x1,y1); c.stroke();
+  }
+  for(let i=0;i<7;i++){
+    const x=(rnd()-.5)*w*.78, y=(rnd()-.5)*h*.92, s=Math.max(.55,w*(.010+rnd()*.018));
+    c.fillStyle=i%3===0?'rgba(232,205,142,.9)':'rgba(255,255,255,.78)';
+    c.save(); c.translate(x,y); c.rotate(rnd()*Math.PI); c.fillRect(-s,-s*.42,s*2,s*.84); c.restore();
+  }
   c.restore();
 }
 function activeLook(){ return targetFinger<0 ? nailLooks[2] : nailLooks[targetFinger]; }
@@ -3859,7 +3875,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile82';
+  const BUILD_VERSION='mobile83';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
