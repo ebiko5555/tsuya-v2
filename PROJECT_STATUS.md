@@ -4,7 +4,7 @@
 
 引継文書最終監査: 2026-09-05（TOUCH HANDS の今回の変更範囲）
 
-現行公開版: `試作80 / mobile80`（SOURCEカードを写真からの制作への入口として追加。公開反映確認済み）
+現行公開版: `試作81 / mobile81`（SOURCEを4つの完成セットに整理し、チップの質感を改善。公開反映確認済み）
 
 現行ローカル改善版: `試作81 / mobile81`（SOURCEの選択を4つに整理し、チップの質感を改善）
 
@@ -1356,3 +1356,9 @@ GitHub Pages run 33979747838（f1f7198）のbuild・report-build-status・deploy
 - SOURCEは`COLOR`、`PATTERN`、`LIGHT`、`MIX`の4入口を残し、それぞれに写真から抽出した色を使う完成済みの5本セットを1つだけ用意した。`残光`、`HALO`、`FLASH`などの枝分かれする名前と選択肢を画面から外した。
 - 各チップには側面の深み、甘皮側の薄い影、先端の透け、細いジェル反射を重ねた。固定試着、SOURCEの小・大プレビュー、作品として見る画面、作品ページのチップ見本で同じ仕上げを使う。
 - 既存の手と爪の追跡・姿勢安定化・光の軌跡には変更を加えていない。実機では肌色・カメラの光に合わせて見え方を確認する。
+
+### 試作81の公開確認
+
+GitHub Pages run 33980681074（77af44d）のbuild・report-build-status・deployがsuccessで完了。公開版HOMEの4作品リンクが`mobile81`を参照し、公開版HANDではチップ5本、SHORT/LONG、SOURCEカード、エラーログなしを確認。
+
+公開URL: https://ebiko5555.github.io/tsuya-v2/?v=77af44d-mobile81
