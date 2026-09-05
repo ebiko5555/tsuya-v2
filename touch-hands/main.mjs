@@ -1,4 +1,4 @@
-import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile72';
+import {BUILD_VERSION,ASSET_VERSION,floatingPose,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile73';
 const stage=document.getElementById('stage');
 const container=document.getElementById('canvas-container');
 const veil=document.getElementById('veil');
