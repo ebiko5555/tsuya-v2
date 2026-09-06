@@ -1570,7 +1570,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile84" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile85" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1783,6 +1783,14 @@
   </div>
 
   <div class="tray" id="tray-hikari">
+    <div class="presetgroup">
+      <div class="presetlabel">カメラの肌補正</div>
+      <div class="presetrow" id="skinFxRow" aria-label="カメラの肌補正を選ぶ">
+        <button class="presetbtn active" type="button" data-skin-fx="natural">ナチュラル</button>
+        <button class="presetbtn" type="button" data-skin-fx="bright">明るめ</button>
+        <button class="presetbtn" type="button" data-skin-fx="white">美白</button>
+      </div>
+    </div>
     <div class="toggle-row">
       <span>指先に光の軌跡を残す</span>
       <div class="switch on" id="trailSwitch"></div>
@@ -1864,7 +1872,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile84"></script>
+<script src="./tracking-core.js?v=mobile85"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -1895,8 +1903,13 @@ function applyTryLength(length){
   return key;
 }
 /* 肌をやわらかく見せる。縮小して描き戻すことでぼかす(重い実フィルタを使わない)。
-   爪はこのあとに描くので、肌だけ柔らかく、爪はくっきり残る。選択肢は出さず常にかける。 */
-const SKIN_FX = {div:5, a:0.42, lift:0.45};
+   爪はこのあとに描くので、肌だけ柔らかく、爪はくっきり残る。 */
+const SKIN_FX_PRESETS={
+  natural:{div:5,a:.42,lift:.45,white:0},
+  bright:{div:5,a:.50,lift:.62,white:.12},
+  white:{div:5,a:.58,lift:.76,white:.25}
+};
+let skinFx='natural';
 const skinCv = document.createElement('canvas');
 const skinCtx = skinCv.getContext('2d');
 const $ = id => document.getElementById(id);
@@ -1909,6 +1922,11 @@ function setGuide(t){
   if(txt) txt.textContent = t || '枠に手をかざしてください';
   else g.textContent = t || '';
   g.style.opacity = t ? 1 : 0;
+}
+function setSkinFx(key){
+  if(!SKIN_FX_PRESETS[key]) key='natural';
+  skinFx=key;
+  document.querySelectorAll('[data-skin-fx]').forEach(b=>b.classList.toggle('active',b.dataset.skinFx===key));
 }
 
 /* ================= MediaPipe（初期化を待ってから使う） ================= */
@@ -2011,7 +2029,7 @@ function startLoops(){
     const dt = Math.min(0.05, Math.max(0.001, (now - lastT)/1000)); lastT = now;
     if(mode === 'live' && video.readyState >= 2){
       const sourceCapture=document.body.classList.contains('source-camera-capture');
-      const sp = SKIN_FX;
+      const sp = SKIN_FX_PRESETS[skinFx];
       ctx.save();
       if(mirrored()){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
       ctx.drawImage(video,0,0,canvas.width,canvas.height);
@@ -2027,6 +2045,12 @@ function startLoops(){
         skinCtx.globalAlpha=sp.lift;
         skinCtx.fillStyle='#ffe9da';
         skinCtx.fillRect(0,0,sw,sh);
+        if(sp.white){
+          skinCtx.globalCompositeOperation='screen';
+          skinCtx.globalAlpha=sp.white;
+          skinCtx.fillStyle='#fffdf9';
+          skinCtx.fillRect(0,0,sw,sh);
+        }
         ctx.globalAlpha = sp.a;
         ctx.drawImage(skinCv,0,0,canvas.width,canvas.height);
         ctx.globalAlpha = 1;
@@ -2481,6 +2505,7 @@ $('trailSwitch').onclick = ()=>{
 };
 $('trailIntensity').addEventListener('input', e=>{ trailIntensity = +e.target.value; });
 $('sculptLen').addEventListener('input', e=>{ tuneVals.sculptLen = +e.target.value; });
+document.querySelectorAll('[data-skin-fx]').forEach(b=>b.onclick=()=>setSkinFx(b.dataset.skinFx));
 
 /* ================= デザイン12種（2026年トレンド反映） ================= */
 function seeded(seed){ let s=seed*9301+49297; return ()=>{ s=(s*9301+49297)%233280; return s/233280; }; }
@@ -3880,7 +3905,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile84';
+  const BUILD_VERSION='mobile85';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();

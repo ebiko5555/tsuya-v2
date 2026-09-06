@@ -141,3 +141,10 @@ test('clipped nail renders add a gel-tip depth and reflection layer',()=>{
   assert.ok(html.includes('透明なジェルの下に沈んだ極細線と箔を置く'));
   assert.ok(html.includes('for(let i=0;i<7;i++)'));
 });
+
+test('camera skin correction offers natural, bright and white options without recoloring nails',()=>{
+  assert.ok(html.includes("const SKIN_FX_PRESETS={"));
+  ['natural','bright','white'].forEach(key=>assert.ok(html.includes('data-skin-fx="'+key+'"')));
+  assert.ok(html.includes("const sp = SKIN_FX_PRESETS[skinFx]"));
+  assert.ok(html.includes('drawNails(dt);'));
+});
