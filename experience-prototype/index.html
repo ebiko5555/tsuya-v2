@@ -915,11 +915,6 @@
   .try-identity .work-nails canvas:nth-child(1),.try-identity .work-nails canvas:nth-child(5){height:20px}
   .try-identity .work-nails canvas:nth-child(2),.try-identity .work-nails canvas:nth-child(4){height:23px}
   .try-identity a{display:block; margin-top:13px; color:rgba(255,255,255,.62); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
-  .skin-fx-dock{position:fixed; z-index:31; display:none; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translateX(-50%); padding:7px; border:1px solid rgba(255,255,255,.25); background:rgba(8,9,12,.70); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
-  body.work-tryon.camera-started .skin-fx-dock{display:flex; align-items:center; gap:6px}
-  .skin-fx-dock span{margin-right:2px; color:rgba(255,255,255,.56); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
-  .skin-fx-dock button{min-height:28px; padding:0 8px; border:1px solid rgba(255,255,255,.30); color:rgba(255,255,255,.74); background:rgba(8,9,12,.28); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.06em}
-  .skin-fx-dock button.active{color:#111; border-color:#fff; background:#fff}
   body.work-tryon.camera-started .try-identity{display:block}
   body.custom-mode.camera-started .try-identity{display:block}
   body.custom-mode #tryIdentity .work-nails,body.custom-mode #tryIdentity a:last-child{display:none}
@@ -1650,7 +1645,6 @@
     <button class="shutter" id="shutterBtn" title="撮影"></button>
     <button class="roundbtn" id="flipBtn" title="カメラ切替"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 9.2h3.1l1.3-2h6.4l1.3 2h4.1v9.4H3.4Z"/><path d="M14.6 13.4a2.7 2.7 0 1 1-1.1-2.2"/><path d="M13.9 8.8v2.6h-2.6"/></svg></button>
   </div>
-  <div class="skin-fx-dock" aria-label="カメラの肌補正を選ぶ"><span>SKIN</span><button type="button" class="active" data-skin-fx="natural">NATURAL</button><button type="button" data-skin-fx="bright">BRIGHT</button><button type="button" data-skin-fx="white">WHITE</button></div>
 
   <div id="snapBar">
     <div class="snap-status" id="snapStatus" role="status" aria-live="polite">
@@ -1789,14 +1783,6 @@
   </div>
 
   <div class="tray" id="tray-hikari">
-    <div class="presetgroup">
-      <div class="presetlabel">カメラの肌補正</div>
-      <div class="presetrow" id="skinFxRow" aria-label="カメラの肌補正を選ぶ">
-        <button class="presetbtn active" type="button" data-skin-fx="natural">ナチュラル</button>
-        <button class="presetbtn" type="button" data-skin-fx="bright">明るめ</button>
-        <button class="presetbtn" type="button" data-skin-fx="white">美白</button>
-      </div>
-    </div>
     <div class="toggle-row">
       <span>指先に光の軌跡を残す</span>
       <div class="switch on" id="trailSwitch"></div>
@@ -1915,7 +1901,7 @@ const SKIN_FX_PRESETS={
   bright:{div:5,a:.50,lift:.62,white:.12},
   white:{div:5,a:.58,lift:.76,white:.25}
 };
-let skinFx='natural';
+let skinFx='white';
 const skinCv = document.createElement('canvas');
 const skinCtx = skinCv.getContext('2d');
 const $ = id => document.getElementById(id);
@@ -2511,7 +2497,6 @@ $('trailSwitch').onclick = ()=>{
 };
 $('trailIntensity').addEventListener('input', e=>{ trailIntensity = +e.target.value; });
 $('sculptLen').addEventListener('input', e=>{ tuneVals.sculptLen = +e.target.value; });
-document.querySelectorAll('[data-skin-fx]').forEach(b=>b.onclick=()=>setSkinFx(b.dataset.skinFx));
 
 /* ================= デザイン12種（2026年トレンド反映） ================= */
 function seeded(seed){ let s=seed*9301+49297; return ()=>{ s=(s*9301+49297)%233280; return s/233280; }; }
