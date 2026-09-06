@@ -17,6 +17,10 @@
 
 出典: このタスクの特別試作依頼、`experience-prototype/index.html`（試作84）、`special-prototype/` の実装とブラウザー操作確認。
 
+SPECIAL 01 公開確認: 2026-09-06、`754ce5a` を `origin main` へpush成功。公開URL `https://ebiko5555.github.io/tsuya-v2/special-prototype/?v=754ce5a-special01` で新しいホームと10作品の表示、COLORの5本見本、試着開始画面への遷移を確認。公開確認はブラウザーで実施。iPhone実機のカメラ追跡・写真保存は引き続き要確認。
+
+作品文字の重なり修正: `c9cda8a` と `bb7c9b3`。作品画像上に重なっていた作品番号ラベルを、画像を隠さない不透明な紙色の帯へ変更。CSSのキャッシュ番号も更新し、`https://ebiko5555.github.io/tsuya-v2/special-prototype/?v=bb7c9b3` で紙色帯と墨色文字の反映を確認。Pagesのbuild・deploy成功。作品映像、他のUI、機能は変更していない。
+
 引継文書最終監査: 2026-09-05（TOUCH HANDS の今回の変更範囲）
 
 現行公開版: `試作82 / mobile82`（停止時のチップ姿勢ロックを強化。公開反映確認済み）
