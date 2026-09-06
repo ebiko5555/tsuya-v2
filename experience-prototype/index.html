@@ -1570,7 +1570,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile85" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile86" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1872,7 +1872,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile85"></script>
+<script src="./tracking-core.js?v=mobile86"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -2529,25 +2529,6 @@ function nudeBase(c,w,h,a){
   const keep=c.globalAlpha; c.globalAlpha=keep*a;
   base(c,w,h,'#f0dcd1','#e5c7b8'); c.globalAlpha=keep;
 }
-function heart(c,x,y,s){
-  c.save(); c.translate(x,y); c.scale(s,s);
-  c.beginPath();
-  c.moveTo(0,0.35);
-  c.bezierCurveTo(-1.1,-0.5,-0.45,-1.2,0,-0.5);
-  c.bezierCurveTo(0.45,-1.2,1.1,-0.5,0,0.35);
-  c.closePath(); c.fill(); c.restore();
-}
-function flower(c,x,y,r,col){
-  c.fillStyle=col;
-  for(let i=0;i<5;i++){
-    const a=i*Math.PI*2/5 - Math.PI/2;
-    c.beginPath();
-    c.ellipse(x+Math.cos(a)*r*0.72, y+Math.sin(a)*r*0.72, r*0.5, r*0.36, a, 0, Math.PI*2);
-    c.fill();
-  }
-  c.fillStyle='#f3d98b';
-  c.beginPath(); c.arc(x,y,r*0.3,0,Math.PI*2); c.fill();
-}
 const LOOKS = {
   onecolor:{name:'ワンカラー', paint(c,w,h,col){ base(c,w,h,shade(col,18),shade(col,-14)); }},
   churun:{name:'ちゅるん', paint(c,w,h,col){
@@ -2622,29 +2603,6 @@ const LOOKS = {
     g.addColorStop(0.72-v*0.60,hexA(col,.7));   /* v が大きいほど深いグラデ */
     g.addColorStop(1,shade(col,-10));
     c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
-  }},
-  flower:{name:'フラワー', varLabel:'お花の大きさ', paint(c,w,h,col,seed,v){
-    base(c,w,h,'#fdf7f1','#f2e4d9');
-    const rnd=seeded(seed+17); const fs=0.5+v;
-    flower(c, -w*0.16, -h*0.05, w*0.22*fs, shade(col,10));
-    flower(c, w*0.2, h*0.24, w*0.15*fs, shade(col,35));
-    c.fillStyle=hexA(shade(col,-15),.8);
-    for(let i=0;i<4;i++){
-      c.beginPath();
-      c.arc((rnd()-0.5)*w*0.9,(rnd()-0.5)*h*0.9,w*0.02,0,Math.PI*2); c.fill();
-    }
-  }},
-  dot:{name:'レトロドット', varLabel:'ドットの大きさ', paint(c,w,h,col,seed,v){
-    base(c,w,h,'#fbf3ea','#f1e2d5');
-    c.fillStyle=shade(col,0);
-    const r=w*(0.035+v*0.10);
-    for(let row=0;row<4;row++){
-      for(let k=0;k<3;k++){
-        const x=(k-1)*w*0.32 + (row%2? w*0.16:0);
-        const y=(row-1.5)*h*0.26;
-        c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
-      }
-    }
   }},
   aurora:{name:'オーロラ', varLabel:'ヴェールの広さ', paint(c,w,h,col,seed,v){
     nudeBase(c,w,h,.55);
@@ -3905,7 +3863,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile85';
+  const BUILD_VERSION='mobile86';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
