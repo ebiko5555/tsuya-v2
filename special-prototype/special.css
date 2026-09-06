@@ -29,3 +29,7 @@ html:has(.special-app),body.special-app{background:var(--paper);color:var(--ink)
 .special-app .work-actions{width:100%!important}
 @media(min-width:820px){.special-app #startOverlay{align-items:flex-start!important}.special-app #startOverlay .invite{position:relative!important;inset:auto!important;transform:none!important;text-align:left!important;align-self:flex-start!important;margin:0 0 20px!important;width:43%!important;max-width:none!important;font-size:clamp(32px,4vw,58px)!important}.special-app .opening-actions{align-self:flex-start!important;margin:0!important;width:310px!important}.special-app .opening-films{left:52%!important;inset-inline-start:52%!important;right:4%!important;transform:none!important;margin:0!important}.special-app .work-copy .work-actions{flex-direction:column!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Artwork labels sit on an opaque paper strip so the work remains unobstructed. */
+.special-home .hero-art .art-overline{color:var(--ink);background:var(--paper);padding:9px 12px;margin:-1px 0 0 -1px;text-shadow:none}
+.special-home .collection-image>span{color:var(--ink);background:var(--paper);}
