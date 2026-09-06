@@ -915,12 +915,11 @@
   .try-identity .work-nails canvas:nth-child(1),.try-identity .work-nails canvas:nth-child(5){height:20px}
   .try-identity .work-nails canvas:nth-child(2),.try-identity .work-nails canvas:nth-child(4){height:23px}
   .try-identity a{display:block; margin-top:13px; color:rgba(255,255,255,.62); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
-  .skin-fx-quick{display:none; margin-top:12px}
-  body.work-tryon .skin-fx-quick{display:block}
-  .skin-fx-quick span{display:block; margin-bottom:5px; color:rgba(255,255,255,.56); font-size:7px; letter-spacing:.14em}
-  .skin-fx-quick div{display:flex; gap:4px}
-  .skin-fx-quick button{min-height:27px; padding:0 7px; border:1px solid rgba(255,255,255,.30); color:rgba(255,255,255,.74); background:rgba(8,9,12,.28); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.06em}
-  .skin-fx-quick button.active{color:#111; border-color:#fff; background:#fff}
+  .skin-fx-dock{position:fixed; z-index:31; display:none; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translateX(-50%); padding:7px; border:1px solid rgba(255,255,255,.25); background:rgba(8,9,12,.70); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
+  body.work-tryon.camera-started .skin-fx-dock{display:flex; align-items:center; gap:6px}
+  .skin-fx-dock span{margin-right:2px; color:rgba(255,255,255,.56); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
+  .skin-fx-dock button{min-height:28px; padding:0 8px; border:1px solid rgba(255,255,255,.30); color:rgba(255,255,255,.74); background:rgba(8,9,12,.28); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.06em}
+  .skin-fx-dock button.active{color:#111; border-color:#fff; background:#fff}
   body.work-tryon.camera-started .try-identity{display:block}
   body.custom-mode.camera-started .try-identity{display:block}
   body.custom-mode #tryIdentity .work-nails,body.custom-mode #tryIdentity a:last-child{display:none}
@@ -1576,7 +1575,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile87" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile88" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1642,7 +1641,6 @@
   <div class="try-identity" id="tryIdentity">
     <span id="tryIdentityText">01 / COLOR</span>
     <div class="work-nails" id="tryNails" aria-label="装着する5本のネイル"></div>
-    <div class="skin-fx-quick" aria-label="カメラの肌補正を選ぶ"><span>SKIN</span><div><button type="button" class="active" data-skin-fx="natural">NATURAL</button><button type="button" data-skin-fx="bright">BRIGHT</button><button type="button" data-skin-fx="white">WHITE</button></div></div>
     <a href="?work=COLOR" id="tryWorkBack">BACK</a>
   </div>
 
@@ -1652,6 +1650,7 @@
     <button class="shutter" id="shutterBtn" title="撮影"></button>
     <button class="roundbtn" id="flipBtn" title="カメラ切替"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 9.2h3.1l1.3-2h6.4l1.3 2h4.1v9.4H3.4Z"/><path d="M14.6 13.4a2.7 2.7 0 1 1-1.1-2.2"/><path d="M13.9 8.8v2.6h-2.6"/></svg></button>
   </div>
+  <div class="skin-fx-dock" aria-label="カメラの肌補正を選ぶ"><span>SKIN</span><button type="button" class="active" data-skin-fx="natural">NATURAL</button><button type="button" data-skin-fx="bright">BRIGHT</button><button type="button" data-skin-fx="white">WHITE</button></div>
 
   <div id="snapBar">
     <div class="snap-status" id="snapStatus" role="status" aria-live="polite">
@@ -1879,7 +1878,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile87"></script>
+<script src="./tracking-core.js?v=mobile88"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3870,7 +3869,7 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile87';
+  const BUILD_VERSION='mobile88';
   document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
   const route=(name,value)=>{
     const query=new URLSearchParams();
