@@ -2346,14 +2346,49 @@ function drawNails(dt=1/60){
       rim.addColorStop(1,'rgba(60,30,20,.5)');
       ctx.fillStyle=rim; ctx.fillRect(-w,-h,w*2,h*2);
       if(gloss>0.05 && !flatLook(nailLooks[fi])){
-        ctx.globalAlpha = alpha*gloss*0.6;
-        ctx.fillStyle='#fff';
+        /* 固定光源（画面の左斜め上・天井から手前へ照射）による動的スペキュラー反射 */
+        const rot = ang + Math.PI/2;
+        const lx = -0.42, ly = -0.90;
+        const cosR = Math.cos(-rot), sinR = Math.sin(-rot);
+        const locLx = lx * cosR - ly * sinR;
+        const locLy = lx * sinR + ly * cosR;
+
+        /* 指の傾き・手の向きに応じて、光のハイライトが爪の表面を滑らかに移動 */
+        const hx = locLx * (w * 0.36);
+        const hy = -h * 0.18 + locLy * (h * 0.14);
+        const facing = Math.max(0.18, Math.min(1.0, 0.45 - locLy * 0.55));
+        const specAlpha = alpha * gloss * facing;
+
+        /* 1. メインの鏡面ハイライト（ソフトボックス・ライトの鋭い光沢） */
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(locLx * 0.35);
+        const hlGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(w * 0.22, 10));
+        hlGrad.addColorStop(0, `rgba(255,255,255,${Math.min(1, 0.92 * specAlpha * 1.5)})`);
+        hlGrad.addColorStop(0.35, `rgba(255,255,255,${0.50 * specAlpha * 1.5})`);
+        hlGrad.addColorStop(0.70, `rgba(255,255,255,${0.12 * specAlpha * 1.5})`);
+        hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = hlGrad;
         ctx.beginPath();
-        ctx.ellipse(-w*0.18,-h*0.20,w*0.15,h*0.26,-0.3,0,Math.PI*2);
+        ctx.ellipse(0, 0, w * 0.18, h * 0.26, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = alpha*gloss*0.28;
+
+        /* 2. 爪のCカーブを走る縦の光の筋（ルブロン / ハイライトリフレクション） */
+        const beamGrad = ctx.createLinearGradient(0, -h * 0.35, 0, h * 0.35);
+        beamGrad.addColorStop(0, 'rgba(255,255,255,0)');
+        beamGrad.addColorStop(0.4, `rgba(255,255,255,${0.35 * specAlpha * 1.5})`);
+        beamGrad.addColorStop(0.5, `rgba(255,255,255,${0.70 * specAlpha * 1.5})`);
+        beamGrad.addColorStop(0.6, `rgba(255,255,255,${0.30 * specAlpha * 1.5})`);
+        beamGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(-w * 0.05, -h * 0.38, w * 0.10, h * 0.76);
+        ctx.restore();
+
+        /* 3. 反対側の微細なアンビエント反射光（環境光のキワ） */
+        ctx.globalAlpha = Math.min(1, specAlpha * 0.35);
+        ctx.fillStyle = 'rgba(255,255,255,.9)';
         ctx.beginPath();
-        ctx.ellipse(w*0.2,h*0.05,w*0.09,h*0.15,0.2,0,Math.PI*2);
+        ctx.ellipse(-hx * 0.75, hy * 0.8, w * 0.08, h * 0.16, 0.2, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -3934,117 +3969,348 @@ updateCmpBadge();
   }
 
   function installArtworkLooks(){
+    /* 01: COLOR（色）— アクリルガッシュと油彩の多層筆跡。極細面相筆によるかすれと絵の具の重なり */
     LOOKS.artColor={name:'作品・色',paint(c,w,h,col,seed){
-      base(c,w,h,'#eeeae4','#c9c8c3');
-      const pal=['#c93869','#e2b832','#277363','#65509a','#d46839','#263749'];
-      const rnd=seeded(700+seed*19); c.lineCap='round';
-      for(let i=0;i<34;i++){
-        const x=(rnd()-.5)*w*1.2, y=(rnd()-.5)*h*1.15;
-        c.strokeStyle=pal[(i+seed)%pal.length]; c.globalAlpha=.58+rnd()*.35; c.lineWidth=w*(.012+rnd()*.026);
-        c.beginPath(); c.moveTo(x-w*.24,y-h*.05); c.bezierCurveTo(x-w*.04,y-h*.18,x+w*.08,y+h*.16,x+w*.28,y-h*.02); c.stroke();
+      base(c,w,h,'#f3efe8','#dcd6cc');
+      const pal=['#c93869','#e2b832','#277363','#65509a','#d46839','#263749','#e8849b','#48a999','#d99b35'];
+      const rnd=seeded(700+seed*23);
+      c.save();
+      /* 1. 下層：柔らかな滲みと混色の面 */
+      for(let i=0;i<8;i++){
+        const x=(rnd()-.5)*w*0.9, y=(rnd()-.5)*h*0.9, r=w*(0.22+rnd()*0.35);
+        const bg=c.createRadialGradient(x,y,0,x,y,r);
+        bg.addColorStop(0,hexA(pal[(i+seed)%pal.length],0.22));
+        bg.addColorStop(1,'rgba(255,255,255,0)');
+        c.fillStyle=bg; c.fillRect(-w/2,-h/2,w,h*1.2);
       }
-      c.globalAlpha=1;
+      /* 2. 中層〜上層：極細筆の多層ストローク */
+      c.lineCap='round'; c.lineJoin='round';
+      for(let i=0;i<75;i++){
+        const x0=(rnd()-.5)*w*1.15, y0=(rnd()-.5)*h*1.12;
+        const strokeLen=w*(0.30+rnd()*0.55);
+        const curveDir=(rnd()-.5)*w*0.35;
+        c.strokeStyle=pal[(i*2+seed)%pal.length];
+        c.globalAlpha=0.35+rnd()*0.58;
+        c.lineWidth=Math.max(0.4, w*(0.006+rnd()*0.022));
+        c.beginPath();
+        c.moveTo(x0-strokeLen*0.5, y0);
+        c.bezierCurveTo(x0-strokeLen*0.15, y0+curveDir, x0+strokeLen*0.15, y0-curveDir, x0+strokeLen*0.5, y0+(rnd()-.5)*h*0.1);
+        c.stroke();
+      }
+      /* 3. 最上層：微小な絵の具の跳ね・顔料の粒子 */
+      c.globalAlpha=0.75;
+      for(let i=0;i<35;i++){
+        const px=(rnd()-.5)*w*0.85, py=(rnd()-.5)*h*0.9, pr=Math.max(0.4, w*(0.005+rnd()*0.012));
+        c.fillStyle=pal[(i+seed*3)%pal.length];
+        c.beginPath(); c.arc(px,py,pr,0,Math.PI*2); c.fill();
+      }
+      c.restore();
     }};
+
+    /* 02: SURFACE（表面）— 金継ぎ・鉱物箔・クラック。不規則な多角形金箔と微小マイカの輝き */
     LOOKS.artSurface={name:'作品・表面',paint(c,w,h,col,seed){
-      const g=c.createLinearGradient(-w*.45,-h*.5,w*.4,h*.5);
-      g.addColorStop(0,'#563619'); g.addColorStop(.35,col); g.addColorStop(.63,'#e0bd70'); g.addColorStop(1,'#70431b');
+      const g=c.createLinearGradient(-w*.45,-h*.52,w*.42,h*.52);
+      g.addColorStop(0,'#3e2413'); g.addColorStop(0.28,shade(col,-12)); g.addColorStop(0.55,'#caa155'); g.addColorStop(0.82,col); g.addColorStop(1,'#462b14');
       c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
-      const rnd=seeded(810+seed*13); c.globalCompositeOperation='screen';
-      for(let i=0;i<9;i++){
-        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, rx=w*(.13+rnd()*.25), ry=h*(.05+rnd()*.13);
-        c.fillStyle=i%2?'rgba(255,231,166,.2)':'rgba(255,255,255,.12)';
-        c.beginPath(); c.ellipse(x,y,rx,ry,rnd()*Math.PI,0,Math.PI*2); c.fill();
+      const rnd=seeded(810+seed*17);
+      c.save();
+      /* 鉱物のマーブル層 */
+      for(let i=0;i<5;i++){
+        const mx=(rnd()-.5)*w*0.7, my=(rnd()-.5)*h*0.7, mr=w*(0.25+rnd()*0.4);
+        const mg=c.createRadialGradient(mx,my,0,mx,my,mr);
+        mg.addColorStop(0,'rgba(240,210,140,0.32)'); mg.addColorStop(1,'rgba(0,0,0,0)');
+        c.fillStyle=mg; c.fillRect(-w/2,-h/2,w,h*1.2);
       }
+      /* 金継ぎのクラック（ひび割れ線） */
+      c.lineCap='round'; c.lineJoin='round';
+      c.strokeStyle='rgba(255,232,166,0.92)'; c.lineWidth=Math.max(0.5, w*0.014);
+      for(let i=0;i<4;i++){
+        let cx=(rnd()-.5)*w*0.8, cy=-h*0.48+rnd()*h*0.2;
+        c.beginPath(); c.moveTo(cx,cy);
+        for(let seg=0;seg<5;seg++){
+          cx+=(rnd()-.5)*w*0.35; cy+=h*0.18+rnd()*h*0.08;
+          c.lineTo(cx,cy);
+        }
+        c.stroke();
+      }
+      /* 不規則な金箔片（26個の多角形） */
       c.globalCompositeOperation='source-over';
-    }};
-    LOOKS.artSculpt={name:'作品・形',paint(c,w,h,col,seed){
-      const g=c.createLinearGradient(0,-h*.5,0,h*.5); g.addColorStop(0,'rgba(250,246,239,.88)'); g.addColorStop(1,hexA(col,.68));
-      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
-      const rnd=seeded(920+seed*23); c.strokeStyle='#c49a4f'; c.lineWidth=Math.max(1,w*.018); c.globalAlpha=.75;
-      for(let i=0;i<7;i++){
-        const x=(rnd()-.5)*w, turn=(rnd()-.5)*w*.7;
-        c.beginPath(); c.moveTo(x,-h*.58); c.bezierCurveTo(x+turn,-h*.2,x-turn,h*.15,x+turn*.4,h*.58); c.stroke();
+      for(let i=0;i<26;i++){
+        const fx=(rnd()-.5)*w*0.82, fy=(rnd()-.5)*h*0.9;
+        const fs=Math.max(0.6, w*(0.012+rnd()*0.035));
+        c.save(); c.translate(fx,fy); c.rotate(rnd()*Math.PI*2);
+        c.fillStyle=i%3===0?'#fff5d6':i%3===1?'#e5be65':'#b88a38';
+        c.globalAlpha=0.72+rnd()*0.26;
+        c.beginPath();
+        c.moveTo(-fs, -fs*0.6); c.lineTo(fs*0.8, -fs*0.9); c.lineTo(fs*1.1, fs*0.5); c.lineTo(-fs*0.4, fs*0.9);
+        c.closePath(); c.fill();
+        c.restore();
       }
-      c.globalAlpha=1;
-    }};
-    LOOKS.artLight={name:'作品・光',paint(c,w,h,col,seed){
-      base(c,w,h,'#071a25','#102d36');
-      const ox=(seed-2)*w*.07, oy=-h*.08;
-      const glow=c.createRadialGradient(ox,oy,0,ox,oy,w*.52);
-      glow.addColorStop(0,'rgba(235,244,215,.96)'); glow.addColorStop(.16,'rgba(99,212,196,.9)'); glow.addColorStop(.5,hexA(col,.58)); glow.addColorStop(1,'rgba(5,19,28,0)');
-      c.fillStyle=glow; c.fillRect(-w/2,-h/2,w,h);
-      const rnd=seeded(1010+seed*17); c.fillStyle='#e8eee0';
-      for(let i=0;i<20;i++){
-        c.globalAlpha=.18+rnd()*.72; c.beginPath(); c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*(.007+rnd()*.018),0,Math.PI*2); c.fill();
-      }
-      c.globalAlpha=1;
-    }};
-    LOOKS.artHand={name:'作品・手',paint(c,w,h,col,seed){
-      base(c,w,h,'#eee9e2',shade(col,20));
-      const rnd=seeded(1120+seed*11); c.strokeStyle='#5e5050'; c.lineWidth=Math.max(1,w*.012); c.globalAlpha=.54;
-      for(let i=0;i<15;i++){
-        const y=-h*.47+i*h*.067+(rnd()-.5)*h*.035;
-        c.beginPath(); c.moveTo(-w*.58,y); c.bezierCurveTo(-w*.18,y-h*.04,w*.12,y+h*.06,w*.58,y-h*.01); c.stroke();
-      }
-      c.strokeStyle='#a17079'; c.globalAlpha=.42; c.beginPath(); c.ellipse(0,-h*.02,w*.28,h*.18,.4,0,Math.PI*2); c.stroke(); c.globalAlpha=1;
-    }};
-    LOOKS.artTrace={name:'作品・痕跡',flat:true,paint(c,w,h,col,seed){
-      const g=c.createLinearGradient(0,-h*.55,0,h*.55); g.addColorStop(0,'#111216'); g.addColorStop(.55,col); g.addColorStop(1,'rgba(185,184,178,.42)');
-      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
-      const rnd=seeded(1240+seed*29);
+      /* 微粒子マイカ（雲母）の星屑 */
+      c.globalCompositeOperation='screen';
+      c.fillStyle='rgba(255,248,220,0.85)';
       for(let i=0;i<32;i++){
-        const x=(rnd()-.5)*w, y=(rnd()-.5)*h, r=w*(.006+rnd()*.025);
-        c.fillStyle=`rgba(235,234,228,${.08+rnd()*.48})`; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+        c.beginPath(); c.arc((rnd()-.5)*w*0.9,(rnd()-.5)*h*0.95,Math.max(0.3,w*(0.004+rnd()*0.010)),0,Math.PI*2); c.fill();
       }
+      c.restore();
     }};
-    LOOKS.artSpace={name:'作品・宇宙と手',paint(c,w,h,col,seed){
-      base(c,w,h,'#050914','#152447');
-      const rnd=seeded(1370+seed*31);
-      for(let i=0;i<24;i++){
-        c.fillStyle=`rgba(240,225,174,${.14+rnd()*.72})`; c.beginPath();
-        c.arc((rnd()-.5)*w,(rnd()-.5)*h,w*(.006+rnd()*.018),0,Math.PI*2); c.fill();
+
+    /* 03: SCULPT（作品・形 / FORMWORK）— 極細ジュエリーワイヤーの立体交差と繊細レリーフ */
+    LOOKS.artSculpt={name:'作品・形',paint(c,w,h,col,seed){
+      const g=c.createLinearGradient(0,-h*.5,0,h*.5);
+      g.addColorStop(0,'#f9f6f0'); g.addColorStop(0.45,'#ece4d6'); g.addColorStop(1,hexA(col,0.65));
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const rnd=seeded(920+seed*29);
+      c.save();
+      c.lineCap='round'; c.lineJoin='round';
+      /* 16本の極細ワイヤーの立体織り */
+      for(let i=0;i<16;i++){
+        const x=(rnd()-.5)*w*0.92, turn=(rnd()-.5)*w*0.65;
+        const isGold = i%2===0;
+        /* ワイヤー背面の微小ドロップシャドウ */
+        c.strokeStyle='rgba(40,25,20,0.18)'; c.lineWidth=Math.max(0.6, w*0.015);
+        c.beginPath(); c.moveTo(x+1,-h*0.56);
+        c.bezierCurveTo(x+turn+1,-h*0.18,x-turn+1,h*0.18,x+turn*0.4+1,h*0.56); c.stroke();
+        /* ワイヤー本体（金線・銀白線） */
+        c.strokeStyle=isGold?'#c89f55':'#e0deda';
+        c.globalAlpha=0.75+rnd()*0.22;
+        c.lineWidth=Math.max(0.5, w*(0.010+rnd()*0.014));
+        c.beginPath(); c.moveTo(x,-h*0.56);
+        c.bezierCurveTo(x+turn,-h*0.18,x-turn,h*0.18,x+turn*0.4,h*0.56); c.stroke();
+        /* 金属ハイライト */
+        c.strokeStyle='rgba(255,255,255,0.7)'; c.lineWidth=Math.max(0.3, w*0.005);
+        c.beginPath(); c.moveTo(x-0.4,-h*0.56);
+        c.bezierCurveTo(x+turn-0.4,-h*0.18,x-turn-0.4,h*0.18,x+turn*0.4-0.4,h*0.56); c.stroke();
       }
-      const x=(seed-2)*w*.08, y=-h*.12;
-      const orb=c.createRadialGradient(x,y,0,x,y,w*.34);
-      orb.addColorStop(0,'rgba(255,250,220,.98)'); orb.addColorStop(.22,'rgba(222,196,112,.84)'); orb.addColorStop(1,'rgba(210,165,70,0)');
-      c.fillStyle=orb; c.fillRect(-w/2,-h/2,w,h);
-    }};
-    LOOKS.artThinking={name:'作品・思惟する手',flat:true,paint(c,w,h,col,seed){
-      base(c,w,h,'#eee7e1',shade(col,8));
-      c.strokeStyle='#6f5960'; c.lineWidth=Math.max(1,w*.014); c.globalAlpha=.62;
-      const rnd=seeded(1480+seed*17);
-      for(let i=0;i<13;i++){
-        const y=-h*.46+i*h*.073;
-        c.beginPath(); c.moveTo(-w*.58,y+(rnd()-.5)*h*.03);
-        c.bezierCurveTo(-w*.18,y-h*.07,w*.18,y+h*.08,w*.58,y-h*.02); c.stroke();
+      /* ワイヤー結び目の小さな金ビーズ */
+      for(let i=0;i<7;i++){
+        const bx=(rnd()-.5)*w*0.7, by=(rnd()-.5)*h*0.6;
+        c.fillStyle='#e8c878'; c.beginPath(); c.arc(bx,by,Math.max(0.6,w*0.016),0,Math.PI*2); c.fill();
+        c.fillStyle='#fff'; c.beginPath(); c.arc(bx-0.3,by-0.3,Math.max(0.3,w*0.006),0,Math.PI*2); c.fill();
       }
-      c.strokeStyle='#af7b82'; c.globalAlpha=.4; c.beginPath(); c.ellipse(0,-h*.04,w*.3,h*.2,seed*.2,0,Math.PI*2); c.stroke(); c.globalAlpha=1;
+      c.restore();
     }};
-    LOOKS.artOrb={name:'作品・白球と赤い爪',paint(c,w,h,col,seed){
-      base(c,w,h,shade(col,6),shade(col,-22));
-      const x=(seed-2)*w*.09, y=-h*.12;
-      c.shadowColor='rgba(255,245,225,.74)'; c.shadowBlur=w*.18; c.fillStyle='#f7f3e9';
-      c.beginPath(); c.arc(x,y,w*.24,0,Math.PI*2); c.fill(); c.shadowBlur=0;
-      c.strokeStyle='rgba(255,216,206,.58)'; c.lineWidth=w*.022; c.beginPath(); c.arc(x,y,w*.34,0,Math.PI*2); c.stroke();
+
+    /* 04: LIGHT（作品・光）— 幾何学マンダラの精密同心円・放射線と無数の光彩フォトン */
+    LOOKS.artLight={name:'作品・光',paint(c,w,h,col,seed){
+      base(c,w,h,'#05151e','#0c262d');
+      const ox=(seed-2)*w*0.06, oy=-h*0.08;
+      const glow=c.createRadialGradient(ox,oy,0,ox,oy,w*0.65);
+      glow.addColorStop(0,'rgba(240,250,225,0.98)'); glow.addColorStop(0.18,'rgba(95,218,202,0.88)'); glow.addColorStop(0.52,hexA(col,0.65)); glow.addColorStop(1,'rgba(3,15,22,0)');
+      c.fillStyle=glow; c.fillRect(-w/2,-h/2,w,h);
+      const rnd=seeded(1010+seed*23);
+      c.save();
+      /* 幾何学マンダラの極細同心円リング（金＆白） */
+      for(let r=1;r<=6;r++){
+        c.strokeStyle=r%2===0?'rgba(235,220,165,0.45)':'rgba(160,240,230,0.38)';
+        c.lineWidth=Math.max(0.4, w*0.007);
+        c.beginPath(); c.arc(ox,oy,w*0.08*r,0,Math.PI*2); c.stroke();
+      }
+      /* 精密放射光（12本の極細スポーク） */
+      c.strokeStyle='rgba(255,255,255,0.32)'; c.lineWidth=Math.max(0.3, w*0.005);
+      for(let a=0;a<12;a++){
+        const rad=a*(Math.PI/6);
+        c.beginPath(); c.moveTo(ox+Math.cos(rad)*w*0.08, oy+Math.sin(rad)*w*0.08);
+        c.lineTo(ox+Math.cos(rad)*w*0.52, oy+Math.sin(rad)*w*0.52); c.stroke();
+      }
+      /* 55個の微細フォトン粒子（星彩ラメ） */
+      for(let i=0;i<55;i++){
+        const pr=rnd()*w*0.55, pa=rnd()*Math.PI*2;
+        const px=ox+Math.cos(pa)*pr, py=oy+Math.sin(pa)*pr;
+        const pSize=Math.max(0.35, w*(0.005+rnd()*0.016));
+        c.fillStyle=i%4===0?'rgba(255,255,255,0.95)':i%4===1?'rgba(230,245,180,0.85)':'rgba(120,230,210,0.72)';
+        c.beginPath(); c.arc(px,py,pSize,0,Math.PI*2); c.fill();
+      }
+      c.restore();
     }};
-    LOOKS.artFrame={name:'作品・二つの手の輪舞曲',paint(c,w,h,col,seed){
-      base(c,w,h,'#f3e9e2',col);
-      c.fillStyle='rgba(217,171,166,.5)'; c.save(); c.rotate((seed-2)*.13); c.fillRect(-w*.7,-h*.14,w*1.4,h*.28); c.restore();
-      c.strokeStyle='#bf9853'; c.lineWidth=Math.max(1,w*.025); c.globalAlpha=.86;
-      c.beginPath(); c.moveTo(-w*.5,h*.28); c.bezierCurveTo(-w*.12,-h*.42,w*.2,h*.4,w*.5,-h*.3); c.stroke();
-      c.strokeStyle='rgba(255,255,255,.8)'; c.lineWidth=w*.06; c.beginPath(); c.moveTo(-w*.48,-h*.26); c.lineTo(w*.44,h*.18); c.stroke(); c.globalAlpha=1;
-    }};
-    LOOKS.artInkFlow={name:'ART・墨流し',varLabel:'にじみの量',paint(c,w,h,col,seed,v){
-      base(c,w,h,'#f5f0e9','#e9ddd5');
-      const rnd=seeded(1610+seed*37), pal=[col,shade(col,-35),'#345b62','#c46578','#d8a84f'];
+
+    /* 05: HAND（作品・手）— 素描・デッサンの繊細ハッチングと人体の骨格線 */
+    LOOKS.artHand={name:'作品・手',paint(c,w,h,col,seed){
+      base(c,w,h,'#f4efe8',shade(col,25));
+      const rnd=seeded(1120+seed*13);
+      c.save();
       c.lineCap='round';
-      for(let i=0;i<8+Math.round(v*9);i++){
-        const y=(rnd()-.5)*h, bend=(rnd()-.5)*h*.55;
-        c.strokeStyle=hexA(pal[i%pal.length],.2+rnd()*.42); c.lineWidth=w*(.045+rnd()*.16);
-        c.beginPath(); c.moveTo(-w*.75,y); c.bezierCurveTo(-w*.22,y+bend,w*.18,y-bend,w*.75,y+bend*.2); c.stroke();
+      /* 40本の精密なデッサン・ハッチング線 */
+      for(let i=0;i<40;i++){
+        const y=-h*0.50+i*h*0.026+(rnd()-.5)*h*0.02;
+        const tilt=(rnd()-.5)*h*0.05;
+        c.strokeStyle=(i%3===0)?'#423537':'#685557';
+        c.globalAlpha=0.28+rnd()*0.42;
+        c.lineWidth=Math.max(0.35, w*(0.005+rnd()*0.010));
+        c.beginPath(); c.moveTo(-w*0.52, y);
+        c.bezierCurveTo(-w*0.15, y-h*0.03+tilt, w*0.15, y+h*0.04-tilt, w*0.52, y+tilt);
+        c.stroke();
       }
-      c.strokeStyle='rgba(255,255,255,.48)'; c.lineWidth=w*.025;
-      c.beginPath(); c.moveTo(-w*.6,h*.18); c.bezierCurveTo(-w*.15,-h*.35,w*.2,h*.4,w*.62,-h*.12); c.stroke();
+      /* 手の構造を示す交差斜線（クロスハッチング） */
+      c.strokeStyle='rgba(130,95,105,0.32)'; c.lineWidth=Math.max(0.3, w*0.006);
+      for(let i=0;i<18;i++){
+        const x=-w*0.4+i*w*0.045;
+        c.beginPath(); c.moveTo(x,-h*0.25); c.lineTo(x+w*0.25,h*0.25); c.stroke();
+      }
+      /* アクセントの有機的な赤鉛筆オーバル */
+      c.strokeStyle='#b87680'; c.globalAlpha=0.48; c.lineWidth=Math.max(0.5, w*0.014);
+      c.beginPath(); c.ellipse(0,-h*0.02,w*0.29,h*0.19,0.35,0,Math.PI*2); c.stroke();
+      c.restore();
+    }};
+
+    /* 06: TRACE（作品・痕跡）— 珪藻土・地層のクラックと85粒の鉱物ダスト */
+    LOOKS.artTrace={name:'作品・痕跡',flat:true,paint(c,w,h,col,seed){
+      const g=c.createLinearGradient(0,-h*.55,0,h*.55);
+      g.addColorStop(0,'#0e0f12'); g.addColorStop(0.48,col); g.addColorStop(1,'rgba(175,172,165,0.48)');
+      c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const rnd=seeded(1240+seed*31);
+      c.save();
+      /* 地層の微細なひび割れ */
+      c.strokeStyle='rgba(215,212,204,0.35)'; c.lineWidth=Math.max(0.35, w*0.008);
+      for(let i=0;i<5;i++){
+        let x=(rnd()-.5)*w*0.8, y=-h*0.5+rnd()*h*0.2;
+        c.beginPath(); c.moveTo(x,y);
+        for(let k=0;k<6;k++){ x+=(rnd()-.5)*w*0.25; y+=h*0.16; c.lineTo(x,y); }
+        c.stroke();
+      }
+      /* 85個の微粒子ダスト（さまざまな不透明度とサイズ） */
+      for(let i=0;i<85;i++){
+        const x=(rnd()-.5)*w*0.92, y=(rnd()-.5)*h*0.95, r=Math.max(0.3, w*(0.004+rnd()*0.018));
+        c.fillStyle=`rgba(240,238,232,${0.06+rnd()*0.55})`;
+        c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+      }
+      c.restore();
+    }};
+
+    /* 07: SPACE（作品・宇宙と手）— 銀河ネビュラの星雲ヴェールと遠近感ある星辰 */
+    LOOKS.artSpace={name:'作品・宇宙と手',paint(c,w,h,col,seed){
+      base(c,w,h,'#040711','#111c38');
+      const rnd=seeded(1370+seed*37);
+      c.save();
+      /* 3層の星雲（ネビュラ）ガス */
+      const gas1=c.createRadialGradient(-w*0.15,-h*0.15,0,-w*0.15,-h*0.15,w*0.55);
+      gas1.addColorStop(0,'rgba(160,80,180,0.32)'); gas1.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=gas1; c.fillRect(-w/2,-h/2,w,h*1.2);
+      const gas2=c.createRadialGradient(w*0.15,h*0.12,0,w*0.15,h*0.12,w*0.48);
+      gas2.addColorStop(0,'rgba(45,140,210,0.28)'); gas2.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=gas2; c.fillRect(-w/2,-h/2,w,h*1.2);
+      /* 75個の恒星・微小銀河 */
+      for(let i=0;i<75;i++){
+        const x=(rnd()-.5)*w*0.92, y=(rnd()-.5)*h*0.95, r=Math.max(0.3, w*(0.003+rnd()*0.016));
+        c.fillStyle=i%5===0?'rgba(255,245,210,0.95)':i%5===1?'rgba(200,230,255,0.85)':'rgba(255,255,255,0.55)';
+        c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+      }
+      /* 金色の恒星オーブと微細十字光 */
+      const ox=(seed-2)*w*0.07, oy=-h*0.12;
+      const orb=c.createRadialGradient(ox,oy,0,ox,oy,w*0.36);
+      orb.addColorStop(0,'rgba(255,252,230,0.99)'); orb.addColorStop(0.24,'rgba(235,205,120,0.88)'); orb.addColorStop(0.65,'rgba(180,135,50,0.25)'); orb.addColorStop(1,'rgba(180,135,50,0)');
+      c.fillStyle=orb; c.fillRect(-w/2,-h/2,w,h);
+      /* 十字回折光 */
+      c.strokeStyle='rgba(255,250,225,0.65)'; c.lineWidth=Math.max(0.4, w*0.006);
+      c.beginPath(); c.moveTo(ox-w*0.28, oy); c.lineTo(ox+w*0.28, oy);
+      c.moveTo(ox, oy-h*0.18); c.lineTo(ox, oy+h*0.18); c.stroke();
+      c.restore();
+    }};
+
+    /* 08: THINKING（作品・思惟する手）— 銅版画エッチングの精密クロスハッチング */
+    LOOKS.artThinking={name:'作品・思惟する手',flat:true,paint(c,w,h,col,seed){
+      base(c,w,h,'#f3eee7',shade(col,10));
+      const rnd=seeded(1480+seed*19);
+      c.save();
+      c.lineCap='round';
+      /* 32本の微細な版画線 */
+      for(let i=0;i<32;i++){
+        const y=-h*0.48+i*h*0.032+(rnd()-.5)*h*0.02;
+        c.strokeStyle=(i%4===0)?'#453538':'#655256';
+        c.globalAlpha=0.32+rnd()*0.45;
+        c.lineWidth=Math.max(0.35, w*(0.005+rnd()*0.010));
+        c.beginPath(); c.moveTo(-w*0.54, y);
+        c.bezierCurveTo(-w*0.18, y-h*0.04, w*0.18, y+h*0.05, w*0.54, y-h*0.01);
+        c.stroke();
+      }
+      /* 幾何学的なオーバルラインと思考の輪郭 */
+      c.strokeStyle='#a66e76'; c.globalAlpha=0.45; c.lineWidth=Math.max(0.4, w*0.012);
+      c.beginPath(); c.ellipse(0,-h*0.03,w*0.32,h*0.22,seed*0.18,0,Math.PI*2); c.stroke();
+      c.restore();
+    }};
+
+    /* 09: ORB（作品・白球と赤い爪）— オパール遊色・ガラス球の立体屈折と金胎漆 */
+    LOOKS.artOrb={name:'作品・白球と赤い爪',paint(c,w,h,col,seed){
+      base(c,w,h,shade(col,12),shade(col,-26));
+      const ox=(seed-2)*w*0.08, oy=-h*0.12;
+      c.save();
+      /* 深紅の漆調の深み */
+      const lacq=c.createRadialGradient(ox,oy,w*0.1,ox,oy,w*0.75);
+      lacq.addColorStop(0,'rgba(255,80,70,0.18)'); lacq.addColorStop(1,'rgba(25,5,8,0.45)');
+      c.fillStyle=lacq; c.fillRect(-w/2,-h/2,w,h*1.2);
+      /* 立体的な白球（White Orb）— 多重オパール光 */
+      const orbRad = w * 0.25;
+      const sphere=c.createRadialGradient(ox-orbRad*0.35, oy-orbRad*0.35, orbRad*0.05, ox, oy, orbRad);
+      sphere.addColorStop(0,'#ffffff');
+      sphere.addColorStop(0.35,'#fbf6ed');
+      sphere.addColorStop(0.72,'#e2ddd2');
+      sphere.addColorStop(0.92,'#b8b2a5');
+      sphere.addColorStop(1,'#7a746a');
+      c.shadowColor='rgba(255,245,225,0.72)'; c.shadowBlur=w*0.16;
+      c.fillStyle=sphere; c.beginPath(); c.arc(ox,oy,orbRad,0,Math.PI*2); c.fill();
+      c.shadowBlur=0;
+      /* オパールのオーロラ干渉膜（薄い青・緑・ピンクの微細ヴェール） */
+      const prism=c.createLinearGradient(ox-orbRad, oy-orbRad, ox+orbRad, oy+orbRad);
+      prism.addColorStop(0.2,'rgba(160,230,255,0.35)');
+      prism.addColorStop(0.5,'rgba(255,210,230,0.28)');
+      prism.addColorStop(0.8,'rgba(220,255,210,0.32)');
+      c.fillStyle=prism; c.beginPath(); c.arc(ox,oy,orbRad,0,Math.PI*2); c.fill();
+      /* 白球を抱く金彩リング */
+      c.strokeStyle='rgba(235,200,120,0.72)'; c.lineWidth=Math.max(0.5, w*0.016);
+      c.beginPath(); c.arc(ox,oy,orbRad*1.32,0,Math.PI*2); c.stroke();
+      c.restore();
+    }};
+
+    /* 10: FRAME（作品・二つの手の輪舞曲）— 幾何学金枠と織り成す二つの手の優雅なリボン */
+    LOOKS.artFrame={name:'作品・二つの手の輪舞曲',paint(c,w,h,col,seed){
+      base(c,w,h,'#f6eee7',col);
+      const rnd=seeded(1550+seed*17);
+      c.save();
+      /* 幾何学マットフレーム（重なり合う紙片） */
+      c.fillStyle='rgba(225,182,176,0.52)';
+      c.save(); c.rotate((seed-2)*0.12); c.fillRect(-w*0.65,-h*0.16,w*1.3,h*0.32); c.restore();
+      /* 二つの手の軌跡を表す極細ゴールドリボン */
+      c.lineCap='round'; c.lineJoin='round';
+      c.strokeStyle='#c49e52'; c.lineWidth=Math.max(0.6, w*0.022); c.globalAlpha=0.88;
+      c.beginPath(); c.moveTo(-w*0.48, h*0.32);
+      c.bezierCurveTo(-w*0.12, -h*0.45, w*0.18, h*0.42, w*0.48, -h*0.28); c.stroke();
+      /* 対称を成すプラチナシルバーのリボン */
+      c.strokeStyle='rgba(255,255,255,0.92)'; c.lineWidth=Math.max(0.5, w*0.015);
+      c.beginPath(); c.moveTo(-w*0.44, -h*0.30);
+      c.bezierCurveTo(-w*0.10, h*0.40, w*0.15, -h*0.40, w*0.44, h*0.25); c.stroke();
+      /* 周囲を縁取る微細金箔のステッチ */
+      for(let i=0;i<8;i++){
+        c.fillStyle='#e5be65';
+        c.fillRect(-w*0.4+i*w*0.11, -h*0.42, Math.max(0.6,w*0.016), Math.max(0.6,w*0.016));
+      }
+      c.restore();
+    }};
+
+    /* 11: ART・墨流し — 伝統的マーブリングの20重の精密な年輪流線 */
+    LOOKS.artInkFlow={name:'ART・墨流し',varLabel:'にじみの量',paint(c,w,h,col,seed,v){
+      base(c,w,h,'#f7f2eb','#ebe0d7');
+      const rnd=seeded(1610+seed*41);
+      const pal=[col,shade(col,-38),'#2a4b52','#b25568','#c89838'];
+      c.save();
+      c.lineCap='round';
+      const cx=(rnd()-.5)*w*0.3, cy=(rnd()-.5)*h*0.3;
+      /* 20重の墨流し波紋 */
+      for(let r=1;r<=20;r++){
+        const radX=r*w*0.038*(0.6+v*0.8);
+        const radY=r*h*0.034*(0.6+v*0.8);
+        c.strokeStyle=pal[(r+seed)%pal.length];
+        c.globalAlpha=0.35+rnd()*0.42;
+        c.lineWidth=Math.max(0.4, w*(0.006+rnd()*0.014));
+        c.beginPath();
+        for(let a=0;a<=Math.PI*2;a+=0.25){
+          const wave=(rnd()-.5)*w*0.04;
+          const px=cx+Math.cos(a)*(radX+wave);
+          const py=cy+Math.sin(a)*(radY+wave);
+          if(a===0) c.moveTo(px,py); else c.lineTo(px,py);
+        }
+        c.closePath(); c.stroke();
+      }
+      c.restore();
     }};
     LOOKS.artKintsugi={name:'ART・金継ぎ',varLabel:'金線の量',paint(c,w,h,col,seed,v){
       base(c,w,h,shade(col,-52),'#17171b');
