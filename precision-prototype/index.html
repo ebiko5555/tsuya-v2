@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>TSUYA PRECISION — 自爪精密密着フィッティング試作</title>
+<!-- MediaPipe Hands for Skeletal Anchoring -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<!-- ONNX Runtime Web for future nail segmentation model integration -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
+<script src="./nail-detector.js"></script>
+<script src="./art-core.js"></script>
+<style>
+  :root {
+    --bg: #0d0c0e;
+    --panel: #161519;
+    --panel-border: rgba(255,255,255,0.08);
+    --accent: #d14f78;
+    --text: #eee7e1;
+    --sub: #9e958f;
+    --gold: #d4af37;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+  header {
+    height: 54px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--panel-border);
+    background: rgba(13,12,14,0.92);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.12em; color: #fff; }
+  .brand span { font-size: 11px; color: var(--sub); letter-spacing: 0.06em; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { background: #222026; border-color: rgba(255,255,255,0.2); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #e05b84; }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  @media (min-width: 900px) {
+    main { flex-direction: row; height: calc(100vh - 54px); }
+  }
+
+  /* ワークスペース・ビューポート */
+  .viewport-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #08080a;
+    overflow: hidden;
+    min-height: 480px;
+  }
+  #viewCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  /* ビフォー/アフターのスプリットバー */
+  .split-slider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #fff;
+    cursor: ew-resize;
+    z-index: 20;
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+  }
+  .split-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .split-badge {
+    position: absolute;
+    top: 16px;
+    padding: 5px 12px;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    z-index: 15;
+  }
+  .badge-before { left: 20px; }
+  .badge-after { right: 20px; }
+
+  /* コントロール・サイドパネル */
+  .control-panel {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border-left: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 30;
+  }
+
+  .panel-section {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--sub);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* 作品選択カルーセル */
+  .artworks-row {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .artworks-row::-webkit-scrollbar { display: none; }
+  .art-card {
+    flex: 0 0 76px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: all 0.2s ease;
+  }
+  .art-card.active { opacity: 1; transform: scale(1.05); }
+  .art-card canvas {
+    width: 44px;
+    height: 74px;
+    border-radius: 8px;
+    background: #08080a;
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .art-card.active canvas {
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(212,175,55,0.4);
+  }
+  .art-card span { font-size: 10px; color: var(--sub); text-align: center; }
+  .art-card.active span { color: #fff; font-weight: 600; }
+
+  /* フィッティング・スライダー */
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .slider-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .slider-header span:first-child { color: var(--text); }
+  .slider-header span:last-child { color: var(--gold); font-family: monospace; }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #28262e;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #eee7e1;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    border: 2px solid #161519;
+  }
+
+  /* 指ごとの微調整タブ */
+  .finger-tabs {
+    display: flex;
+    background: #0f0e12;
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 14px;
+  }
+  .finger-tab {
+    flex: 1;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--sub);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .finger-tab.active {
+    background: #25232b;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* 撮影モーダル */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    display: none;
+  }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  #cameraVideo {
+    width: 100%;
+    max-height: 380px;
+    border-radius: 12px;
+    background: #000;
+    object-fit: cover;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>TSUYA PRECISION</h1>
+    <span>自爪精密密着試作 / ネイリスト仕様</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="cameraBtn" type="button">📷 カメラで撮影</button>
+    <label class="btn" for="uploadInput">📁 写真を読込</label>
+    <input type="file" id="uploadInput" accept="image/*" style="display:none">
+    <button class="btn btn-primary" id="saveBtn" type="button">💾 写真を保存</button>
+  </div>
+</header>
+
+<main>
+  <!-- ビューポート -->
+  <div class="viewport-container" id="viewport">
+    <canvas id="viewCanvas"></canvas>
+    
+    <!-- ビフォー・アフタースプリット -->
+    <div class="split-slider" id="splitSlider" style="left: 50%;">
+      <div class="split-handle">↔</div>
+    </div>
+    <div class="split-badge badge-before">自爪（すっぴん）</div>
+    <div class="split-badge badge-after">ネイル密着後</div>
+  </div>
+
+  <!-- ネイリスト仕様コントロールパネル -->
+  <aside class="control-panel">
+    <!-- 作品選択 -->
+    <section class="panel-section">
+      <div class="panel-title">
+        <span>WORK SELECTION / 作品選択</span>
+        <span id="activeWorkTitle" style="color: #fff;">01 COLOR / 色</span>
+      </div>
+      <div class="artworks-row" id="artworksRow"></div>
+    </section>
+
+    <!-- 全体フィッティング調整 -->
+    <section class="panel-section">
+      <div class="panel-title">
+        <span>PRECISION FIT / 全体密着調整</span>
+      </div>
+      <div class="control-group">
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>キューティクル深さ（甘皮のキワへ）</span>
+            <span id="valCuticle">+1.2 mm</span>
+          </div>
+          <input type="range" id="sliderCuticle" min="0" max="200" value="100">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>自爪幅（サイドウォール密着）</span>
+            <span id="valWidth">100 %</span>
+          </div>
+          <input type="range" id="sliderWidth" min="70" max="130" value="100">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>レングス（長さ）</span>
+            <span id="valLength">100 %</span>
+          </div>
+          <input type="range" id="sliderLength" min="80" max="160" value="100">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>生え際スキンブレンド（甘皮の影）</span>
+            <span id="valBlend">85 %</span>
+          </div>
+          <input type="range" id="sliderBlend" min="0" max="100" value="85">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>トップジェル光沢（ハイポイント）</span>
+            <span id="valGloss">96 %</span>
+          </div>
+          <input type="range" id="sliderGloss" min="0" max="100" value="96">
+        </div>
+      </div>
+    </section>
+
+    <!-- 指ごとの微調整タブ -->
+    <section class="panel-section">
+      <div class="panel-title">
+        <span>PER-FINGER TUNE / 指ごとの個別微調整</span>
+      </div>
+      <div class="finger-tabs" id="fingerTabs">
+        <div class="finger-tab active" data-fi="0">親指</div>
+        <div class="finger-tab" data-fi="1">人差指</div>
+        <div class="finger-tab" data-fi="2">中指</div>
+        <div class="finger-tab" data-fi="3">薬指</div>
+        <div class="finger-tab" data-fi="4">小指</div>
+      </div>
+
+      <div class="control-group">
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>上下オフセット（甘皮ライン微調整）</span>
+            <span id="valShiftY">0 px</span>
+          </div>
+          <input type="range" id="sliderShiftY" min="-30" max="30" value="0">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>左右オフセット（サイドバランス）</span>
+            <span id="valShiftX">0 px</span>
+          </div>
+          <input type="range" id="sliderShiftX" min="-30" max="30" value="0">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>この指の幅微調整</span>
+            <span id="valFingerW">100 %</span>
+          </div>
+          <input type="range" id="sliderFingerW" min="75" max="125" value="100">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span>この指の長さ微調整</span>
+            <span id="valFingerL">100 %</span>
+          </div>
+          <input type="range" id="sliderFingerL" min="75" max="125" value="100">
+        </div>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<!-- カメラ撮影モーダル -->
+<div class="modal-overlay" id="cameraModal">
+  <div class="modal-box">
+    <h3 style="font-size:15px; letter-spacing:0.08em;">手を撮影してください</h3>
+    <p style="font-size:12px; color:var(--sub);">自然な光の下で、指先を揃えてカメラにかざしてください</p>
+    <video id="cameraVideo" playsinline autoplay muted></video>
+    <div style="display:flex; gap:12px; width:100%; justify-content:center;">
+      <button class="btn" id="cancelSnapBtn" type="button">キャンセル</button>
+      <button class="btn btn-primary" id="takeSnapBtn" type="button">📸 シャッターを切る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // 10作品の定義
+  const WORKS = {
+    COLOR: { no:'01', title:'COLOR / 色', look:'artColor', col:'#d14f78', gloss:0.76 },
+    SURFACE: { no:'02', title:'SURFACE / 表面', look:'artSurface', col:'#c18d3f', gloss:1.0 },
+    SCULPT: { no:'03', title:'SCULPT / FORMWORK', look:'artSculpt', col:'#e8ddd0', gloss:0.42 },
+    LIGHT: { no:'04', title:'LIGHT / 光', look:'artLight', col:'#447c86', gloss:1.0 },
+    HAND: { no:'05', title:'HAND / 手の記憶', look:'artHand', col:'#b89c91', gloss:0.30 },
+    TRACE: { no:'06', title:'TRACE / 痕跡', look:'artTrace', col:'#313236', gloss:0.12 },
+    SPACE: { no:'07', title:'SPACE / 宇宙と手', look:'artSpace', col:'#0d1934', gloss:0.96 },
+    THINKING: { no:'08', title:'THINKING / 思惟する手', look:'artThinking', col:'#d7c5bf', gloss:0.24 },
+    ORB: { no:'09', title:'WHITE ORB', look:'artOrb', col:'#c52d35', gloss:1.0 },
+    FRAME: { no:'10', title:'FRAME / 輪舞曲', look:'artFrame', col:'#e2b9b2', gloss:0.82 }
+  };
+
+  let currentWork = 'COLOR';
+  let activeFingerIdx = 0;
+  let baseImage = null;
+  let handLandmarks = null;
+  let splitRatio = 0.50;
+  let isDraggingSplit = false;
+
+  const engine = new PrecisionNailEngine();
+  const canvas = document.getElementById('viewCanvas');
+  const ctx = canvas.getContext('2d');
+  const splitSlider = document.getElementById('splitSlider');
+
+  // MediaPipe Handsの初期化
+  let handsModel = null;
+  function initMediaPipe(){
+    if(typeof Hands === 'undefined') return;
+    handsModel = new Hands({
+      locateFile: function(file) {
+        return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/' + file;
+      }
+    });
+    handsModel.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+    handsModel.onResults(function(res) {
+      if(res.multiHandLandmarks && res.multiHandLandmarks.length > 0){
+        handLandmarks = res.multiHandLandmarks[0];
+        render();
+      }
+    });
+  }
+
+  // デフォルトのサンプル手の画像を生成
+  function createDefaultHandImage(){
+    const cv = document.createElement('canvas');
+    cv.width = 1000; cv.height = 1200;
+    const c = cv.getContext('2d');
+    
+    // エレガントなスタジオ背景
+    const bgGrad = c.createRadialGradient(500, 600, 100, 500, 600, 700);
+    bgGrad.addColorStop(0, '#1c1a20');
+    bgGrad.addColorStop(1, '#0c0b0e');
+    c.fillStyle = bgGrad; c.fillRect(0,0,1000,1200);
+
+    // 美しい手のシルエット＆肌色
+    c.save();
+    c.translate(500, 650);
+    c.fillStyle = '#e8cbbd';
+    c.shadowColor = 'rgba(0,0,0,0.5)';
+    c.shadowBlur = 40;
+
+    // 手のひら
+    c.beginPath();
+    c.ellipse(0, 80, 140, 180, 0, 0, Math.PI*2);
+    c.fill();
+
+    // 5本の指
+    const fingers = [
+      { x: -140, y: 30,  w: 36, h: 180, rot: -0.55 },
+      { x: -75,  y: -120, w: 32, h: 220, rot: -0.15 },
+      { x: 0,    y: -160, w: 33, h: 250, rot: 0.00 },
+      { x: 75,   y: -130, w: 31, h: 230, rot: 0.12 },
+      { x: 140,  y: -50,  w: 27, h: 180, rot: 0.35 }
+    ];
+
+    fingers.forEach(function(f) {
+      c.save();
+      c.translate(f.x, f.y);
+      c.rotate(f.rot);
+      c.beginPath();
+      c.roundRect(-f.w/2, -f.h, f.w, f.h, [f.w/2, f.w/2, 10, 10]);
+      c.fill();
+
+      // 自爪のすっぴんピンクベージュ
+      c.fillStyle = 'rgba(235, 175, 175, 0.75)';
+      c.beginPath();
+      c.roundRect(-f.w*0.42, -f.h + 8, f.w*0.84, f.h*0.35, [f.w*0.4, f.w*0.4, 6, 6]);
+      c.fill();
+      c.restore();
+    });
+
+    c.restore();
+    const img = new Image();
+    img.src = cv.toDataURL();
+    img.onload = function() {
+      baseImage = img;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      if(handsModel) handsModel.send({image: img});
+      render();
+    };
+  }
+
+  // レンダリング関数
+  function render(){
+    if(!baseImage) return;
+    canvas.width = baseImage.width;
+    canvas.height = baseImage.height;
+
+    // 1. 下地：撮影写真そのもの（すっぴん）
+    ctx.drawImage(baseImage, 0, 0);
+
+    // 2. 自爪フィッティングが有効な場合、ネイルアートを精密密着描画
+    if(handLandmarks){
+      const fittedNails = engine.fitNailsFromLandmarks(handLandmarks, canvas.width, canvas.height);
+      const splitX = canvas.width * splitRatio;
+      const work = WORKS[currentWork];
+
+      fittedNails.forEach(function(nail, fi) {
+        ctx.save();
+
+        // ビフォー/アフター比較クリップ（スプリットバーより右側だけネイルを描く）
+        ctx.beginPath();
+        ctx.rect(splitX, 0, canvas.width - splitX, canvas.height);
+        ctx.clip();
+
+        ctx.translate(nail.root.x, nail.root.y);
+        ctx.rotate(nail.angle + Math.PI/2);
+
+        // A. 自爪輪郭に完璧に沿わせたクリッピング
+        engine.drawCuticleContour(ctx, nail);
+        ctx.clip();
+
+        // B. 高精細アートのレンダリング
+        ctx.save();
+        paintByKey(ctx, work.look, nail.width, nail.height, work.col, fi + 10);
+        paintGelTip(ctx, nail.width, nail.height, fi + 10, work.gloss, work.look);
+        ctx.restore();
+
+        // C. キューティクル・スキンブレンド
+        const blendAlpha = parseFloat(document.getElementById('sliderBlend').value) / 100;
+        ctx.globalAlpha = blendAlpha;
+        engine.applyCuticleSkinBlend(ctx, nail);
+        ctx.globalAlpha = 1.0;
+
+        // D. トップジェルの立体ドーム光沢
+        const dome = ctx.createRadialGradient(0, -nail.height*0.06, nail.width*0.1, 0, -nail.height*0.06, nail.width*0.55);
+        dome.addColorStop(0, 'rgba(255,255,255,0.09)');
+        dome.addColorStop(0.65, 'rgba(0,0,0,0)');
+        dome.addColorStop(1, 'rgba(20,10,8,0.28)');
+        ctx.fillStyle = dome;
+        ctx.fillRect(-nail.width*0.6, -nail.height*0.65, nail.width*1.2, nail.height*1.3);
+
+        ctx.restore();
+      });
+    }
+  }
+
+  // 作品カルーセルの構築
+  function buildArtworkRow(){
+    const box = document.getElementById('artworksRow');
+    box.innerHTML = '';
+    Object.entries(WORKS).forEach(function(entry) {
+      const key = entry[0], w = entry[1];
+      const card = document.createElement('div');
+      card.className = 'art-card' + (key === currentWork ? ' active' : '');
+      const cv = document.createElement('canvas');
+      cv.width = 88; cv.height = 148;
+      const c = cv.getContext('2d');
+      c.translate(44, 74);
+      paintPhotographicSpecimen(c, 44, 88, w.look, w.col, 15, w.gloss);
+
+      const span = document.createElement('span');
+      span.textContent = w.title.split(' / ')[0];
+      card.append(cv, span);
+      card.onclick = function() {
+        box.querySelectorAll('.art-card').forEach(function(x) { x.classList.remove('active'); });
+        card.classList.add('active');
+        currentWork = key;
+        document.getElementById('activeWorkTitle').textContent = w.no + ' ' + w.title;
+        document.getElementById('sliderGloss').value = Math.round(w.gloss * 100);
+        document.getElementById('valGloss').textContent = Math.round(w.gloss * 100) + ' %';
+        render();
+      };
+      box.appendChild(card);
+    });
+  }
+
+  // スライダー・コントロールのイベント接続
+  function setupControls(){
+    const sCuticle = document.getElementById('sliderCuticle');
+    const sWidth = document.getElementById('sliderWidth');
+    const sLength = document.getElementById('sliderLength');
+    const sBlend = document.getElementById('sliderBlend');
+    const sGloss = document.getElementById('sliderGloss');
+
+    sCuticle.oninput = function() {
+      const v = parseFloat(sCuticle.value);
+      engine.calibration.cuticleOffset = (v / 100) * 0.12;
+      document.getElementById('valCuticle').textContent = ((v - 100) * 0.02).toFixed(1) + ' mm';
+      render();
+    };
+
+    sWidth.oninput = function() {
+      const v = parseFloat(sWidth.value);
+      engine.calibration.widthScale = v / 100;
+      document.getElementById('valWidth').textContent = v + ' %';
+      render();
+    };
+
+    sLength.oninput = function() {
+      const v = parseFloat(sLength.value);
+      engine.calibration.lengthScale = v / 100;
+      document.getElementById('valLength').textContent = v + ' %';
+      render();
+    };
+
+    sBlend.oninput = function() {
+      document.getElementById('valBlend').textContent = sBlend.value + ' %';
+      render();
+    };
+
+    sGloss.oninput = function() {
+      WORKS[currentWork].gloss = parseFloat(sGloss.value) / 100;
+      document.getElementById('valGloss').textContent = sGloss.value + ' %';
+      render();
+    };
+
+    // 指ごとの微調整タブ
+    const tabs = document.querySelectorAll('.finger-tab');
+    tabs.forEach(function(tab) {
+      tab.onclick = function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        activeFingerIdx = parseInt(tab.dataset.fi, 10);
+        syncFingerSliders();
+      };
+    });
+
+    const sShiftY = document.getElementById('sliderShiftY');
+    const sShiftX = document.getElementById('sliderShiftX');
+    const sFingerW = document.getElementById('sliderFingerW');
+    const sFingerL = document.getElementById('sliderFingerL');
+
+    function syncFingerSliders(){
+      const f = engine.calibration.perFinger[activeFingerIdx];
+      sShiftY.value = f.shiftY;
+      sShiftX.value = f.shiftX;
+      sFingerW.value = Math.round(f.scaleW * 100);
+      sFingerL.value = Math.round(f.scaleL * 100);
+      document.getElementById('valShiftY').textContent = f.shiftY + ' px';
+      document.getElementById('valShiftX').textContent = f.shiftX + ' px';
+      document.getElementById('valFingerW').textContent = Math.round(f.scaleW * 100) + ' %';
+      document.getElementById('valFingerL').textContent = Math.round(f.scaleL * 100) + ' %';
+    }
+
+    sShiftY.oninput = function() {
+      engine.calibration.perFinger[activeFingerIdx].shiftY = parseFloat(sShiftY.value);
+      document.getElementById('valShiftY').textContent = sShiftY.value + ' px';
+      render();
+    };
+    sShiftX.oninput = function() {
+      engine.calibration.perFinger[activeFingerIdx].shiftX = parseFloat(sShiftX.value);
+      document.getElementById('valShiftX').textContent = sShiftX.value + ' px';
+      render();
+    };
+    sFingerW.oninput = function() {
+      engine.calibration.perFinger[activeFingerIdx].scaleW = parseFloat(sFingerW.value) / 100;
+      document.getElementById('valFingerW').textContent = sFingerW.value + ' %';
+      render();
+    };
+    sFingerL.oninput = function() {
+      engine.calibration.perFinger[activeFingerIdx].scaleL = parseFloat(sFingerL.value) / 100;
+      document.getElementById('valFingerL').textContent = sFingerL.value + ' %';
+      render();
+    };
+
+    // 写真アップロード
+    document.getElementById('uploadInput').onchange = function(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          baseImage = img;
+          canvas.width = img.width;
+          canvas.height = img.height;
+          if(handsModel) handsModel.send({image: img});
+          render();
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // 保存ボタン
+    document.getElementById('saveBtn').onclick = function() {
+      const a = document.createElement('a');
+      a.download = 'tsuya-precision-' + currentWork + '.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+
+    // スプリットバーのドラッグ
+    const viewport = document.getElementById('viewport');
+    function updateSplit(clientX){
+      const rect = viewport.getBoundingClientRect();
+      const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+      splitRatio = x / rect.width;
+      splitSlider.style.left = (splitRatio * 100) + '%';
+      render();
+    }
+    splitSlider.onmousedown = function() { isDraggingSplit = true; };
+    window.onmousemove = function(e) { if(isDraggingSplit) updateSplit(e.clientX); };
+    window.onmouseup = function() { isDraggingSplit = false; };
+    splitSlider.ontouchstart = function() { isDraggingSplit = true; };
+    window.ontouchmove = function(e) { if(isDraggingSplit) updateSplit(e.touches[0].clientX); };
+    window.ontouchend = function() { isDraggingSplit = false; };
+
+    // カメラ撮影モーダル
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraVideo');
+    let cameraStream = null;
+
+    document.getElementById('cameraBtn').onclick = async function() {
+      modal.style.display = 'flex';
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        video.srcObject = cameraStream;
+      } catch(err) {
+        alert('カメラを起動できませんでした: ' + err.message);
+        modal.style.display = 'none';
+      }
+    };
+
+    document.getElementById('cancelSnapBtn').onclick = function() {
+      if(cameraStream) cameraStream.getTracks().forEach(function(t) { t.stop(); });
+      modal.style.display = 'none';
+    };
+
+    document.getElementById('takeSnapBtn').onclick = function() {
+      const cv = document.createElement('canvas');
+      cv.width = video.videoWidth || 1280;
+      cv.height = video.videoHeight || 720;
+      const c = cv.getContext('2d');
+      c.translate(cv.width, 0);
+      c.scale(-1, 1);
+      c.drawImage(video, 0, 0, cv.width, cv.height);
+
+      if(cameraStream) cameraStream.getTracks().forEach(function(t) { t.stop(); });
+      modal.style.display = 'none';
+
+      const img = new Image();
+      img.onload = function() {
+        baseImage = img;
+        canvas.width = img.width;
+        canvas.height = img.height;
+        if(handsModel) handsModel.send({image: img});
+        render();
+      };
+      img.src = cv.toDataURL();
+    };
+  }
+
+  // 初期起動
+  window.addEventListener('DOMContentLoaded', function() {
+    initMediaPipe();
+    buildArtworkRow();
+    setupControls();
+    createDefaultHandImage();
+  });
+})();
+</script>
+</body>
+</html>
