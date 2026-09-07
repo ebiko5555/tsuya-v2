@@ -1,0 +1,1075 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/uzp70g",
+    "id": "uzp70g",
+    "slide": 8,
+    "layoutId": "79e036a6-7017-4ffc-9ba4-104872efceaf",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "78982951-b6bb-4f18-a88f-024747f05ead",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F7F6F2",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Hiragino Sans"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "79e036a6-7017-4ffc-9ba4-104872efceaf",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "78982951-b6bb-4f18-a88f-024747f05ead",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "78982951-b6bb-4f18-a88f-024747f05ead",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ryh0jm9c",
+      "id": "1",
+      "bbox": [
+        54,
+        26,
+        600,
+        26
+      ],
+      "geometry": "rect",
+      "text": "THREE SOURCE SETS",
+      "textPreview": "THREE SOURCE SETS",
+      "resolvedFontSize": 13.67,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 14,
+        "typeface": "Hiragino Sans",
+        "color": "#B58A32",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.98,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "THREE SOURCE SETS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "THREE SOURCE SETS",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Hiragino Sans",
+            "color": "#B58A32",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "THREE SOURCE SETS",
+              "fontSize": 14,
+              "typeface": "Hiragino Sans",
+              "color": "#B58A32",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/szq1srax",
+      "id": "2",
+      "bbox": [
+        54,
+        56,
+        1160,
+        72
+      ],
+      "geometry": "rect",
+      "text": "同じ写真から、模様の配列が異なる3案を作る",
+      "textPreview": "同じ写真から、模様の配列が異なる3案を作る",
+      "resolvedFontSize": 38,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 38,
+        "typeface": "Hiragino Sans",
+        "color": "#171717",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "同じ写真から、模様の配列が異なる3案を作る"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "同じ写真から、模様の配列が異なる3案を作る",
+          "resolvedTextStyle": {
+            "fontSize": 38,
+            "typeface": "Hiragino Sans",
+            "color": "#171717",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "同じ写真から、模様の配列が異なる3案を作る",
+              "fontSize": 38,
+              "typeface": "Hiragino Sans",
+              "color": "#171717",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t0zilwri",
+      "id": "3",
+      "bbox": [
+        54,
+        124,
+        1172,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#C8C3B8",
+      "lineColor": "#C8C3B8",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1sju1s3",
+      "id": "4",
+      "bbox": [
+        1178,
+        675,
+        48,
+        20
+      ],
+      "geometry": "rect",
+      "text": "08",
+      "textPreview": "08",
+      "resolvedFontSize": 8.67,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 12,
+        "typeface": "Hiragino Sans",
+        "color": "#66635E",
+        "alignment": "right",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.72,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "08"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "08",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "typeface": "Hiragino Sans",
+            "color": "#66635E",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "08",
+              "fontSize": 12,
+              "typeface": "Hiragino Sans",
+              "color": "#66635E",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/f210n698",
+      "id": "5",
+      "bbox": [
+        54,
+        170,
+        360,
+        34
+      ],
+      "geometry": "rect",
+      "text": "01  流転",
+      "textPreview": "01  流転",
+      "resolvedFontSize": 20.33,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Hiragino Sans",
+        "color": "#C74872",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.85,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01  流転"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01  流転",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Hiragino Sans",
+            "color": "#C74872",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01  流転",
+              "fontSize": 24,
+              "typeface": "Hiragino Sans",
+              "color": "#C74872",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/g3a1wbat",
+      "id": "6",
+      "bbox": [
+        54,
+        224,
+        364,
+        196
+      ],
+      "geometry": "rect",
+      "fillColor": "#08090B",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/0jmtc3ud",
+      "id": "7",
+      "bbox": [
+        72,
+        252,
+        328,
+        128
+      ],
+      "alt": "流転の5本",
+      "contentType": "image/png",
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "577ae4cc-22a9-401e-922d-de925df1bcea",
+        "contentType": "image/png",
+        "byteLength": 38886
+      }
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25sjylsz",
+      "id": "8",
+      "bbox": [
+        54,
+        450,
+        364,
+        42
+      ],
+      "geometry": "rect",
+      "text": "形 → 線 → 形 → 光 → 単色",
+      "textPreview": "形 → 線 → 形 → 光 → 単色",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#171717",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "形 → 線 → 形 → 光 → 単色"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "形 → 線 → 形 → 光 → 単色",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#171717",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "形 → 線 → 形 → 光 → 単色",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#171717",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3610r69k",
+      "id": "9",
+      "bbox": [
+        54,
+        504,
+        364,
+        54
+      ],
+      "geometry": "rect",
+      "text": "形と線を主役にする",
+      "textPreview": "形と線を主役にする",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#66635E",
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "形と線を主役にする"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "形と線を主役にする",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#66635E",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "形と線を主役にする",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#66635E",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/36lcjipo",
+      "id": "10",
+      "bbox": [
+        458,
+        170,
+        360,
+        34
+      ],
+      "geometry": "rect",
+      "text": "02  景層",
+      "textPreview": "02  景層",
+      "resolvedFontSize": 20.33,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Hiragino Sans",
+        "color": "#B58A32",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.85,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02  景層"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02  景層",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Hiragino Sans",
+            "color": "#B58A32",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02  景層",
+              "fontSize": 24,
+              "typeface": "Hiragino Sans",
+              "color": "#B58A32",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25cvqx83",
+      "id": "11",
+      "bbox": [
+        458,
+        224,
+        364,
+        196
+      ],
+      "geometry": "rect",
+      "fillColor": "#08090B",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/axcj6hon",
+      "id": "12",
+      "bbox": [
+        476,
+        252,
+        328,
+        128
+      ],
+      "alt": "景層の5本",
+      "contentType": "image/png",
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "3fc87785-76fd-4285-8267-46cdbe1376cf",
+        "contentType": "image/png",
+        "byteLength": 31546
+      }
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/47udsnq9",
+      "id": "13",
+      "bbox": [
+        458,
+        450,
+        364,
+        42
+      ],
+      "geometry": "rect",
+      "text": "線 → 透け → 形 → 粒子 → 単色",
+      "textPreview": "線 → 透け → 形 → 粒子 → 単色",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#171717",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "線 → 透け → 形 → 粒子 → 単色"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "線 → 透け → 形 → 粒子 → 単色",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#171717",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "線 → 透け → 形 → 粒子 → 単色",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#171717",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/f2lcfips",
+      "id": "14",
+      "bbox": [
+        458,
+        504,
+        364,
+        54
+      ],
+      "geometry": "rect",
+      "text": "柄と静かな面を混ぜる",
+      "textPreview": "柄と静かな面を混ぜる",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#66635E",
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "柄と静かな面を混ぜる"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "柄と静かな面を混ぜる",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#66635E",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "柄と静かな面を混ぜる",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#66635E",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1svmd87",
+      "id": "15",
+      "bbox": [
+        862,
+        170,
+        360,
+        34
+      ],
+      "geometry": "rect",
+      "text": "03  残光",
+      "textPreview": "03  残光",
+      "resolvedFontSize": 20.33,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Hiragino Sans",
+        "color": "#B58A32",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.85,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "03  残光"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03  残光",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Hiragino Sans",
+            "color": "#B58A32",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03  残光",
+              "fontSize": 24,
+              "typeface": "Hiragino Sans",
+              "color": "#B58A32",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h43uhs7y",
+      "id": "16",
+      "bbox": [
+        862,
+        224,
+        364,
+        196
+      ],
+      "geometry": "rect",
+      "fillColor": "#08090B",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/nu10v25c",
+      "id": "17",
+      "bbox": [
+        880,
+        252,
+        328,
+        128
+      ],
+      "alt": "残光の5本",
+      "contentType": "image/png",
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "c1e1b55c-aa7d-4f9e-8334-ce6c704fd330",
+        "contentType": "image/png",
+        "byteLength": 42236
+      }
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zy5wrmpw",
+      "id": "18",
+      "bbox": [
+        862,
+        450,
+        364,
+        42
+      ],
+      "geometry": "rect",
+      "text": "形 → 細線 → 光 → パール → マット",
+      "textPreview": "形 → 細線 → 光 → パール → マット",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#171717",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "形 → 細線 → 光 → パール → マット"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "形 → 細線 → 光 → パール → マット",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#171717",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "形 → 細線 → 光 → パール → マット",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#171717",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/exwvyh8b",
+      "id": "19",
+      "bbox": [
+        862,
+        504,
+        364,
+        54
+      ],
+      "geometry": "rect",
+      "text": "質感差で光を強調する",
+      "textPreview": "質感差で光を強調する",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#66635E",
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "質感差で光を強調する"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "質感差で光を強調する",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#66635E",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "質感差で光を強調する",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#66635E",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/at0fqlsj",
+      "id": "20",
+      "bbox": [
+        100,
+        610,
+        1080,
+        38
+      ],
+      "geometry": "rect",
+      "text": "「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈",
+      "textPreview": "「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18,
+        "typeface": "Hiragino Sans",
+        "color": "#66635E",
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Hiragino Sans",
+            "color": "#66635E",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈",
+              "fontSize": 18,
+              "typeface": "Hiragino Sans",
+              "color": "#66635E",
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

@@ -1,0 +1,296 @@
+{"kind":"deck","id":"pr/31mj0h","name":"Deck"}
+{"kind":"layout","layoutId":"78982951-b6bb-4f18-a88f-024747f05ead","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"79e036a6-7017-4ffc-9ba4-104872efceaf","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/k1inyh","slide":1,"title":"艶 II / SOURCE","textShapes":7}
+{"kind":"textbox","id":"sh/c7atkjat","slide":1,"text":"艶 II / SOURCE","textPreview":"艶 II / SOURCE","textChars":13,"textLines":1,"bbox":[54,42,520,28]}
+{"kind":"textbox","id":"sh/b61sbe98","slide":1,"text":"写真から\n5本のネイルへ","textPreview":"写真から | 5本のネイルへ","textChars":12,"textLines":2,"bbox":[54,118,540,170]}
+{"kind":"textbox","id":"sh/q5sri9sn","slide":1,"text":"色・線・光を採集し、\n制御された偶然性で再構成する","textPreview":"色・線・光を採集し、 | 制御された偶然性で再構成する","textChars":25,"textLines":2,"bbox":[58,326,500,88]}
+{"kind":"textbox","id":"sh/lw3ah8ra","slide":1,"text":"修士制作　制作過程","textPreview":"修士制作　制作過程","textChars":9,"textLines":1,"bbox":[58,554,300,28]}
+{"kind":"textbox","id":"sh/0vuto3ap","slide":1,"text":"今福恵美子","textPreview":"今福恵美子","textChars":5,"textLines":1,"bbox":[58,590,300,30]}
+{"kind":"shape","id":"sh/y9cbmtsj","slide":1,"bbox":[684,478,516,132]}
+{"kind":"textbox","id":"sh/gfq9czal","slide":1,"text":"Vincent van Gogh, Sunflowers, 1888 / Public Domain","textPreview":"Vincent van Gogh, Sunflowers, 1888 / Public Domain","textChars":50,"textLines":1,"bbox":[658,636,568,24]}
+{"kind":"textbox","id":"sh/qd4budg7","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"image","id":"im/ixs36xgz","slide":1,"name":"","alt":"ゴッホ《ひまわり》","bbox":[658,42,568,486]}
+{"kind":"image","id":"im/cnulc7yh","slide":1,"name":"","alt":"ひまわりから生成した流転の5本","bbox":[708,494,468,84]}
+{"kind":"notes","id":"nt/k1inyh","slide":1,"text":"この発表では、写真をそのまま爪に貼るのではなく、色・線・形・光に分解し、5本のネイルとして再構成する制作過程を説明します。\n\n[Sources]\n- Vincent van Gogh, Sunflowers, 1888, Public Domain, Wikimedia Commons\n- ネイル画像: 艶II SOURCEのCanvas描画出力 / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/40kg87","slide":2,"title":"METHOD / CENTRAL IDEA","textShapes":15}
+{"kind":"textbox","id":"sh/vm9gzmt0","slide":2,"text":"METHOD / CENTRAL IDEA","textPreview":"METHOD / CENTRAL IDEA","textChars":21,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/wnihsral","slide":2,"text":"ランダムではなく、3つの要素を掛け合わせる","textPreview":"ランダムではなく、3つの要素を掛け合わせる","textChars":21,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/hory1wbq","slide":2,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/ipkzuhsb","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/jqtg3mtw","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[80,188,100,44]}
+{"kind":"textbox","id":"sh/4r2hwrah","slide":2,"text":"写真の特徴","textPreview":"写真の特徴","textChars":5,"textLines":1,"bbox":[80,244,300,46]}
+{"kind":"textbox","id":"sh/5cby5wb2","slide":2,"text":"色の量と鮮やかさ\n線・明暗差・光","textPreview":"色の量と鮮やかさ | 線・明暗差・光","textChars":16,"textLines":2,"bbox":[80,306,300,96]}
+{"kind":"textbox","id":"sh/ytgfixs7","slide":2,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[399,282,50,60]}
+{"kind":"textbox","id":"sh/zupgr2ts","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[460,188,100,44]}
+{"kind":"textbox","id":"sh/v2xgryxw","slide":2,"text":"今福の構成判断","textPreview":"今福の構成判断","textChars":7,"textLines":1,"bbox":[460,244,300,46]}
+{"kind":"textbox","id":"sh/a1ofidgb","slide":2,"text":"色を並べる順番\n5本の模様と強弱","textPreview":"色を並べる順番 | 5本の模様と強弱","textChars":16,"textLines":2,"bbox":[460,306,300,96]}
+{"kind":"textbox","id":"sh/x4fyt8f2","slide":2,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[779,282,50,60]}
+{"kind":"textbox","id":"sh/w36xk3yh","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[840,188,100,44]}
+{"kind":"textbox","id":"sh/nedgnyx0","slide":2,"text":"制御された乱数","textPreview":"制御された乱数","textChars":7,"textLines":1,"bbox":[840,244,300,46]}
+{"kind":"textbox","id":"sh/md4fetgf","slide":2,"text":"線や光の位置に\n自然な揺らぎを作る","textPreview":"線や光の位置に | 自然な揺らぎを作る","textChars":17,"textLines":2,"bbox":[840,306,300,96]}
+{"kind":"textbox","id":"sh/90fyp8f6","slide":2,"text":"写真の個性は残す。でも、5本のまとまりは偶然に任せない。","textPreview":"写真の個性は残す。でも、5本のまとまりは偶然に任せない。","textChars":28,"textLines":1,"bbox":[80,500,1090,64]}
+{"kind":"notes","id":"nt/40kg87","slide":2,"text":"プログラムはすべてを乱数で決めません。画像から変わる部分、5本の構成として固定する部分、細部だけを揺らす部分を分けています。\n\n[Sources]\n- 制作説明の正本: /Users/imafukuemiko/.codex/attachments/cd087418-b6c9-4d19-942e-3f5aace1da53/pasted-text.txt\n- 実装: /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/twod5k","slide":3,"title":"PROCESS / OVERVIEW","textShapes":16}
+{"kind":"textbox","id":"sh/cvadoz61","slide":3,"text":"PROCESS / OVERVIEW","textPreview":"PROCESS / OVERVIEW","textChars":18,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/ru1cfupw","slide":3,"text":"入力した写真を、4段階でネイルへ変換する","textPreview":"入力した写真を、4段階でネイルへ変換する","textChars":20,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/qtsvmpob","slide":3,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/psjudk7q","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"shape","id":"sh/4radkf65","slide":3,"bbox":[92,302,1072,3]}
+{"kind":"shape","id":"sh/3qhcbapk","slide":3,"bbox":[74,280,42,42]}
+{"kind":"textbox","id":"sh/2p8vipoz","slide":3,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[68,285,54,30]}
+{"kind":"textbox","id":"sh/9o3eponu","slide":3,"text":"色を8色選ぶ","textPreview":"色を8色選ぶ","textChars":6,"textLines":1,"bbox":[74,348,246,58]}
+{"kind":"textbox","id":"sh/onudwj69","slide":3,"text":"面積と彩度で\n色の順位を決める","textPreview":"面積と彩度で | 色の順位を決める","textChars":15,"textLines":2,"bbox":[74,418,246,86]}
+{"kind":"shape","id":"sh/ehcb2psn","slide":3,"bbox":[360,280,42,42]}
+{"kind":"textbox","id":"sh/filsbu98","slide":3,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[354,285,54,30]}
+{"kind":"textbox","id":"sh/0jut4zat","slide":3,"text":"特徴を0-1にする","textPreview":"特徴を0-1にする","textChars":9,"textLines":1,"bbox":[360,348,246,58]}
+{"kind":"textbox","id":"sh/14nud4re","slide":3,"text":"線・明暗差・光を\n比較できる数値にする","textPreview":"線・明暗差・光を | 比較できる数値にする","textChars":19,"textLines":2,"bbox":[360,418,246,86]}
+{"kind":"shape","id":"sh/6dcby5sb","slide":3,"bbox":[646,280,42,42]}
+{"kind":"textbox","id":"sh/rels7a9w","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[640,285,54,30]}
+{"kind":"textbox","id":"sh/sfut0fah","slide":3,"text":"色と5本を構成する","textPreview":"色と5本を構成する","textChars":9,"textLines":1,"bbox":[646,348,246,58]}
+{"kind":"textbox","id":"sh/tg3a9kr2","slide":3,"text":"色順と模様表に\n数値を入れる","textPreview":"色順と模様表に | 数値を入れる","textChars":14,"textLines":2,"bbox":[646,418,246,86]}
+{"kind":"shape","id":"sh/a9wba9sv","slide":3,"bbox":[932,280,42,42]}
+{"kind":"textbox","id":"sh/ba5cje9g","slide":3,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[926,285,54,30]}
+{"kind":"textbox","id":"sh/nixgf2lg","slide":3,"text":"線・形・光を描く","textPreview":"線・形・光を描く","textChars":8,"textLines":1,"bbox":[932,348,246,58]}
+{"kind":"textbox","id":"sh/mhozmx4v","slide":3,"text":"同じ入力なら\n同じ結果を再現できる","textPreview":"同じ入力なら | 同じ結果を再現できる","textChars":17,"textLines":2,"bbox":[932,418,246,86]}
+{"kind":"textbox","id":"sh/94fihc3m","slide":3,"text":"ここでは「生成」を、特徴の採集と再編成として扱う","textPreview":"ここでは「生成」を、特徴の採集と再編成として扱う","textChars":24,"textLines":1,"bbox":[74,568,1080,42]}
+{"kind":"notes","id":"nt/twod5k","slide":3,"text":"写真を小さくして全体の傾向を読み、色と特徴量を取り出し、5本の構成とCanvas描画に渡します。画像そのものを爪へ貼る処理ではありません。\n\n[Sources]\n- extractSourcePalette(), analyzeSource(), makeSourceSets() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/74ft54","slide":4,"title":"COLOR EXTRACTION","textShapes":11}
+{"kind":"textbox","id":"sh/25kvmdwj","slide":4,"text":"COLOR EXTRACTION","textPreview":"COLOR EXTRACTION","textChars":16,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/p8vuhsfu","slide":4,"text":"色は「写っている量」と「鮮やかさ」で選ぶ","textPreview":"色は「写っている量」と「鮮やかさ」で選ぶ","textChars":20,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/o72donep","slide":4,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/badcjix0","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/xwvelsf6","slide":4,"text":"色の得点","textPreview":"色の得点","textChars":4,"textLines":1,"bbox":[432,174,220,34]}
+{"kind":"textbox","id":"sh/cbmdsnel","slide":4,"text":"写真に含まれる量\n×\n（0.28 + 彩度 × 2.8）","textPreview":"写真に含まれる量 | × | （0.28 + 彩度 × 2.8）","textChars":28,"textLines":3,"bbox":[432,220,700,150]}
+{"kind":"shape","id":"sh/zydwn2xc","slide":4,"bbox":[446,396,674,2]}
+{"kind":"textbox","id":"sh/yx4vuxwr","slide":4,"text":"0.28","textPreview":"0.28","textChars":4,"textLines":1,"bbox":[446,422,180,42]}
+{"kind":"textbox","id":"sh/snepg3e1","slide":4,"text":"白・灰・茶色など\n低彩度色を0にしない","textPreview":"白・灰・茶色など | 低彩度色を0にしない","textChars":19,"textLines":2,"bbox":[446,470,250,74]}
+{"kind":"textbox","id":"sh/don698v6","slide":4,"text":"2.8","textPreview":"2.8","textChars":3,"textLines":1,"bbox":[780,422,180,42]}
+{"kind":"textbox","id":"sh/qlc7edwv","slide":4,"text":"面積が小さくても\n鮮やかな色を拾う","textPreview":"面積が小さくても | 鮮やかな色を拾う","textChars":17,"textLines":2,"bbox":[780,470,250,74]}
+{"kind":"shape","id":"sh/rm5o7idg","slide":4,"bbox":[432,582,76,34]}
+{"kind":"shape","id":"sh/0repknux","slide":4,"bbox":[524,582,76,34]}
+{"kind":"shape","id":"sh/1snqdsvi","slide":4,"bbox":[616,582,76,34]}
+{"kind":"shape","id":"sh/epw7idcr","slide":4,"bbox":[708,582,76,34]}
+{"kind":"shape","id":"sh/fq5obidc","slide":4,"bbox":[800,582,76,34]}
+{"kind":"shape","id":"sh/ovyponut","slide":4,"bbox":[892,582,76,34]}
+{"kind":"shape","id":"sh/pw7qhsve","slide":4,"bbox":[984,582,76,34]}
+{"kind":"shape","id":"sh/xc361sni","slide":4,"bbox":[1076,582,76,34]}
+{"kind":"textbox","id":"sh/wbupsnmd","slide":4,"text":"プログラムが選んだ8色","textPreview":"プログラムが選んだ8色","textChars":11,"textLines":1,"bbox":[432,626,720,26]}
+{"kind":"textbox","id":"sh/balozi5s","slide":4,"text":"Vincent van Gogh, Sunflowers, 1888 / Public Domain","textPreview":"Vincent van Gogh, Sunflowers, 1888 / Public Domain","textChars":50,"textLines":1,"bbox":[54,628,320,24]}
+{"kind":"image","id":"im/72pov29o","slide":4,"name":"","alt":"ゴッホ《ひまわり》","bbox":[54,164,320,388]}
+{"kind":"notes","id":"nt/74ft54","slide":4,"text":"得点は、多い色だけでなく、少量でも印象の強い色を拾うための設計値です。0.28と0にしないことで低彩度色を残し、2.8で鮮やかな差し色を強調します。\n\n[Sources]\n- Vincent van Gogh, Sunflowers, 1888, Public Domain, Wikimedia Commons\n- 色抽出式: extractSourcePalette() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/5gipw7","slide":5,"title":"PARAMETER STUDY","textShapes":13}
+{"kind":"textbox","id":"sh/ja5kjuhc","slide":5,"text":"PARAMETER STUDY","textPreview":"PARAMETER STUDY","textChars":15,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/kbelczyx","slide":5,"text":"数値を変えると、選ばれる色の性格が変わる","textPreview":"数値を変えると、選ばれる色の性格が変わる","textChars":20,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/lc72l4zi","slide":5,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/6dg3epg3","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/7epk7uho","slide":5,"text":"0.28 を大きく","textPreview":"0.28 を大きく","textChars":9,"textLines":1,"bbox":[64,176,340,38]}
+{"kind":"textbox","id":"sh/sfylgzy9","slide":5,"text":"無彩色・茶色・ベージュが残る","textPreview":"無彩色・茶色・ベージュが残る","textChars":14,"textLines":1,"bbox":[438,176,700,38]}
+{"kind":"textbox","id":"sh/tg7294zu","slide":5,"text":"落ち着く / 差し色が弱くなる","textPreview":"落ち着く / 差し色が弱くなる","textChars":15,"textLines":1,"bbox":[438,228,700,40]}
+{"kind":"shape","id":"sh/mhcj250z","slide":5,"bbox":[64,288,1096,1]}
+{"kind":"textbox","id":"sh/nilkbahk","slide":5,"text":"2.8 を大きく","textPreview":"2.8 を大きく","textChars":8,"textLines":1,"bbox":[64,321,340,38]}
+{"kind":"textbox","id":"sh/7mx0rmxw","slide":5,"text":"少量の赤や青が上位に入る","textPreview":"少量の赤や青が上位に入る","textChars":12,"textLines":1,"bbox":[438,321,700,38]}
+{"kind":"textbox","id":"sh/6l4zi1wb","slide":5,"text":"鮮やか / 元画像の面積比から離れる","textPreview":"鮮やか / 元画像の面積比から離れる","textChars":18,"textLines":1,"bbox":[438,373,700,40]}
+{"kind":"shape","id":"sh/tofitwf2","slide":5,"bbox":[64,433,1096,1]}
+{"kind":"textbox","id":"sh/8n61kreh","slide":5,"text":"RGB距離 48 を大きく","textPreview":"RGB距離 48 を大きく","textChars":13,"textLines":1,"bbox":[64,466,340,38]}
+{"kind":"textbox","id":"sh/jid0nmx0","slide":5,"text":"似た色を同時に選びにくくする","textPreview":"似た色を同時に選びにくくする","textChars":14,"textLines":1,"bbox":[438,466,700,38]}
+{"kind":"textbox","id":"sh/yx4zehwf","slide":5,"text":"色幅が出る / 微妙な色差は減る","textPreview":"色幅が出る / 微妙な色差は減る","textChars":16,"textLines":1,"bbox":[438,518,700,40]}
+{"kind":"shape","id":"sh/lkvipwf6","slide":5,"bbox":[64,578,1096,1]}
+{"kind":"shape","id":"sh/kjmhgrel","slide":5,"bbox":[64,606,1096,42]}
+{"kind":"textbox","id":"sh/but0j2xo","slide":5,"text":"0.28と2.8は唯一の正解ではなく、AI実装時に置かれた暫定値","textPreview":"0.28と2.8は唯一の正解ではなく、AI実装時に置かれた暫定値","textChars":32,"textLines":1,"bbox":[82,611,1058,30]}
+{"kind":"notes","id":"nt/5gipw7","slide":5,"text":"値を大きくすると常に良くなるのではなく、色の性格が変わります。0.28と2.8は今福が直接指定した数値でも、比較実験で最適と証明した数値でもありません。制作方針をコード化する際にAI実装支援が置いた暫定値です。\n\n[Sources]\n- extractSourcePalette() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html\n- 制作起点記録と数値の来歴: /Users/imafukuemiko/.codex/attachments/cd087418-b6c9-4d19-942e-3f5aace1da53/pasted-text.txt"}
+{"kind":"slide","id":"sl/qi0wrz","slide":6,"title":"FIVE-FINGER COMPOSITION","textShapes":16}
+{"kind":"textbox","id":"sh/vih4fqlw","slide":6,"text":"FIVE-FINGER COMPOSITION","textPreview":"FIVE-FINGER COMPOSITION","textChars":23,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/wjq5ov2h","slide":6,"text":"色の多様性と、5本の並びでバランスを作る","textPreview":"色の多様性と、5本の並びでバランスを作る","textChars":20,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/hkzmh03m","slide":6,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/i58nq5k7","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/j6hojals","slide":6,"text":"似すぎる色は、最初の選考で離す","textPreview":"似すぎる色は、最初の選考で離す","textChars":15,"textLines":1,"bbox":[66,170,520,38]}
+{"kind":"shape","id":"sh/47a5sf2d","slide":6,"bbox":[92,236,72,72]}
+{"kind":"textbox","id":"sh/58j6l03y","slide":6,"text":"色A","textPreview":"色A","textChars":2,"textLines":1,"bbox":[82,316,92,26]}
+{"kind":"shape","id":"sh/ypone1k3","slide":6,"bbox":[262,236,72,72]}
+{"kind":"textbox","id":"sh/zax476lo","slide":6,"text":"色B","textPreview":"色B","textChars":2,"textLines":1,"bbox":[252,316,92,26]}
+{"kind":"textbox","id":"sh/fmt43atg","slide":6,"text":"RGB距離 ≤ 48","textPreview":"RGB距離 ≤ 48","textChars":10,"textLines":1,"bbox":[356,246,220,42]}
+{"kind":"textbox","id":"sh/e1k3u5sv","slide":6,"text":"似た色ばかりを防ぐ\n※これだけで「美しさ」は判定しない","textPreview":"似た色ばかりを防ぐ | ※これだけで「美しさ」は判定しない","textChars":27,"textLines":2,"bbox":[92,350,470,82]}
+{"kind":"shape","id":"sh/1ovm5kbm","slide":6,"bbox":[620,168,1,420]}
+{"kind":"textbox","id":"sh/gnmlwfa1","slide":6,"text":"抽出順位は、そのまま並べない","textPreview":"抽出順位は、そのまま並べない","textChars":14,"textLines":1,"bbox":[680,170,500,38]}
+{"kind":"shape","id":"sh/ryt4zatk","slide":6,"bbox":[690,248,72,72]}
+{"kind":"textbox","id":"sh/6xk3q5sz","slide":6,"text":"1位","textPreview":"1位","textChars":2,"textLines":1,"bbox":[680,328,92,26]}
+{"kind":"shape","id":"sh/t0bm1kba","slide":6,"bbox":[766,284,20,2]}
+{"kind":"shape","id":"sh/sz2lsfap","slide":6,"bbox":[775,277,14,15]}
+{"kind":"shape","id":"sh/ju94vqt8","slide":6,"bbox":[786,248,72,72]}
+{"kind":"textbox","id":"sh/it03mlsn","slide":6,"text":"4位","textPreview":"4位","textChars":2,"textLines":1,"bbox":[776,328,92,26]}
+{"kind":"shape","id":"sh/mp0nelwv","slide":6,"bbox":[862,284,20,2]}
+{"kind":"shape","id":"sh/7q947qd0","slide":6,"bbox":[871,277,14,15]}
+{"kind":"shape","id":"sh/8ri5gvel","slide":6,"bbox":[882,248,72,72]}
+{"kind":"textbox","id":"sh/9srm90v6","slide":6,"text":"2位","textPreview":"2位","textChars":2,"textLines":1,"bbox":[872,328,92,26]}
+{"kind":"shape","id":"sh/ut0ni5wr","slide":6,"bbox":[958,284,20,2]}
+{"kind":"shape","id":"sh/vu94badc","slide":6,"bbox":[967,277,14,15]}
+{"kind":"shape","id":"sh/wv25kfex","slide":6,"bbox":[978,248,72,72]}
+{"kind":"textbox","id":"sh/hwb6d0vi","slide":6,"text":"5位","textPreview":"5位","textChars":2,"textLines":1,"bbox":[968,328,92,26]}
+{"kind":"shape","id":"sh/ixknm5wn","slide":6,"bbox":[1054,284,20,2]}
+{"kind":"shape","id":"sh/jytofad8","slide":6,"bbox":[1063,277,14,15]}
+{"kind":"shape","id":"sh/tsvq54fq","slide":6,"bbox":[1074,248,72,72]}
+{"kind":"textbox","id":"sh/srmpczy5","slide":6,"text":"3位","textPreview":"3位","textChars":2,"textLines":1,"bbox":[1064,328,92,26]}
+{"kind":"textbox","id":"sh/rqd83exk","slide":6,"text":"主色と差し色を交互に置く\nこの色順はプログラムに固定","textPreview":"主色と差し色を交互に置く | この色順はプログラムに固定","textChars":26,"textLines":2,"bbox":[690,392,470,74]}
+{"kind":"textbox","id":"sh/6p47a9gz","slide":6,"text":"バランス = 色の選別 + 並べる順番 + 模様の強弱","textPreview":"バランス = 色の選別 + 並べる順番 + 模様の強弱","textChars":27,"textLines":1,"bbox":[112,552,1050,48]}
+{"kind":"notes","id":"nt/qi0wrz","slide":6,"text":"RGB距離48は、似た色ばかりを防ぐフィルターです。その後、1・4・2・5・3位の順に並べることで、上位色が隣り続けるのを避けます。美的バランスは、距離計算一つではなく、後段の模様構成と合わせて作ります。\n\n[Sources]\n- 色距離と配列: extractSourcePalette(), makeSourceSets() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/btka72","slide":7,"title":"FEATURE ANALYSIS","textShapes":14}
+{"kind":"textbox","id":"sh/ne5wjadw","slide":7,"text":"FEATURE ANALYSIS","textPreview":"FEATURE ANALYSIS","textChars":16,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/ofexcfeh","slide":7,"text":"写真の線・明暗差・光を0から1の数値にする","textPreview":"写真の線・明暗差・光を0から1の数値にする","textChars":21,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/9gnel0v2","slide":7,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/ahwfe5wn","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/w3yxgfut","slide":7,"text":"実測値","textPreview":"実測値","textChars":3,"textLines":1,"bbox":[590,166,240,32]}
+{"kind":"textbox","id":"sh/x47epkvy","slide":7,"text":"LINE  線密度","textPreview":"LINE  線密度","textChars":9,"textLines":1,"bbox":[590,224,300,26]}
+{"kind":"shape","id":"sh/qlcv2lw3","slide":7,"bbox":[590,262,500,14]}
+{"kind":"shape","id":"sh/r6lwbqdo","slide":7,"bbox":[590,262,185,14]}
+{"kind":"textbox","id":"sh/raxcnmpc","slide":7,"text":"37","textPreview":"37","textChars":2,"textLines":1,"bbox":[1110,252,70,34]}
+{"kind":"textbox","id":"sh/69ovuh8r","slide":7,"text":"LIGHT  光","textPreview":"LIGHT  光","textChars":8,"textLines":1,"bbox":[590,312,300,26]}
+{"kind":"shape","id":"sh/tcfupw72","slide":7,"bbox":[590,350,500,14]}
+{"kind":"shape","id":"sh/sb6dwrqx","slide":7,"bbox":[590,350,20,14]}
+{"kind":"textbox","id":"sh/j6xcjm90","slide":7,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1110,340,70,34]}
+{"kind":"textbox","id":"sh/i54bqh8f","slide":7,"text":"CONTRAST  明暗差","textPreview":"CONTRAST  明暗差","textChars":13,"textLines":1,"bbox":[590,400,300,26]}
+{"kind":"shape","id":"sh/58fulw76","slide":7,"bbox":[590,438,500,14]}
+{"kind":"shape","id":"sh/k76tsrql","slide":7,"bbox":[590,438,245,14]}
+{"kind":"textbox","id":"sh/v2dcf294","slide":7,"text":"49","textPreview":"49","textChars":2,"textLines":1,"bbox":[1110,428,70,34]}
+{"kind":"textbox","id":"sh/a14bmx8j","slide":7,"text":"SATURATION  彩度","textPreview":"SATURATION  彩度","textChars":14,"textLines":1,"bbox":[590,488,300,26]}
+{"kind":"shape","id":"sh/ydkvyxsb","slide":7,"bbox":[590,526,500,14]}
+{"kind":"shape","id":"sh/zetw72tw","slide":7,"bbox":[590,526,500,14]}
+{"kind":"textbox","id":"sh/0zmd07ah","slide":7,"text":"100","textPreview":"100","textChars":3,"textLines":1,"bbox":[1110,516,70,34]}
+{"kind":"textbox","id":"sh/l0ve9cb2","slide":7,"text":"数値は「写真が何を表すか」ではなく、\n画面上の視覚的特徴を測っている","textPreview":"数値は「写真が何を表すか」ではなく、 | 画面上の視覚的特徴を測っている","textChars":34,"textLines":2,"bbox":[590,592,590,54]}
+{"kind":"textbox","id":"sh/m14v2hsn","slide":7,"text":"写真: Mathious Ier / CC0 / Wikimedia Commons","textPreview":"写真: Mathious Ier / CC0 / Wikimedia Commons","textChars":42,"textLines":1,"bbox":[54,546,480,22]}
+{"kind":"image","id":"im/6twrqd4n","slide":7,"name":"","alt":"Ferrari F8 Tributo","bbox":[54,164,480,360]}
+{"kind":"notes","id":"nt/btka72","slide":7,"text":"プログラムは「フェラーリ」という意味を理解しているのではなく、画素の明るさの差、鮮やかさ、明るい面積を測っています。\n\n[Sources]\n- Photo: Mathious Ier, Ferrari F8 Tributo, CC0, Wikimedia Commons\n- 数値化: analyzeSource() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/uzp70g","slide":8,"title":"THREE SOURCE SETS","textShapes":13}
+{"kind":"textbox","id":"sh/ryh0jm9c","slide":8,"text":"THREE SOURCE SETS","textPreview":"THREE SOURCE SETS","textChars":17,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/szq1srax","slide":8,"text":"同じ写真から、模様の配列が異なる3案を作る","textPreview":"同じ写真から、模様の配列が異なる3案を作る","textChars":21,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/t0zilwri","slide":8,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/e1sju1s3","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/f210n698","slide":8,"text":"01  流転","textPreview":"01  流転","textChars":6,"textLines":1,"bbox":[54,170,360,34]}
+{"kind":"shape","id":"sh/g3a1wbat","slide":8,"bbox":[54,224,364,196]}
+{"kind":"textbox","id":"sh/25sjylsz","slide":8,"text":"形 → 線 → 形 → 光 → 単色","textPreview":"形 → 線 → 形 → 光 → 単色","textChars":18,"textLines":1,"bbox":[54,450,364,42]}
+{"kind":"textbox","id":"sh/3610r69k","slide":8,"text":"形と線を主役にする","textPreview":"形と線を主役にする","textChars":9,"textLines":1,"bbox":[54,504,364,54]}
+{"kind":"textbox","id":"sh/36lcjipo","slide":8,"text":"02  景層","textPreview":"02  景層","textChars":6,"textLines":1,"bbox":[458,170,360,34]}
+{"kind":"shape","id":"sh/25cvqx83","slide":8,"bbox":[458,224,364,196]}
+{"kind":"textbox","id":"sh/47udsnq9","slide":8,"text":"線 → 透け → 形 → 粒子 → 単色","textPreview":"線 → 透け → 形 → 粒子 → 単色","textChars":20,"textLines":1,"bbox":[458,450,364,42]}
+{"kind":"textbox","id":"sh/f2lcfips","slide":8,"text":"柄と静かな面を混ぜる","textPreview":"柄と静かな面を混ぜる","textChars":10,"textLines":1,"bbox":[458,504,364,54]}
+{"kind":"textbox","id":"sh/u1svmd87","slide":8,"text":"03  残光","textPreview":"03  残光","textChars":6,"textLines":1,"bbox":[862,170,360,34]}
+{"kind":"shape","id":"sh/h43uhs7y","slide":8,"bbox":[862,224,364,196]}
+{"kind":"textbox","id":"sh/zy5wrmpw","slide":8,"text":"形 → 細線 → 光 → パール → マット","textPreview":"形 → 細線 → 光 → パール → マット","textChars":22,"textLines":1,"bbox":[862,450,364,42]}
+{"kind":"textbox","id":"sh/exwvyh8b","slide":8,"text":"質感差で光を強調する","textPreview":"質感差で光を強調する","textChars":10,"textLines":1,"bbox":[862,504,364,54]}
+{"kind":"textbox","id":"sh/at0fqlsj","slide":8,"text":"「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈","textPreview":"「主役」や「余白」はコード上の名称ではなく、模様配列のデザイン上の解釈","textChars":35,"textLines":1,"bbox":[100,610,1080,38]}
+{"kind":"image","id":"im/0jmtc3ud","slide":8,"name":"","alt":"流転の5本","bbox":[72,252,328,128]}
+{"kind":"image","id":"im/axcj6hon","slide":8,"name":"","alt":"景層の5本","bbox":[476,252,328,128]}
+{"kind":"image","id":"im/nu10v25c","slide":8,"name":"","alt":"残光の5本","bbox":[880,252,328,128]}
+{"kind":"notes","id":"nt/uzp70g","slide":8,"text":"画像分析が決めるのは色と模様量です。どの指に形、線、光、単色を置くかは、予めプログラムに指定した構成表です。\n\n[Sources]\n- sourceRecipes('MIX'), makeSourceSets() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html\n- 各ネイル画像: 艶II SOURCEのCanvas描画出力"}
+{"kind":"slide","id":"sl/vw05pt","slide":9,"title":"SEEDED VARIATION","textShapes":16}
+{"kind":"textbox","id":"sh/y9wz6xs3","slide":9,"text":"SEEDED VARIATION","textPreview":"SEEDED VARIATION","textChars":16,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/lcni1cru","slide":9,"text":"同じ画像から、同じ3案を出せるようにする","textPreview":"同じ画像から、同じ3案を出せるようにする","textChars":20,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/0be187a9","slide":9,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/b6l0v29s","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/q5cz2xs7","slide":9,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[72,170,66,38]}
+{"kind":"textbox","id":"sh/d8nixsri","slide":9,"text":"画像の色を順番に読む","textPreview":"画像の色を順番に読む","textChars":10,"textLines":1,"bbox":[154,170,390,38]}
+{"kind":"textbox","id":"sh/c7uh4nax","slide":9,"text":"各画素の色と透明度を、小さな数へまとめる","textPreview":"各画素の色と透明度を、小さな数へまとめる","textChars":20,"textLines":1,"bbox":[566,170,620,44]}
+{"kind":"shape","id":"sh/v2p07m9w","slide":9,"bbox":[72,242,1114,1]}
+{"kind":"textbox","id":"sh/a1gjehsb","slide":9,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[72,272,66,38]}
+{"kind":"textbox","id":"sh/wbil4f2h","slide":9,"text":"画像ごとの番号を作る","textPreview":"画像ごとの番号を作る","textChars":10,"textLines":1,"bbox":[154,272,390,38]}
+{"kind":"textbox","id":"sh/xcr2xkj2","slide":9,"text":"画像全体から、一つの整数を計算する","textPreview":"画像全体から、一つの整数を計算する","textChars":17,"textLines":1,"bbox":[566,272,620,44]}
+{"kind":"shape","id":"sh/apg325kb","slide":9,"bbox":[72,344,1114,1]}
+{"kind":"textbox","id":"sh/vapkva1w","slide":9,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[72,374,66,38]}
+{"kind":"textbox","id":"sh/onyl0f25","slide":9,"text":"番号から小さな変化を作る","textPreview":"番号から小さな変化を作る","textChars":12,"textLines":1,"bbox":[154,374,390,38]}
+{"kind":"textbox","id":"sh/9o72tkjq","slide":9,"text":"0から1までの数を、決まった順番で取り出す","textPreview":"0から1までの数を、決まった順番で取り出す","textChars":21,"textLines":1,"bbox":[566,374,620,44]}
+{"kind":"shape","id":"sh/mlgjy5kf","slide":9,"bbox":[72,446,1114,1]}
+{"kind":"textbox","id":"sh/nmpkra1k","slide":9,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[72,476,66,38]}
+{"kind":"textbox","id":"sh/0je1wv29","slide":9,"text":"決めた範囲の中だけを変える","textPreview":"決めた範囲の中だけを変える","textChars":13,"textLines":1,"bbox":[154,476,390,38]}
+{"kind":"textbox","id":"sh/1k72p0ju","slide":9,"text":"低彩度色と鮮やかな色の強め方を少し動かす","textPreview":"低彩度色と鮮やかな色の強め方を少し動かす","textChars":20,"textLines":1,"bbox":[566,476,620,44]}
+{"kind":"shape","id":"sh/h4fads76","slide":9,"bbox":[72,588,1114,54]}
+{"kind":"textbox","id":"sh/g3694nql","slide":9,"text":"同じ画像 → 同じ番号 → 同じ変化　／　別の画像 → 別の番号 → 少し違う変化","textPreview":"同じ画像 → 同じ番号 → 同じ変化　／　別の画像 → 別の番号 → 少し違う変化","textChars":41,"textLines":1,"bbox":[96,598,1066,34]}
+{"kind":"notes","id":"nt/vw05pt","slide":9,"text":"ここでいうシードは、画像から計算する一つの整数です。その整数から0から1までの数を順番に作ります。同じ画像なら整数も数の順番も同じになるため、ページを開き直しても同じ3案を再現できます。\n\n[Sources]\n- sourceSeedFromPixels(), sourcePaletteTunings() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/t4xxuu","slide":10,"title":"VARIATION LIMITS","textShapes":22}
+{"kind":"textbox","id":"sh/gzu9cjut","slide":10,"text":"VARIATION LIMITS","textPreview":"VARIATION LIMITS","textChars":16,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/vels3ed8","slide":10,"text":"変える範囲を先に決め、色選びだけを少し動かす","textPreview":"変える範囲を先に決め、色選びだけを少し動かす","textChars":22,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/udcra9cn","slide":10,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/54na9ova","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/43e9g3u5","slide":10,"text":"案","textPreview":"案","textChars":1,"textLines":1,"bbox":[72,168,140,30]}
+{"kind":"textbox","id":"sh/325s7ydk","slide":10,"text":"低彩度色を残す量","textPreview":"低彩度色を残す量","textChars":8,"textLines":1,"bbox":[220,168,250,30]}
+{"kind":"textbox","id":"sh/i1wretcz","slide":10,"text":"鮮やかな色を強める量","textPreview":"鮮やかな色を強める量","textChars":10,"textLines":1,"bbox":[492,168,300,30]}
+{"kind":"textbox","id":"sh/l8jqx4v6","slide":10,"text":"役割","textPreview":"役割","textChars":2,"textLines":1,"bbox":[822,168,340,30]}
+{"kind":"textbox","id":"sh/k7a94zul","slide":10,"text":"流転","textPreview":"流転","textChars":2,"textLines":1,"bbox":[72,220,130,38]}
+{"kind":"textbox","id":"sh/mx4betsr","slide":10,"text":"0.25〜0.31","textPreview":"0.25〜0.31","textChars":9,"textLines":1,"bbox":[220,220,220,38]}
+{"kind":"textbox","id":"sh/nyds7y9w","slide":10,"text":"2.75〜3.15","textPreview":"2.75〜3.15","textChars":9,"textLines":1,"bbox":[492,220,260,38]}
+{"kind":"textbox","id":"sh/ozmtg3ah","slide":10,"text":"形と線を強く見せる","textPreview":"形と線を強く見せる","textChars":9,"textLines":1,"bbox":[822,220,350,44]}
+{"kind":"shape","id":"sh/90va9or2","slide":10,"bbox":[72,288,1098,1]}
+{"kind":"textbox","id":"sh/a14bitsn","slide":10,"text":"景層","textPreview":"景層","textChars":2,"textLines":1,"bbox":[72,322,130,38]}
+{"kind":"textbox","id":"sh/b2dsby98","slide":10,"text":"0.30〜0.36","textPreview":"0.30〜0.36","textChars":9,"textLines":1,"bbox":[220,322,220,38]}
+{"kind":"textbox","id":"sh/w36tk3at","slide":10,"text":"2.20〜2.65","textPreview":"2.20〜2.65","textChars":9,"textLines":1,"bbox":[492,322,260,38]}
+{"kind":"textbox","id":"sh/x4fad8re","slide":10,"text":"低彩度色も残して層を作る","textPreview":"低彩度色も残して層を作る","textChars":12,"textLines":1,"bbox":[822,322,350,44]}
+{"kind":"shape","id":"sh/y5obmdsj","slide":10,"bbox":[72,390,1098,1]}
+{"kind":"textbox","id":"sh/j6xsfi94","slide":10,"text":"残光","textPreview":"残光","textChars":2,"textLines":1,"bbox":[72,424,130,38]}
+{"kind":"textbox","id":"sh/vahs3ipc","slide":10,"text":"0.22〜0.28","textPreview":"0.22〜0.28","textChars":9,"textLines":1,"bbox":[220,424,220,38]}
+{"kind":"textbox","id":"sh/u9orador","slide":10,"text":"3.05〜3.45","textPreview":"3.05〜3.45","textChars":9,"textLines":1,"bbox":[492,424,260,38]}
+{"kind":"textbox","id":"sh/hwza5s7i","slide":10,"text":"小さな鮮やかな色を拾う","textPreview":"小さな鮮やかな色を拾う","textChars":11,"textLines":1,"bbox":[822,424,350,44]}
+{"kind":"shape","id":"sh/gvq9cn6x","slide":10,"bbox":[72,492,1098,1]}
+{"kind":"textbox","id":"sh/76xszypg","slide":10,"text":"変えないもの","textPreview":"変えないもの","textChars":6,"textLines":1,"bbox":[72,550,190,34]}
+{"kind":"textbox","id":"sh/65or6t8v","slide":10,"text":"5本の模様の順番　／　爪の形と長さ　／　線・形・光の描き方　／　手の追跡","textPreview":"5本の模様の順番　／　爪の形と長さ　／　線・形・光の描き方　／　手の追跡","textChars":36,"textLines":1,"bbox":[276,548,894,42]}
+{"kind":"textbox","id":"sh/t8fa1876","slide":10,"text":"数値は自由に動かさず、案ごとの上限と下限の中だけで変える","textPreview":"数値は自由に動かさず、案ごとの上限と下限の中だけで変える","textChars":28,"textLines":1,"bbox":[72,612,1098,34]}
+{"kind":"notes","id":"nt/t4xxuu","slide":10,"text":"今回の試作では、色の得点式にある二つの数値だけを画像ごとに変えます。流転、景層、残光には別々の範囲を設定し、5本の構成や手の追跡は変えません。\n\n[Sources]\n- sourcePaletteTunings(), makeSourceSets() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/rcmq6d","slide":11,"title":"BALANCING RULES","textShapes":16}
+{"kind":"textbox","id":"sh/nelwvmt4","slide":11,"text":"BALANCING RULES","textPreview":"BALANCING RULES","textChars":15,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/ofuxorap","slide":11,"text":"バランスは、4つの制限を重ねて作る","textPreview":"バランスは、4つの制限を重ねて作る","textChars":17,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/pgnexwba","slide":11,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/ahwfq1sv","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/bi5wz6tg","slide":11,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[64,176,70,38]}
+{"kind":"textbox","id":"sh/cjexsbal","slide":11,"text":"色の重複を減らす","textPreview":"色の重複を減らす","textChars":8,"textLines":1,"bbox":[144,176,450,38]}
+{"kind":"textbox","id":"sh/xkne1gb6","slide":11,"text":"似すぎる色の同時採用を抑える","textPreview":"似すぎる色の同時採用を抑える","textChars":14,"textLines":1,"bbox":[144,234,450,74]}
+{"kind":"shape","id":"sh/ylwfulsr","slide":11,"bbox":[64,330,512,1]}
+{"kind":"textbox","id":"sh/zm5w36tc","slide":11,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[650,176,70,38]}
+{"kind":"textbox","id":"sh/76d83ap4","slide":11,"text":"色順をずらす","textPreview":"色順をずらす","textChars":6,"textLines":1,"bbox":[730,176,450,38]}
+{"kind":"textbox","id":"sh/65k7a5oj","slide":11,"text":"上位色を連続させず 1・4・2・5・3 で並べる","textPreview":"上位色を連続させず 1・4・2・5・3 で並べる","textChars":24,"textLines":1,"bbox":[730,234,450,74]}
+{"kind":"shape","id":"sh/t8vq5k7u","slide":11,"bbox":[650,330,512,1]}
+{"kind":"textbox","id":"sh/87mpcf6p","slide":11,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[64,384,70,38]}
+{"kind":"textbox","id":"sh/jitozqps","slide":11,"text":"模様の強弱を混ぜる","textPreview":"模様の強弱を混ぜる","textChars":9,"textLines":1,"bbox":[144,384,450,38]}
+{"kind":"textbox","id":"sh/yhk76lo7","slide":11,"text":"形・線・光の間に透け・単色・マットを置く","textPreview":"形・線・光の間に透け・単色・マットを置く","textChars":20,"textLines":1,"bbox":[144,442,450,74]}
+{"kind":"shape","id":"sh/l4b6107y","slide":11,"bbox":[64,538,512,1]}
+{"kind":"textbox","id":"sh/k32p8v6d","slide":11,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[650,384,70,38]}
+{"kind":"textbox","id":"sh/3ex8bupc","slide":11,"text":"数値の上限と下限","textPreview":"数値の上限と下限","textChars":8,"textLines":1,"bbox":[730,384,450,38]}
+{"kind":"textbox","id":"sh/id47ipor","slide":11,"text":"弱すぎるときも描き、多すぎるときは1で止める","textPreview":"弱すぎるときも描き、多すぎるときは1で止める","textChars":22,"textLines":1,"bbox":[730,442,450,74]}
+{"kind":"shape","id":"sh/et8bat8z","slide":11,"bbox":[650,538,512,1]}
+{"kind":"shape","id":"sh/fuhs3y9k","slide":11,"bbox":[64,606,1098,40]}
+{"kind":"textbox","id":"sh/0vqtc3q5","slide":11,"text":"プログラムは「美しい」を理解せず、まとまりやすい条件を実行する","textPreview":"プログラムは「美しい」を理解せず、まとまりやすい条件を実行する","textChars":31,"textLines":1,"bbox":[78,610,1070,28]}
+{"kind":"notes","id":"nt/rcmq6d","slide":11,"text":"一つの計算で美的バランスを出しているわけではありません。色の選別、並べ順、模様構成、強さの制限を順番に適用しています。\n\n[Sources]\n- extractSourcePalette(), sourceRecipes(), makeSourceSets() / /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html"}
+{"kind":"slide","id":"sl/zz9jqk","slide":12,"title":"AUTHOR EVALUATION","textShapes":19}
+{"kind":"textbox","id":"sh/7upgrilc","slide":12,"text":"AUTHOR EVALUATION","textPreview":"AUTHOR EVALUATION","textChars":17,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/8vyxknmx","slide":12,"text":"最後の「良さ」は、ネイリストと制作者の目で判断する","textPreview":"最後の「良さ」は、ネイリストと制作者の目で判断する","textChars":25,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/9w7yts3i","slide":12,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/ypwfed4v","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/kryxgnm1","slide":12,"text":"プログラムができること","textPreview":"プログラムができること","textChars":11,"textLines":1,"bbox":[64,404,470,34]}
+{"kind":"textbox","id":"sh/ls7yps36","slide":12,"text":"複数案を生成する\n同じ条件を再現する\n色・線・光の量を調整する","textPreview":"複数案を生成する | 同じ条件を再現する | 色・線・光の量を調整する","textChars":31,"textLines":3,"bbox":[64,452,500,112]}
+{"kind":"shape","id":"sh/a1wfat4j","slide":12,"bbox":[638,166,1,438]}
+{"kind":"textbox","id":"sh/b25gjyl4","slide":12,"text":"今福が見て決めること","textPreview":"今福が見て決めること","textChars":10,"textLines":1,"bbox":[696,178,460,34]}
+{"kind":"textbox","id":"sh/fe90b6hg","slide":12,"text":"統一感","textPreview":"統一感","textChars":3,"textLines":1,"bbox":[696,238,110,30]}
+{"kind":"textbox","id":"sh/ud0j21gv","slide":12,"text":"5本が一つのセットに見える","textPreview":"5本が一つのセットに見える","textChars":13,"textLines":1,"bbox":[818,238,360,40]}
+{"kind":"textbox","id":"sh/h0bidgzm","slide":12,"text":"変化","textPreview":"変化","textChars":2,"textLines":1,"bbox":[696,296,110,30]}
+{"kind":"textbox","id":"sh/gf214by1","slide":12,"text":"5本すべてが同じではない","textPreview":"5本すべてが同じではない","textChars":12,"textLines":1,"bbox":[818,296,360,40]}
+{"kind":"textbox","id":"sh/32t0f6hs","slide":12,"text":"強弱","textPreview":"強弱","textChars":2,"textLines":1,"bbox":[696,354,110,30]}
+{"kind":"textbox","id":"sh/21kj6lg7","slide":12,"text":"柄と静かな面の両方がある","textPreview":"柄と静かな面の両方がある","textChars":12,"textLines":1,"bbox":[818,354,360,40]}
+{"kind":"textbox","id":"sh/p4bihgzi","slide":12,"text":"装着性","textPreview":"装着性","textChars":3,"textLines":1,"bbox":[696,412,110,30]}
+{"kind":"textbox","id":"sh/43218byx","slide":12,"text":"実際の手とスマホ画面で読み取れる","textPreview":"実際の手とスマホ画面で読み取れる","textChars":16,"textLines":1,"bbox":[818,412,360,40]}
+{"kind":"textbox","id":"sh/j6p03mh8","slide":12,"text":"翻訳性","textPreview":"翻訳性","textChars":3,"textLines":1,"bbox":[696,470,110,30]}
+{"kind":"textbox","id":"sh/i5gzuh0n","slide":12,"text":"元画像の特徴がコピーでなく残る","textPreview":"元画像の特徴がコピーでなく残る","textChars":15,"textLines":1,"bbox":[818,470,360,40]}
+{"kind":"textbox","id":"sh/md8vy94n","slide":12,"text":"作品性","textPreview":"作品性","textChars":3,"textLines":1,"bbox":[696,528,110,30]}
+{"kind":"textbox","id":"sh/nehcre58","slide":12,"text":"通常のネイルと作品の間にある","textPreview":"通常のネイルと作品の間にある","textChars":14,"textLines":1,"bbox":[818,528,360,40]}
+{"kind":"textbox","id":"sh/8fqd0jmt","slide":12,"text":"良くない出力は採用せず、構成や見え方の修正を指示した","textPreview":"良くない出力は採用せず、構成や見え方の修正を指示した","textChars":26,"textLines":1,"bbox":[64,612,1098,32]}
+{"kind":"image","id":"im/mhgve1cb","slide":12,"name":"","alt":"フェラーリから生成した景層","bbox":[62,178,540,184]}
+{"kind":"notes","id":"nt/zz9jqk","slide":12,"text":"「ネイルとして良い」は自動的な点数ではありません。5本の統一感、強弱、実際の手に載せたときの見え方、元画像との関係を今福が比較し、採用・却下・修正を決めました。\n\n[Sources]\n- 制作対話と判断基準: /Users/imafukuemiko/.codex/attachments/cd087418-b6c9-4d19-942e-3f5aace1da53/pasted-text.txt\n- ネイル画像: 艶II SOURCEのCanvas描画出力"}
+{"kind":"slide","id":"sl/f9m3wb","slide":13,"title":"AUTHORSHIP / CONCLUSION","textShapes":8}
+{"kind":"textbox","id":"sh/a1wvel8f","slide":13,"text":"AUTHORSHIP / CONCLUSION","textPreview":"AUTHORSHIP / CONCLUSION","textChars":23,"textLines":1,"bbox":[54,26,600,26]}
+{"kind":"textbox","id":"sh/xo7u9076","slide":13,"text":"作者性は「全部を手作業したか」ではなく、判断と責任にある","textPreview":"作者性は「全部を手作業したか」ではなく、判断と責任にある","textChars":28,"textLines":1,"bbox":[54,56,1160,72]}
+{"kind":"shape","id":"sh/wnydgvql","slide":13,"bbox":[54,124,1172,1]}
+{"kind":"textbox","id":"sh/ny5c3qpo","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1178,675,48,20]}
+{"kind":"textbox","id":"sh/mxwval83","slide":13,"text":"今福恵美子","textPreview":"今福恵美子","textChars":5,"textLines":1,"bbox":[78,176,500,42]}
+{"kind":"textbox","id":"sh/90nu5g7u","slide":13,"text":"• 写真からネイルを作る発想\n• 色・線・光へ分解する方針\n• 5本を同じ柄にしない方針\n• 出力の比較、採用、却下、修正\n• 作品全体の体験と美的方向","textPreview":"• 写真からネイルを作る発想 | • 色・線・光へ分解する方針 | • 5本を同じ柄にしない方針 | • 出力の比較、採用、却下、修正 | • 作品全体の体験と美的方向","textChars":76,"textLines":5,"bbox":[78,238,500,210]}
+{"kind":"textbox","id":"sh/ozedcvq9","slide":13,"text":"生成AIによる実装支援","textPreview":"生成AIによる実装支援","textChars":11,"textLines":1,"bbox":[704,176,480,42]}
+{"kind":"textbox","id":"sh/7u9wfap8","slide":13,"text":"• 色抽出式のコード化\n• 特徴量の数値化\n• Canvasによる線・形・光の描画\n• バグ修正とスマートフォン向け実装\n• 説明と記録の整理","textPreview":"• 色抽出式のコード化 | • 特徴量の数値化 | • Canvasによる線・形・光の描画 | • バグ修正とスマートフォン向け実装 | • 説明と記録の整理","textChars":71,"textLines":5,"bbox":[704,238,480,210]}
+{"kind":"shape","id":"sh/6t0vm5on","slide":13,"bbox":[630,168,1,312]}
+{"kind":"shape","id":"sh/gvuxgrq9","slide":13,"bbox":[80,514,1104,112]}
+{"kind":"textbox","id":"sh/hg3y9w7u","slide":13,"text":"写真から特徴を採集し、\n制作者の判断で「装着できる作品」へ編集する","textPreview":"写真から特徴を採集し、 | 制作者の判断で「装着できる作品」へ編集する","textChars":33,"textLines":2,"bbox":[118,530,1028,76]}
+{"kind":"notes","id":"nt/f9m3wb","slide":13,"text":"作品の発想、方針、美的判断、最終責任は今福恵美子が担います。数式の具体化やコードの実装には生成AIの支援を利用しています。発表では、この分担を明示します。\n\n[Sources]\n- 今福恵美子の制作対話・採否判断\n- 実装支援: OpenAI Codex / ChatGPT\n- 京都芸術大学通信教育課程の生成AI利用ガイドラインに基づき、利用範囲と本人の確認を記録"}

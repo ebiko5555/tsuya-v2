@@ -1,0 +1,8 @@
+発表資料の出典メモ
+
+- 今福恵美子とCodexの制作対話: /Users/imafukuemiko/.codex/attachments/cd087418-b6c9-4d19-942e-3f5aace1da53/pasted-text.txt
+- 現行プログラム: /Volumes/blender/新Secondbrain/20_Projects/ネイルアプリ4部作/tsuya-v2-deploy/experience-prototype/index.html
+- Vincent van Gogh, Sunflowers, 1888, Public Domain, Wikimedia Commons
+- Ferrari F8 Tributo photograph, Mathious Ier, CC0, Wikimedia Commons
+- ネイル画像: 艶II SOURCEのCanvas描画出力
+- 生成AI利用の明示は、京都芸術大学通信教育課程の生成AI利用ガイドラインを前提に、構想・選択・編集・最終判断の主体は本人であること、実装支援にAIを使用したことを区別する。
