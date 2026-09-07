@@ -334,7 +334,6 @@
     <span>自爪精密密着試作</span>
   </div>
   <div class="header-actions">
-    <button class="btn" id="flipBtn" type="button">🔄 カメラ切替</button>
     <button class="btn btn-green" id="freezeBtn" type="button">📸 一時停止（スナップ固定）</button>
     <label class="btn" for="uploadInput">📁 写真読込</label>
     <input type="file" id="uploadInput" accept="image/*" style="display:none">
@@ -1399,8 +1398,8 @@ function paintPhotographicSpecimen(c, w, h, look, color, seed, gloss=0.96){
 
   let currentWork = 'COLOR';
   let activeFingerIdx = 0;
-  let facing = 'environment';
-  function mirrored(){ return facing === 'user'; }
+  const facing = 'environment';
+  function mirrored(){ return false; }
   let isFrozen = false;
   let frozenCanvas = null;
   let frozenLandmarks = null;
@@ -1416,7 +1415,6 @@ function paintPhotographicSpecimen(c, w, h, look, color, seed, gloss=0.96){
   const video = document.getElementById('webcamVideo');
   const statusText = document.getElementById('statusText');
   const statusDot = document.getElementById('statusDot');
-  const flipBtn = document.getElementById('flipBtn');
   const freezeBtn = document.getElementById('freezeBtn');
   const splitSlider = document.getElementById('splitSlider');
   const badgeBefore = document.getElementById('badgeBefore');
@@ -1748,11 +1746,6 @@ function paintPhotographicSpecimen(c, w, h, look, color, seed, gloss=0.96){
   }
 
   function setupControls(){
-    flipBtn.onclick = () => {
-      facing = (facing === 'environment' ? 'user' : 'environment');
-      statusText.textContent = (facing === 'environment' ? '外側カメラに切替中…' : '内側カメラに切替中…');
-      startCamera();
-    };
     freezeBtn.onclick = toggleFreeze;
     startBtn.onclick = startCamera;
 
