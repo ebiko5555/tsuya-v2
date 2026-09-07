@@ -1881,7 +1881,20 @@ function paintPhotographicSpecimen(c, w, h, look, color, seed, gloss=0.96){
     buildArtworkRow();
     setupControls();
     initMediaPipe();
-    startCamera();
+    if(navigator.permissions && navigator.permissions.query){
+      navigator.permissions.query({ name: 'camera' }).then(p => {
+        if(p.state === 'granted'){
+          startCamera();
+        } else {
+          startOverlay.style.display = 'flex';
+          statusText.textContent = '「カメラを開始する」を押してください';
+        }
+      }).catch(() => {
+        startOverlay.style.display = 'flex';
+      });
+    } else {
+      startOverlay.style.display = 'flex';
+    }
   }
 
   if(document.readyState === 'loading'){
