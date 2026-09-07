@@ -1,4 +1,4 @@
-import {BUILD_VERSION,ASSET_VERSION,floatingPose,createFloatWorld,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs?v=mobile88';
+import {ASSET_VERSION,MODEL_VISUAL_SCALE,floatingPose,createFloatWorld,MODEL_CONFIG,clamp,fitCamera,createGesture,advanceRotation,workURL} from './touch-core.mjs';
 const stage=document.getElementById('stage');
 const container=document.getElementById('canvas-container');
 const veil=document.getElementById('veil');
@@ -35,7 +35,7 @@ function placeLinks(){
     const pixels=height/(2*Math.tan(50*Math.PI/360)*(distance-z));
     item.link.style.setProperty('--x',`${width/2+x*pixels}px`);
     item.link.style.setProperty('--y',`${height/2-y*pixels}px`);
-    item.link.style.setProperty('--size',`${Math.max(44,item.size*1.35*pixels)}px`);
+    item.link.style.setProperty('--size',`${Math.max(64,item.size*1.35*MODEL_VISUAL_SCALE*pixels)}px`);
   }
 }
 function showTouch(x,y){
@@ -182,7 +182,7 @@ async function setup(){
           const center=box.getCenter(new THREE.Vector3());const size=box.getSize(new THREE.Vector3());
           // Center inside a scaled parent: translation and geometry receive the same scale.
           const centered=new THREE.Group();centered.add(gltf.scene);centered.position.copy(center).multiplyScalar(-1);
-          const normalized=new THREE.Group();normalized.add(centered);normalized.scale.setScalar(item.size/Math.max(size.x,size.y,size.z,1e-8));
+          const normalized=new THREE.Group();normalized.add(centered);normalized.scale.setScalar(MODEL_VISUAL_SCALE*item.size/Math.max(size.x,size.y,size.z,1e-8));
           item.visual=new THREE.Group();item.visual.userData.work=item.id;item.visual.add(normalized);item.pivot.add(item.visual);
           if(pickGLTF){
             const pickCenter=new THREE.Group();pickCenter.add(pickGLTF.scene);pickCenter.position.copy(center).multiplyScalar(-1);

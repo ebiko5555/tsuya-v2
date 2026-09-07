@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs';
-import {createGesture,advanceRotation,fitCamera,MODEL_RADII,createFloatWorld,MODEL_CONFIG,BUILD_VERSION,ASSET_VERSION,floatingPose,workURL} from '../touch-hands/touch-core.mjs';
+import {createGesture,advanceRotation,fitCamera,MODEL_RADII,MODEL_VISUAL_SCALE,createFloatWorld,MODEL_CONFIG,ASSET_VERSION,floatingPose,workURL} from '../touch-hands/touch-core.mjs';
 
 test('a small touch selects, but a drag returning to its origin never selects',()=>{
  const g=createGesture();g.start(1,50,50,0);g.move(1,53,52);assert.equal(g.end(1,53,52,120),true);
@@ -38,12 +38,12 @@ test('billiards have the same motion at 30, 60 and 120 Hz',()=>{
  const reference=simulate(120);
  for(const hz of [30,60])simulate(hz).forEach((b,i)=>['x','y','vx','vy'].forEach(k=>assert.ok(Math.abs(b[k]-reference[i][k])<1e-6)));
 });
-test('all four work routes and the application entry points use the current revision',()=>{
+test('all four work routes use stable URLs and the enlarged visual scale',()=>{
  const html=fs.readFileSync(new URL('../touch-hands/index.html',import.meta.url),'utf8');
  for(const config of MODEL_CONFIG){assert.ok(html.includes(workURL(config.id).replace('&','&amp;')));}
- for(const path of ['../index.html','../top-prototype/index.html','../experience-prototype/index.html']){
-  const text=fs.readFileSync(new URL(path,import.meta.url),'utf8');assert.ok(text.includes(BUILD_VERSION));
- }
+ assert.ok(MODEL_VISUAL_SCALE>=1.6);
+ assert.ok(!html.includes('?v='));
+ assert.ok(!html.includes('main.mjs?'));
 });
 
 test('each model floats independently and keeps full rotation and drag inertia',()=>{
@@ -56,13 +56,14 @@ test('each model floats independently and keeps full rotation and drag inertia',
  }
  assert.ok(advanceRotation(7,1,1).rotation>7);
 });
-test('HOME, the root entry and the retired glyph URL all lead to the four models',()=>{
+test('HOME, the root entry and the retired glyph URL use stable routes to the four models',()=>{
  const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
  const root=read('../index.html'),old=read('../top-prototype/index.html'),work=read('../experience-prototype/index.html');
- assert.ok(root.includes("location.replace('touch-hands/?v="+BUILD_VERSION+"')"));
- assert.ok(old.includes("location.replace('../touch-hands/?v="+BUILD_VERSION+"')"));
+ assert.ok(root.includes("location.replace('touch-hands/')"));
+ assert.ok(old.includes("location.replace('../touch-hands/')"));
  assert.ok(!old.includes('id="glyph"'));
- assert.ok(work.includes("document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION"));
+ assert.ok(work.includes("document.getElementById('siteHome').href='../touch-hands/'"));
  assert.ok(!work.includes('../top-prototype/'));
+ assert.ok(!work.includes("query.set('v'"));
  for(const config of MODEL_CONFIG)assert.ok(fs.existsSync(new URL('../touch-hands/assets/'+ASSET_VERSION+'/'+config.name+'.glb',import.meta.url)));
 });

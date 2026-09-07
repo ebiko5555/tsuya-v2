@@ -1570,7 +1570,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
   <span id="globalBackText">BACK</span>
 </a>
-<a class="site-home" id="siteHome" href="../touch-hands/?v=mobile88" aria-label="トップページへ戻る">HOME</a>
+<a class="site-home" id="siteHome" href="../touch-hands/" aria-label="トップページへ戻る">HOME</a>
 
 <div class="stage">
   <canvas id="canvas"></canvas>
@@ -1864,7 +1864,7 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile88"></script>
+<script src="./tracking-core.js"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
@@ -3854,23 +3854,21 @@ updateCmpBadge();
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
   const params=new URLSearchParams(location.search);
-  const BUILD_VERSION='mobile88';
-  document.getElementById('siteHome').href='../touch-hands/?v='+BUILD_VERSION;
+  document.getElementById('siteHome').href='../touch-hands/';
   const route=(name,value)=>{
     const query=new URLSearchParams();
     if(name&&value) query.set(name,value);
-    query.set('v',BUILD_VERSION);
     return '?'+query.toString();
   };
   const homeRoute=()=>route(null,null);
   const customRoute=from=>{
     const query=new URLSearchParams(); query.set('mode','custom');
     if(from) query.set('from',from);
-    query.set('v',BUILD_VERSION); return '?'+query.toString();
+    return '?'+query.toString();
   };
   const tryRoute=(key,length)=>{
     const query=new URLSearchParams();
-    query.set('try',key); query.set('length',normalizeTryLength(length)); query.set('v',BUILD_VERSION);
+    query.set('try',key); query.set('length',normalizeTryLength(length));
     return '?'+query.toString();
   };
   const normalizeWorkKey=key=>key==='NAILORB'?'ORB':key;

@@ -1,6 +1,9 @@
 // Geometry and gesture rules shared by the page and its regression checks.
-export const BUILD_VERSION = 'mobile88';
+export const BUILD_VERSION = 'mobile89';
 export const ASSET_VERSION = 'mobile71';
+// The rendered forms can overlap in the camera view while the moving bodies
+// continue to keep their own space through the billiard collision model.
+export const MODEL_VISUAL_SCALE = 1.65;
 export const MODEL_CONFIG = [
   {id:'COLOR', label:'色の作品へ', name:'bottle', size:50, x:0, y:17.55, phase:0},
   {id:'SURFACE', label:'表面の作品へ', name:'frientirip', size:52, x:14.3, y:0, phase:Math.PI/2},
@@ -96,7 +99,7 @@ export function advanceRotation(rotation, velocity, dt) {
   const decay=Math.exp(-1.5*dt), travel=(1-decay)/1.5;
   return {rotation:rotation+velocity*travel, velocity:velocity*decay};
 }
-export const workURL = id => `../experience-prototype/?work=${encodeURIComponent(id)}&v=${BUILD_VERSION}`;
+export const workURL = id => `../experience-prototype/?work=${encodeURIComponent(id)}`;
 
 export function floatingPose(config,time,reduced=false,width=390,height=744,body=null){
   const i=MODEL_CONFIG.findIndex(item=>item.id===config.id);

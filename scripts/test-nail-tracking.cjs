@@ -68,7 +68,8 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});
  assert.ok(!html.includes('drawTrails=function'));
- assert.ok(html.indexOf('tracking-core.js?v=')>=0&&html.indexOf('tracking-core.js?v=')<html.indexOf('TsuyaTracking.createTracker()'));
+ assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createTracker()'));
+ assert.ok(!html.includes('tracking-core.js?v='));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 

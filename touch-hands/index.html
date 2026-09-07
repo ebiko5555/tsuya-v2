@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07080c">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>TOUCH HANDS</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07080c;color:#f2f5fa;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
-#stage{position:fixed;inset:env(safe-area-inset-top,0px) 0 calc(100px + env(safe-area-inset-bottom,0px));touch-action:none;isolation:isolate}
+#stage{position:fixed;inset:env(safe-area-inset-top,0px) 0 calc(80px + env(safe-area-inset-bottom,0px));touch-action:none;isolation:isolate}
 #canvas-container{position:absolute;inset:0;pointer-events:none}
 canvas{display:block;width:100%;height:100%}
 #works{position:absolute;inset:0}
@@ -21,7 +23,7 @@ canvas{display:block;width:100%;height:100%}
 .work.is-ready img{opacity:0}
 .work.is-loading::after{content:"";position:absolute;inset:18%;border:1px solid #b9d0ef24;border-top-color:#d7e4f37a;border-radius:50%;animation:breathe 2.4s ease-in-out infinite}
 @keyframes breathe{50%{opacity:.3;transform:scale(.94)}}
-.touch-hands-title{position:fixed;margin:0;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;pointer-events:none;font-size:clamp(20px,5.9vw,26px);font-weight:300;letter-spacing:.35em;text-indent:.35em;color:#fff;text-shadow:0 0 24px #ffffff66}
+.touch-hands-title{position:fixed;margin:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;pointer-events:none;font-size:clamp(20px,5.9vw,26px);font-weight:300;letter-spacing:.35em;text-indent:.35em;color:#fff;text-shadow:0 0 24px #ffffff66}
 #touch-ring{position:fixed;width:36px;height:36px;border:1px solid #fff;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;z-index:20;box-shadow:0 0 16px #ffffff26}
 #touch-ring::after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;transform:translate(-50%,-50%);border-radius:50%;background:#d5b574}
 #veil{position:fixed;inset:0;background:#07080c;opacity:0;pointer-events:none;z-index:30;transition:opacity .25s ease}
@@ -34,10 +36,10 @@ canvas{display:block;width:100%;height:100%}
 <main id="stage" aria-label="４つの造形に触れて作品へ。なでると空間が動きます。">
   <div id="canvas-container" aria-hidden="true"></div>
   <nav id="works" aria-label="作品を選ぶ">
-    <a class="work" data-work="COLOR" href="../experience-prototype/?work=COLOR&amp;v=mobile88" aria-label="色の作品へ" style="--x:50%;--y:22%;--size:130px"><img src="assets/mobile71/bottle.webp" alt="" width="384" height="384" fetchpriority="high"></a>
-    <a class="work" data-work="SURFACE" href="../experience-prototype/?work=SURFACE&amp;v=mobile88" aria-label="表面の作品へ" style="--x:76%;--y:50%;--size:130px"><img src="assets/mobile71/frientirip.webp" alt="" width="384" height="384"></a>
-    <a class="work" data-work="HAND" href="../experience-prototype/?work=HAND&amp;v=mobile88" aria-label="手の作品へ" style="--x:50%;--y:78%;--size:130px"><img src="assets/mobile71/hand.webp" alt="" width="384" height="384"></a>
-    <a class="work" data-work="SPACE" href="../experience-prototype/?work=SPACE&amp;v=mobile88" aria-label="宇宙と手の作品へ" style="--x:24%;--y:50%;--size:130px"><img src="assets/mobile71/jisakuhand.webp" alt="" width="384" height="384"></a>
+    <a class="work" data-work="COLOR" href="../experience-prototype/?work=COLOR" aria-label="色の作品へ" style="--x:50%;--y:22%;--size:130px"><img src="assets/mobile71/bottle.webp" alt="" width="384" height="384" fetchpriority="high"></a>
+    <a class="work" data-work="SURFACE" href="../experience-prototype/?work=SURFACE" aria-label="表面の作品へ" style="--x:76%;--y:50%;--size:130px"><img src="assets/mobile71/frientirip.webp" alt="" width="384" height="384"></a>
+    <a class="work" data-work="HAND" href="../experience-prototype/?work=HAND" aria-label="手の作品へ" style="--x:50%;--y:78%;--size:130px"><img src="assets/mobile71/hand.webp" alt="" width="384" height="384"></a>
+    <a class="work" data-work="SPACE" href="../experience-prototype/?work=SPACE" aria-label="宇宙と手の作品へ" style="--x:24%;--y:50%;--size:130px"><img src="assets/mobile71/jisakuhand.webp" alt="" width="384" height="384"></a>
   </nav>
 </main>
 <h1 class="touch-hands-title">TOUCH HANDS</h1>
@@ -45,6 +47,6 @@ canvas{display:block;width:100%;height:100%}
 <div id="touch-ring" aria-hidden="true"></div>
 <div id="veil" aria-hidden="true"></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="./main.mjs?v=mobile88"></script>
+<script type="module" src="./main.mjs"></script>
 </body>
 </html>
