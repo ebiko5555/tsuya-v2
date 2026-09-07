@@ -2291,7 +2291,7 @@ async function loadImage(file){
 }
 
 /* ================= 爪の描画 ================= */
-const FINGERS = [[4,3],[8,7],[12,11],[16,15],[20,19]];
+const FINGERS = [[4,3,2],[8,7,6],[12,11,10],[16,15,14],[20,19,18]];
 /* 手のひらの骨。どれか1本が奥行きでつぶれても、一番長いものは残る */
 const PALM_BONES = [[0,5],[0,17],[5,17],[0,9],[0,13],[9,17]];
 /* 手のひらの大きさに対する、指節の長さの目安（手を平らにした時の実測比の75%）。
@@ -2318,12 +2318,16 @@ function drawNails(dt=1/60){
       const d = Math.hypot(ax-bx, ay-by);
       if(d > handRef) handRef = d;
     });
-    FINGERS.forEach(([tip,dip], fi)=>{
-      const [tx,ty]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]);
+    FINGERS.forEach(([tip,dip,pip], fi)=>{
+      const [tx,ty]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]), [px,py]=lmXY(lm[pip]);
       /* 奥行きで指節がつぶれても、爪がここまでしか小さくならないようにする */
       const rawLen = Math.max(Math.hypot(tx-dx,ty-dy), handRef*MIN_LEN_RATIO[fi]);
       if(rawLen < 4) return;
-      const rawAng = Math.atan2(ty-dy,tx-dx);
+      /* 爪の向き（角度）：指先（tip〜dip）単体だと1pxのジッターで先端が大きく首を振る。
+         指全体の胴体軸である中節（dip〜pip）を合成し、角度の激しい震え・首振りを根本から消去 */
+      const vTipX = tx - dx, vTipY = ty - dy;
+      const vMidX = dx - px, vMidY = dy - py;
+      const rawAng = Math.atan2(vTipY * 0.42 + vMidY * 0.58, vTipX * 0.42 + vMidX * 0.58);
       const st=TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
       nailState[hi*5+fi]=st;
       const len = st.len, ang = st.ang;

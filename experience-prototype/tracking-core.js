@@ -57,12 +57,13 @@
     return {len:previous.len+alpha(7+relative*24,dt)*(length-previous.len),ang:previous.ang+alpha(9+Math.abs(dAng)*20,dt)*dAng};
   }
   // Stabilize the complete nail pose, so position, angle and length settle together.
-  // Entering motion needs a clear movement; once moving, a lower threshold keeps it responsive.
+  // Independent damping for angle and length prevents lever-arm vibration from fluttering the tip.
   function stabilizeNail(previous,target,dt){
     const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
     if(!previous||!Number.isFinite(previous.x))return {...target,mean:{...target}};
+    const safeDt=clamp(dt,1/120,.1);
     const mean=previous.mean||previous;
-    const avg=alpha(2,clamp(dt,1/120,.1));
+    const avg=alpha(2,safeDt);
     const nextMean={x:mean.x+(target.x-mean.x)*avg,y:mean.y+(target.y-mean.y)*avg,len:mean.len+(target.len-mean.len)*avg,ang:mean.ang+angleDelta(target.ang,mean.ang)*avg};
     const positionNoise=Math.max(2.4,target.len*.08);
     const lengthNoise=Math.max(1.2,target.len*.052),angleNoise=.09;
@@ -74,8 +75,20 @@
     const continuing=rawMove>positionNoise*.44||meanMove>positionNoise*.28||rawLength>lengthNoise*.44||meanLength>lengthNoise*.28||rawAngle>angleNoise*.44||meanAngle>angleNoise*.28;
     const moving=previous.moving?continuing:entering;
     if(!moving)return {...previous,mean:nextMean,moving:false};
-    const follow=alpha(18+rawMove/Math.max(target.len,1)*25,dt);
-    return {x:previous.x+(target.x-previous.x)*follow,y:previous.y+(target.y-previous.y)*follow,len:previous.len+(target.len-previous.len)*follow,ang:previous.ang+angleDelta(target.ang,previous.ang)*follow,mean:nextMean,moving:true};
+    // Position tracks quickly for responsive hand motion
+    const followPos=alpha(18+rawMove/Math.max(target.len,1)*25,safeDt);
+    // Angle uses a refined hydraulic damper to stop high-frequency flutter from whipping the nail tip
+    const followAng=alpha(12+rawAngle*20,safeDt);
+    // Length uses smooth settling to eliminate breathing jitter
+    const followLen=alpha(10+rawLength/Math.max(target.len,1)*20,safeDt);
+    return {
+      x:previous.x+(target.x-previous.x)*followPos,
+      y:previous.y+(target.y-previous.y)*followPos,
+      len:previous.len+(target.len-previous.len)*followLen,
+      ang:previous.ang+angleDelta(target.ang,previous.ang)*followAng,
+      mean:nextMean,
+      moving:true
+    };
   }
   function createTrailSampler(){
     const tips=new Map();
