@@ -39,11 +39,14 @@
       const recent=age<=.065;
       return hands.map(lm=>lm.map(s=>{
         const out={x:s.x,y:s.y,z:s.z};
-        for(const [axis,vKey,rawVKey,cKey] of [['x','vx','rawVX','cx'],['y','vy','rawVY','cy']]){
-          if(recent&&s[axis==='x'?'consistentX':'consistentY']>=3&&Math.abs(s[rawVKey])>.012&&s[vKey]*s[rawVKey]>0){
-            const horizon=Math.min(.045,age+1/(2*Math.PI*s[cKey]));
-            out[axis]+=clamp(s[vKey]*horizon,-.018,.018);
-          }
+        for(const [axis,vKey,rawVKey,cKey,extKey] of [['x','vx','rawVX','cx','extrapX'],['y','vy','rawVY','cy','extrapY']]){
+          const conKey=axis==='x'?'consistentX':'consistentY';
+          const active=recent&&s[conKey]>=2&&Math.abs(s[rawVKey])>.012&&s[vKey]*s[rawVKey]>0;
+          const horizon=Math.min(.045,age+1/(2*Math.PI*s[cKey]));
+          const targetExtrap=active?clamp(s[vKey]*horizon,-.018,.018):0;
+          // Smooth the extrapolation offset transition so it never rolls back or jumps abruptly
+          s[extKey]=(s[extKey]||0)+(targetExtrap-(s[extKey]||0))*0.65;
+          out[axis]+=s[extKey];
         }
         return out;
       }));
