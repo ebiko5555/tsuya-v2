@@ -864,12 +864,12 @@
   .work-title{position:relative; display:inline-block}
   .work-title::after{content:""; position:absolute; left:calc(100% + 15px); top:54%; width:42px; height:1px; background:var(--work-accent); opacity:.78}
   .work-nails{display:flex; align-items:flex-end; gap:7px; height:52px; margin-top:14px}
-  .work-nails canvas{width:21px; height:42px; filter:drop-shadow(0 5px 7px rgba(0,0,0,.26))}
+  .work-nails canvas{width:21px; height:42px; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3)) drop-shadow(0 1px 2px rgba(0,0,0,.18))}
   .work-nails canvas:nth-child(1),.work-nails canvas:nth-child(5){height:35px}
   .work-nails canvas:nth-child(2),.work-nails canvas:nth-child(4){height:39px}
   /* 作品ページでは、装着用の小アイコンではなくチップ標本として読める大きさにする。 */
   body.art-page .work-nails{height:78px; gap:9px; margin-top:17px}
-  body.art-page .work-nails canvas{width:36px; height:72px}
+  body.art-page .work-nails canvas{width:36px; height:72px; filter:drop-shadow(0 8px 16px rgba(0,0,0,.42)) drop-shadow(0 2px 4px rgba(0,0,0,.25))}
   body.art-page .work-nails canvas:nth-child(1),body.art-page .work-nails canvas:nth-child(5){height:59px}
   body.art-page .work-nails canvas:nth-child(2),body.art-page .work-nails canvas:nth-child(4){height:66px}
   .work-actions{display:grid; gap:10px; margin-top:18px; max-width:310px}
@@ -1434,7 +1434,7 @@
 
   body.work-tryon.camera-started .try-identity{width:244px}
   body.work-tryon .try-identity .work-nails{height:82px; margin-top:12px; gap:8px}
-  body.work-tryon .try-identity .work-nails canvas{width:34px; height:68px}
+  body.work-tryon .try-identity .work-nails canvas{width:34px; height:68px; filter:drop-shadow(0 6px 12px rgba(0,0,0,.38)) drop-shadow(0 2px 4px rgba(0,0,0,.2))}
   body.work-tryon .try-identity .work-nails canvas:nth-child(1),body.work-tryon .try-identity .work-nails canvas:nth-child(5){height:57px}
   body.work-tryon .try-identity .work-nails canvas:nth-child(2),body.work-tryon .try-identity .work-nails canvas:nth-child(4){height:63px}
 
@@ -2339,7 +2339,7 @@ function drawNails(dt=1/60){
       ctx.clip();
       ctx.globalAlpha = alpha;
       paintByKey(ctx,nailLooks[fi],w,h,nailColors[fi],hi*5+fi);
-      paintGelTip(ctx,w,h,hi*5+fi,gloss);
+      paintGelTip(ctx,w,h,hi*5+fi,gloss,nailLooks[fi]);
       ctx.globalAlpha = alpha*0.3;
       const rim = ctx.createRadialGradient(0,0,Math.min(w,h)*0.35, 0,0,Math.max(w,h)*0.75);
       rim.addColorStop(0,'rgba(0,0,0,0)');
@@ -2853,10 +2853,24 @@ function paintByKey(c,key,w,h,col,seed){
   }
   LOOKS[key].paint(c,w,h,col,seed,varOf(key));
 }
+function getFoilWireProfile(lookKey){
+  if(!lookKey) return { foil: 1, wire: 1 };
+  if(flatLook(lookKey)) return { foil: 0, wire: 0 };
+  /* 無地系・シアー系：ノイズを排除し、滑らかな発色と透明感を優先（完全にゼロ） */
+  const zeroLooks = ['onecolor', 'sheer', 'churun', 'matte', 'velvet', 'french', 'milk', 'artTrace', 'artThinking'];
+  if(zeroLooks.includes(lookKey)) return { foil: 0, wire: 0 };
+  /* 繊細・微光系：線はゼロ、微細な箔のみごく微量に沈める */
+  const subtleLooks = ['grad', 'pearl', 'frenchmirror'];
+  if(subtleLooks.includes(lookKey)) return { foil: 0.28, wire: 0 };
+  /* アート・テクスチャ・作品系：しっかりと箔と極細線を活かす */
+  return { foil: 1.0, wire: 1.0 };
+}
 /* 柄の上にだけ重ねる、チップの断面・甘皮側の影・ジェル反射。
    呼び出し側で爪の形にクリップしてから使うため、柄の外へは出ない。 */
-function paintGelTip(c,w,h,seed,gloss=1){
+function paintGelTip(c,w,h,seed,gloss=1,lookKey=null){
   const keep=c.globalAlpha, rnd=seeded(seed+71);
+  const profile=getFoilWireProfile(lookKey);
+  const isFlat=flatLook(lookKey);
   c.save();
   const side=c.createLinearGradient(-w*.5,0,w*.5,0);
   side.addColorStop(0,'rgba(29,17,18,.25)'); side.addColorStop(.10,'rgba(255,245,242,.055)');
@@ -2868,7 +2882,7 @@ function paintGelTip(c,w,h,seed,gloss=1){
   const edge=c.createLinearGradient(0,-h*.58,0,-h*.26);
   edge.addColorStop(0,'rgba(255,255,255,.22)'); edge.addColorStop(.55,'rgba(255,239,232,.055)'); edge.addColorStop(1,'rgba(255,255,255,0)');
   c.globalAlpha=keep*.62; c.fillStyle=edge; c.fillRect(-w*.5,-h*.6,w,h*.38);
-  if(gloss>.04){
+  if(gloss>.04 && !isFlat){
     const shine=c.createLinearGradient(-w*.36,-h*.48,w*.28,h*.30);
     shine.addColorStop(0,'rgba(255,255,255,0)'); shine.addColorStop(.38,'rgba(255,255,255,.05)');
     shine.addColorStop(.52,'rgba(255,255,255,.31)'); shine.addColorStop(.64,'rgba(255,255,255,.045)'); shine.addColorStop(1,'rgba(255,255,255,0)');
@@ -2876,21 +2890,27 @@ function paintGelTip(c,w,h,seed,gloss=1){
     c.globalAlpha=keep*(.10+gloss*.16); c.fillStyle='rgba(255,255,255,.9)';
     for(let i=0;i<2;i++){ const x=(rnd()-.5)*w*.48, y=(-.18+rnd()*.36)*h; c.fillRect(x,y,Math.max(.7,w*.018),Math.max(1.2,h*.035)); }
   }
-  /* 表面の反射とは別に、透明なジェルの下に沈んだ極細線と箔を置く。
-     seedを指ごとに変えるので、5本が同じ柄の複製にならない。 */
-  c.globalAlpha=keep*(.10+Math.min(.15,gloss*.12));
-  c.lineCap='round'; c.lineJoin='round'; c.lineWidth=Math.max(.42,w*.012);
-  for(let i=0;i<3;i++){
-    const x0=(rnd()-.5)*w*.82, y0=(rnd()-.5)*h*.88;
-    const x1=(rnd()-.5)*w*.72, y1=(rnd()-.5)*h*.82;
-    c.strokeStyle=i===1?'rgba(255,252,246,.9)':'rgba(214,178,111,.92)';
-    c.beginPath(); c.moveTo(x0,y0);
-    c.quadraticCurveTo((x0+x1)*.5+(rnd()-.5)*w*.25,(y0+y1)*.5+(rnd()-.5)*h*.18,x1,y1); c.stroke();
+  /* デザイン属性に連動した、透明なジェルの下に沈んだ極細線と箔。
+     無地・シアー系ではゼロになり、余計なノイズやゴミ感を完全に防ぐ。 */
+  if(profile.wire > 0){
+    c.globalAlpha=keep*(.10+Math.min(.15,gloss*.12))*profile.wire;
+    c.lineCap='round'; c.lineJoin='round'; c.lineWidth=Math.max(.42,w*.012);
+    for(let i=0;i<3;i++){
+      const x0=(rnd()-.5)*w*.82, y0=(rnd()-.5)*h*.88;
+      const x1=(rnd()-.5)*w*.72, y1=(rnd()-.5)*h*.82;
+      c.strokeStyle=i===1?'rgba(255,252,246,.9)':'rgba(214,178,111,.92)';
+      c.beginPath(); c.moveTo(x0,y0);
+      c.quadraticCurveTo((x0+x1)*.5+(rnd()-.5)*w*.25,(y0+y1)*.5+(rnd()-.5)*h*.18,x1,y1); c.stroke();
+    }
   }
-  for(let i=0;i<7;i++){
-    const x=(rnd()-.5)*w*.78, y=(rnd()-.5)*h*.92, s=Math.max(.55,w*(.010+rnd()*.018));
-    c.fillStyle=i%3===0?'rgba(232,205,142,.9)':'rgba(255,255,255,.78)';
-    c.save(); c.translate(x,y); c.rotate(rnd()*Math.PI); c.fillRect(-s,-s*.42,s*2,s*.84); c.restore();
+  if(profile.foil > 0){
+    const foilCount = profile.foil < 0.5 ? 2 : 7;
+    c.globalAlpha=keep*(.10+Math.min(.15,gloss*.12))*profile.foil;
+    for(let i=0;i<foilCount;i++){
+      const x=(rnd()-.5)*w*.78, y=(rnd()-.5)*h*.92, s=Math.max(.55,w*(.010+rnd()*.018));
+      c.fillStyle=i%3===0?'rgba(232,205,142,.9)':'rgba(255,255,255,.78)';
+      c.save(); c.translate(x,y); c.rotate(rnd()*Math.PI); c.fillRect(-s,-s*.42,s*2,s*.84); c.restore();
+    }
   }
   c.restore();
 }
@@ -3372,7 +3392,7 @@ function drawSourceSetPreview(canvas,set){
     c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
     c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
     c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
-    paintByKey(c,look,24,heights[i],set.colors[i],i+11); paintGelTip(c,24,heights[i],i+11,.92); c.restore();
+    paintByKey(c,look,24,heights[i],set.colors[i],i+11); paintGelTip(c,24,heights[i],i+11,.92,look); c.restore();
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
@@ -3390,7 +3410,7 @@ function drawLargeSourceSetPreview(canvas,set,length){
     c.bezierCurveTo(w*.32,-h*.50,w/2,-h*.26,w/2,baseY);
     c.bezierCurveTo(w/2,h*.48,w*.28,h*.56,0,h*.56);
     c.bezierCurveTo(-w*.28,h*.56,-w/2,h*.48,-w/2,baseY); c.closePath(); c.clip();
-    paintByKey(c,look,w,h,set.colors[i],i+21); paintGelTip(c,w,h,i+21,.94); c.restore();
+    paintByKey(c,look,w,h,set.colors[i],i+21); paintGelTip(c,w,h,i+21,.94,look); c.restore();
   }));
   if(sourceProfile&&keepPalette) sourceProfile.palette=keepPalette;
 }
@@ -3682,7 +3702,7 @@ function paintExhibitNail(c,x,y,w,h,angle,index){
   c.save(); exhibitNailPath(c,w,h,tuneVals.sculptShape); c.clip();
   c.globalAlpha=tuneVals.opacity/100;
   withVars(Object.assign({},lookVar),()=>paintByKey(c,nailLooks[index],w,h,nailColors[index],index+31));
-  paintGelTip(c,w,h,index+31,tuneVals.gloss/100);
+  paintGelTip(c,w,h,index+31,tuneVals.gloss/100,nailLooks[index]);
   const rim=c.createRadialGradient(0,0,Math.min(w,h)*.32,0,0,Math.max(w,h)*.76);
   rim.addColorStop(0,'rgba(0,0,0,0)'); rim.addColorStop(1,'rgba(45,22,18,.42)');
   c.globalAlpha=.25; c.fillStyle=rim; c.fillRect(-w,-h,w*2,h*2);
@@ -4103,22 +4123,134 @@ updateCmpBadge();
     }};
   }
 
-  function nailShape(c,w,h){
-    c.beginPath(); c.moveTo(-w*.5,h*.42); c.lineTo(-w*.5,-h*.2);
-    c.quadraticCurveTo(-w*.46,-h*.5,0,-h*.54); c.quadraticCurveTo(w*.46,-h*.5,w*.5,-h*.2);
-    c.lineTo(w*.5,h*.42); c.quadraticCurveTo(0,h*.55,-w*.5,h*.42); c.closePath();
+  /* サロンのプロフェッショナル・オーバルアーモンドフォルムの精密ベジェ曲線 */
+  function nailShapeSpecimen(c,w,h){
+    const baseY = h * 0.42;
+    c.beginPath();
+    c.moveTo(-w*0.48, baseY);
+    /* キューティクル（根元）側の優美なラウンド */
+    c.bezierCurveTo(-w*0.48, h*0.53, -w*0.25, h*0.56, 0, h*0.56);
+    c.bezierCurveTo(w*0.25, h*0.56, w*0.48, h*0.53, w*0.48, baseY);
+    /* サイドストレートから先端へのなだらかな絞り込み */
+    c.bezierCurveTo(w*0.49, h*0.06, w*0.46, -h*0.24, w*0.36, -h*0.42);
+    /* 先端（フリーエッジ）の美しいCアーチ */
+    c.bezierCurveTo(w*0.22, -h*0.55, -w*0.22, -h*0.55, -w*0.36, -h*0.42);
+    c.bezierCurveTo(-w*0.46, -h*0.24, -w*0.49, h*0.06, -w*0.48, baseY);
+    c.closePath();
   }
+
+  /* 写真のような10倍の緻密さを持つスタジオ標本レンダラー */
+  function paintPhotographicSpecimen(c, w, h, look, color, seed, gloss=0.96){
+    const isFlat = flatLook(look);
+    c.save();
+
+    // 1. 標本台の多層アンビエントシャドウ（チップの下に落ちるリアルな写真影）
+    c.save();
+    c.shadowColor = 'rgba(0,0,0,0.36)';
+    c.shadowBlur = w * 0.22;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = h * 0.05;
+    c.fillStyle = 'rgba(12,8,10,0.7)';
+    nailShapeSpecimen(c, w, h);
+    c.fill();
+    c.restore();
+
+    // 2. チップ本体のクリッピングとアート描画
+    c.save();
+    nailShapeSpecimen(c, w, h);
+    c.clip();
+
+    // ベース・アート描画
+    paintByKey(c, look, w, h, color, seed);
+
+    // デザイン属性連動のジェルレイヤー（箔・線・キューティクル段差）
+    paintGelTip(c, w, h, seed, gloss, look);
+
+    // 3. トップジェルの立体ドーム（ハイポイントとCカーブの厚み）
+    const dome = c.createRadialGradient(0, -h*0.06, w*0.10, 0, -h*0.06, w*0.54);
+    dome.addColorStop(0, 'rgba(255,255,255,0.07)');
+    dome.addColorStop(0.62, 'rgba(0,0,0,0)');
+    dome.addColorStop(1, 'rgba(18,8,6,0.26)');
+    c.fillStyle = dome;
+    c.fillRect(-w*0.6, -h*0.65, w*1.2, h*1.3);
+
+    // 4. 写真撮影時のスタジオ照明（ソフトボックスの澄んだ縦ハイライト）
+    if(!isFlat && gloss > 0.1){
+      const softbox = c.createLinearGradient(-w*0.36, -h*0.52, -w*0.06, h*0.38);
+      softbox.addColorStop(0, 'rgba(255,255,255,0)');
+      softbox.addColorStop(0.30, 'rgba(255,255,255,0.06)');
+      softbox.addColorStop(0.46, 'rgba(255,255,255,0.76)');
+      softbox.addColorStop(0.52, 'rgba(255,255,255,0.88)');
+      softbox.addColorStop(0.58, 'rgba(255,255,255,0.20)');
+      softbox.addColorStop(0.74, 'rgba(255,255,255,0.03)');
+      softbox.addColorStop(1, 'rgba(255,255,255,0)');
+      c.globalAlpha = Math.min(0.88, 0.45 + gloss * 0.42);
+      c.fillStyle = softbox;
+      c.fillRect(-w*0.55, -h*0.6, w*1.1, h*1.2);
+
+      // 先端フリーエッジのガラス光沢
+      const tipGlow = c.createRadialGradient(0, -h*0.44, 0, 0, -h*0.44, w*0.32);
+      tipGlow.addColorStop(0, 'rgba(255,255,255,0.68)');
+      tipGlow.addColorStop(0.5, 'rgba(255,255,255,0.16)');
+      tipGlow.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = tipGlow;
+      c.fillRect(-w*0.5, -h*0.56, w, h*0.26);
+
+      // 右側アンビエント反射光
+      const subRim = c.createLinearGradient(w*0.24, 0, w*0.48, 0);
+      subRim.addColorStop(0, 'rgba(255,255,255,0)');
+      subRim.addColorStop(1, 'rgba(255,255,255,0.28)');
+      c.fillStyle = subRim;
+      c.fillRect(w*0.2, -h*0.5, w*0.3, h);
+    } else if(isFlat){
+      // マット・ベルベットの微粒子質感
+      const matteGlow = c.createRadialGradient(0, -h*0.05, 0, 0, -h*0.05, w*0.5);
+      matteGlow.addColorStop(0, 'rgba(255,255,255,0.07)');
+      matteGlow.addColorStop(0.7, 'rgba(255,255,255,0.02)');
+      matteGlow.addColorStop(1, 'rgba(0,0,0,0.18)');
+      c.fillStyle = matteGlow;
+      c.fillRect(-w*0.6, -h*0.65, w*1.2, h*1.3);
+    }
+    c.restore();
+
+    // 5. 写真のような「全周クリアジェルのガラス境界線（Rim Edge Reflection）」
+    c.save();
+    nailShapeSpecimen(c, w, h);
+    c.lineWidth = Math.max(0.75, w * 0.016);
+    if(!isFlat){
+      const edgeGrad = c.createLinearGradient(-w*0.4, -h*0.5, w*0.4, h*0.5);
+      edgeGrad.addColorStop(0, 'rgba(255,255,255,0.78)');
+      edgeGrad.addColorStop(0.35, 'rgba(255,255,255,0.36)');
+      edgeGrad.addColorStop(0.7, 'rgba(255,255,255,0.14)');
+      edgeGrad.addColorStop(1, 'rgba(255,255,255,0.56)');
+      c.strokeStyle = edgeGrad;
+      c.globalAlpha = 0.68;
+    } else {
+      c.strokeStyle = 'rgba(255,255,255,0.16)';
+      c.globalAlpha = 0.38;
+    }
+    c.stroke();
+    c.restore();
+
+    c.restore();
+  }
+
   function renderNailPreview(key,targetId,length){
     const box=document.getElementById(targetId); if(!box) return; box.innerHTML='';
     const p=works[key].preset;
     const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.68;
     withVars(p.vars,()=>p.looks.forEach((look,i)=>{
-      const cv=document.createElement('canvas'); cv.width=96; cv.height=160;
+      const cv=document.createElement('canvas');
+      /* 写真のような10倍の緻密さ：Retina対応の倍密度（192×320） */
+      cv.width=192; cv.height=320;
       cv.dataset.look=look; cv.title=LOOKS[look]?.name||look;
       cv.setAttribute('aria-label',(i+1)+'本目 '+(LOOKS[look]?.name||look));
       const h=122*lengthScale, w=62;
-      const c=cv.getContext('2d'); c.translate(48,80); nailShape(c,w,h); c.clip();
-      paintByKey(c,look,w,h,p.colors[i],i); paintGelTip(c,w,h,i,.92); box.appendChild(cv);
+      const c=cv.getContext('2d');
+      c.scale(2, 2);
+      c.translate(48, 80);
+      paintPhotographicSpecimen(c, w, h, look, p.colors[i], i, 0.94);
+      box.appendChild(cv);
     }));
   }
   installArtworkLooks();
