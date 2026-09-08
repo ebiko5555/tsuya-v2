@@ -70,6 +70,7 @@ test('try-on gloss has no fixed diagonal haze and appears only when nail directi
  assert.ok(draw.includes('const specStrength = Math.pow'));
  assert.ok(draw.includes('if(specAlpha>.018)'));
  assert.ok(!gel.includes('const shine=c.createLinearGradient'));
+ assert.ok(!html.includes('const softbox = c.createLinearGradient'));
 });
 test('all ten artwork presets restore a restrained trail and no late override hides it',()=>{
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
