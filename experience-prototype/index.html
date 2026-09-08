@@ -1906,7 +1906,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile99';
+const BUILD_VERSION = 'mobile100';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -2618,6 +2618,41 @@ function nudeBase(c,w,h,a){
   const keep=c.globalAlpha; c.globalAlpha=keep*a;
   base(c,w,h,'#f0dcd1','#e5c7b8'); c.globalAlpha=keep;
 }
+function getComplementaryColor(hex){
+  if(!hex || !hex.startsWith('#') || hex.length < 7) return '#00f5d4';
+  let r = parseInt(hex.slice(1,3), 16) / 255;
+  let g = parseInt(hex.slice(3,5), 16) / 255;
+  let b = parseInt(hex.slice(5,7), 16) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  let h = 0, s = 0, l = (mx + mn) / 2;
+  if(mx !== mn){
+    const d = mx - mn;
+    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    switch(mx){
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  h = (h + 0.5) % 1.0;
+  s = Math.min(1.0, Math.max(0.80, s * 1.5));
+  l = Math.max(0.38, Math.min(0.62, l));
+  const hue2rgb = (p, q, t) => {
+    if(t < 0) t += 1;
+    if(t > 1) t -= 1;
+    if(t < 1/6) return p + (q - p) * 6 * t;
+    if(t < 1/2) return q;
+    if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const cr = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+  const cg = Math.round(hue2rgb(p, q, h) * 255);
+  const cb = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+  return '#' + [cr, cg, cb].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('');
+}
 const LOOKS = {
   onecolor:{name:'ワンカラー', paint(c,w,h,col){ base(c,w,h,shade(col,18),shade(col,-14)); }},
   churun:{name:'ちゅるん', paint(c,w,h,col){
@@ -2962,6 +2997,105 @@ const LOOKS = {
       c.beginPath(); c.arc(px,py,pSize,0,Math.PI*2); c.fill();
     }
     c.restore(); c.globalAlpha=keep;
+  }},
+  sourceclash:{name:'反対色スプリット', material:true, varLabel:'対比の強さ', paint(c,w,h,col,seed,v){
+    const compCol=getComplementaryColor(col);
+    const rnd=seeded(seed+211);
+    const keep=c.globalAlpha;
+    base(c,w,h,shade(col,25),shade(col,-15));
+    c.save();
+    c.beginPath();
+    const splitOffset=(v-.5)*w*.4;
+    c.moveTo(-w*.7,-h*.7);
+    c.lineTo(w*.8+splitOffset,-h*.7);
+    c.bezierCurveTo(w*.2+splitOffset,-h*.1,-w*.3+splitOffset,h*.2,-w*.7,h*.7);
+    c.closePath();
+    const borderGrad=c.createLinearGradient(-w*.4,-h*.4,w*.4,h*.4);
+    borderGrad.addColorStop(0,hexA(compCol,.98));
+    borderGrad.addColorStop(1,hexA(shade(compCol,-35),.95));
+    c.fillStyle=borderGrad; c.fill();
+    c.strokeStyle='#ffd700'; c.lineWidth=Math.max(.8,w*.024); c.lineCap='round'; c.stroke();
+    c.strokeStyle='#ffffff'; c.lineWidth=Math.max(.4,w*.008); c.stroke();
+    c.restore();
+    c.save();
+    for(let i=0;i<7;i++){
+      const px=(rnd()-.5)*w*.75, py=(rnd()-.5)*h*.8;
+      const r=w*(.035+rnd()*.06);
+      c.fillStyle=i%2===0?hexA(compCol,.9):hexA('#ffffff',.95);
+      c.beginPath(); c.arc(px,py,r,0,Math.PI*2); c.fill();
+      if(i%3===0){ c.strokeStyle='#ffd700'; c.lineWidth=Math.max(.5,w*.01); c.stroke(); }
+    }
+    for(let i=0;i<18;i++){
+      const fx=(rnd()-.5)*w*.85, fy=(rnd()-.5)*h*.9;
+      c.fillStyle=i%2===0?'#ffffff':hexA(compCol,.9);
+      c.beginPath(); c.arc(fx,fy,Math.max(.5,w*(.008+rnd()*0.015)),0,Math.PI*2); c.fill();
+    }
+    c.restore();
+    c.globalAlpha=keep;
+  }},
+  sourcemarble:{name:'反対色マーブル', material:true, varLabel:'マーブルの渦', paint(c,w,h,col,seed,v){
+    const compCol=getComplementaryColor(col);
+    const rnd=seeded(seed+337);
+    const keep=c.globalAlpha;
+    base(c,w,h,shade(col,20),shade(col,-20));
+    c.save();
+    const swirls=5;
+    for(let i=0;i<swirls;i++){
+      const y=((i+.5)/swirls-.5)*h*1.3;
+      const swirlGrad=c.createLinearGradient(-w*.6,y,w*.6,y);
+      swirlGrad.addColorStop(0,'rgba(0,0,0,0)');
+      swirlGrad.addColorStop(.3,hexA(compCol,.9));
+      swirlGrad.addColorStop(.5,hexA('#ffffff',.92));
+      swirlGrad.addColorStop(.7,hexA(shade(col,40),.8));
+      swirlGrad.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=swirlGrad;
+      c.beginPath();
+      c.moveTo(-w*.6,y-h*.1);
+      const cp1x=(rnd()-.5)*w*.8, cp1y=y+(rnd()-.5)*h*.25;
+      const cp2x=(rnd()-.5)*w*.8, cp2y=y+(rnd()-.5)*h*.25;
+      c.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,w*.6,y+h*.08);
+      c.lineTo(w*.6,y+h*.18);
+      c.bezierCurveTo(cp2x,cp2y+h*.1,cp1x,cp1y+h*.1,-w*.6,y);
+      c.closePath();
+      c.fill();
+    }
+    c.strokeStyle='#ffd700'; c.lineWidth=Math.max(.6,w*.014); c.lineCap='round';
+    c.beginPath(); c.moveTo(-w*.4,-h*.35);
+    c.bezierCurveTo(w*.2,-h*.1,-w*.1,h*.15,w*.35,h*.38); c.stroke();
+    c.globalCompositeOperation='screen';
+    for(let i=0;i<8;i++){
+      const nx=(rnd()-.5)*w*.8, ny=(rnd()-.5)*h*.85, rad=w*(.08+rnd()*.15);
+      const ng=c.createRadialGradient(nx,ny,0,nx,ny,rad);
+      ng.addColorStop(0,hexA(compCol,.6)); ng.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=ng; c.fillRect(-w/2,-h/2,w,h);
+    }
+    c.restore();
+    c.globalAlpha=keep;
+  }},
+  sourceburst:{name:'反対色サイバー', material:true, varLabel:'ネオンの強さ', paint(c,w,h,col,seed,v){
+    const compCol=getComplementaryColor(col);
+    const rnd=seeded(seed+519);
+    const keep=c.globalAlpha;
+    base(c,w,h,shade(col,-20),shade(col,-50));
+    c.save();
+    c.lineCap='round';
+    const lines=7;
+    for(let i=0;i<lines;i++){
+      const x0=(rnd()-.5)*w*1.1, y0=(rnd()-.5)*h*1.2;
+      const x1=(rnd()-.5)*w*1.1, y1=(rnd()-.5)*h*1.2;
+      c.strokeStyle=i%2===0?hexA(compCol,.95):hexA(shade(col,60),.95);
+      c.lineWidth=Math.max(.7,w*(.015+rnd()*.025));
+      c.beginPath(); c.moveTo(x0,y0); c.lineTo(x1,y1); c.stroke();
+      c.strokeStyle='#ffffff'; c.lineWidth=Math.max(.3,c.lineWidth*.35); c.stroke();
+    }
+    c.globalCompositeOperation='screen';
+    for(let i=0;i<20;i++){
+      const bx=(rnd()-.5)*w*.85, by=(rnd()-.5)*h*.9, br=w*(.01+rnd()*.02);
+      c.fillStyle=i%3===0?'#ffffff':(i%3===1?compCol:col);
+      c.beginPath(); c.arc(bx,by,br,0,Math.PI*2); c.fill();
+    }
+    c.restore();
+    c.globalAlpha=keep;
   }},
 };
 
@@ -3657,31 +3791,38 @@ function makeSourceSets(mode){
     const p=variants[idx%variants.length]||sourceProfile.palette;
     let looks;
     if(isExtra){
-      const extraPool=['sourceform','flash','mizuhikari','line','sourceglow','sourcefield'];
-      looks=[0,1,2,3,4].map(i=>extraPool[(i*2+Math.floor(rnd()*extraPool.length))%extraPool.length]);
-      if(!looks.includes('flash')) looks[1]='flash';
-      if(!looks.includes('sourceform')) looks[0]='sourceform';
-      if(!looks.includes('mizuhikari')) looks[3]='mizuhikari';
+      // 奇抜案：1本のチップの中に反対色・柄が激しく融合するルックを5本すべてに配置！
+      const boldArtLooks=['sourceclash','sourcemarble','sourceburst','sourceclash','sourcemarble'];
+      looks=[0,1,2,3,4].map(i=>boldArtLooks[(i+Math.floor(rnd()*boldArtLooks.length))%boldArtLooks.length]);
+      if(!looks.includes('sourceclash')) looks[0]='sourceclash';
+      if(!looks.includes('sourcemarble')) looks[1]='sourcemarble';
+      if(!looks.includes('sourceburst')) looks[2]='sourceburst';
     }else{
       looks=baseLooks.map((look,i)=>baseLooks[(i+idx+Math.floor(rnd()*baseLooks.length))%baseLooks.length]);
     }
-    const order=[0,1,2,3,4].map(()=>Math.floor(rnd()*p.length));
-    const name=isExtra?'EXTRA / 03 奇抜':(idx===0?`${baseName} / 01 調和`:`${baseName} / 02 ニュアンス`);
+    let colors;
+    if(isExtra){
+      // 奇抜案：5本のメインカラーも対比・補色が交互に波打つように配置
+      colors=[0,1,2,3,4].map(i=>p[(i*3+Math.floor(rnd()*2))%p.length]);
+    }else{
+      const order=[0,1,2,3,4].map(()=>Math.floor(rnd()*p.length));
+      colors=order.map(i=>p[i%p.length]);
+    }
+    const name=isExtra?'EXTRA / 03 反対色＆柄':(idx===0?`${baseName} / 01 調和`:`${baseName} / 02 ニュアンス`);
     return {
-      name, isExtra, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
-      colors:order.map(i=>p[i%p.length]),
+      name, isExtra, looks, colors, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
       tune:{
         gloss:isExtra?100:Math.round((mode==='PATTERN'?72:96)+(rnd()-.5)*18),
         opacity:96,
         nailSize:95,
-        sculptLen:isExtra?126:118,
+        sculptLen:isExtra?128:118,
         sculptShape:isExtra?'stiletto':'natural'
       },
       vars:isExtra?{
         sourceform:.98,
         sourcefield:.96,
         sourceglow:.96,
-        stardust:.92,
+        stardust:.95,
         flash:.98
       }:{
         sourceform:Math.min(1,.25+sourceProfile.density*.75),
@@ -3748,7 +3889,7 @@ function renderSourceSets(){
       btn.dataset.palette=set.sourcePalette.join(',');
     }
     const code=document.createElement('span'); code.className='source-set-code';
-    code.textContent=set.isExtra?'★ EXTRA / 奇抜':(idx===0?'01 HARMONY':'02 NUANCE');
+    code.textContent=set.isExtra?'★ EXTRA / 反対色＆柄':(idx===0?'01 HARMONY':'02 NUANCE');
     const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
     btn.append(code,cv);
     btn.onclick=()=>{
