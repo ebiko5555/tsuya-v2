@@ -984,14 +984,13 @@
   .source-mode .mode-label{display:block}
   .source-mode.active{border-color:#fff; color:#08090c; background:#fff}
   .source-sets{display:grid; gap:7px; margin-top:10px}
-  .source-set{display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; width:100%; min-height:72px; padding:8px 11px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:left}
+  .source-set{display:flex; justify-content:center; align-items:center; width:100%; min-height:72px; padding:6px 8px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:center}
   .source-set.active{border-color:rgba(255,255,255,.7); background:rgba(255,255,255,.08)}
-  .source-set.is-extra{border-color:rgba(255,160,80,.38); background:rgba(255,160,80,.04)}
+  .source-set.is-extra{border-color:rgba(255,160,80,.42); background:rgba(255,160,80,.05)}
   .source-set.is-extra.active{border-color:#ffa552; background:rgba(255,165,82,.14); box-shadow:0 0 14px rgba(255,165,82,.28)}
-  .source-set.is-extra .source-set-code{color:#ffa552; font-weight:700}
-  .source-set-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; color:rgba(255,255,255,.52)}
-  .source-set canvas{width:150px; height:57px}
-  .source-set-name{font-size:9px; letter-spacing:.08em; color:rgba(255,255,255,.72); white-space:nowrap}
+  .source-set-code{display:none}
+  .source-set canvas{width:180px; max-width:100%; height:auto; aspect-ratio:200/76}
+  .source-set-name{display:none}
   .source-try{display:none; align-items:center; justify-content:space-between; width:100%; min-height:46px; margin-top:10px; padding:0 14px; border:0; color:#08090c; background:#fff; font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .source-try.ready{display:flex}
   .source-try::after{content:"→"; font-size:17px; font-weight:300}
@@ -1563,12 +1562,12 @@
     body.custom-mode.source-planning .source-mode{min-height:58px; font-size:9px; letter-spacing:.04em}
     body.custom-mode.source-planning .source-sets{grid-template-columns:1fr; gap:8px; margin-top:12px}
     body.custom-mode.source-planning .source-set{
-      display:grid; grid-template-columns:30px minmax(0,1fr) auto; align-items:center;
-      min-height:88px; padding:8px 10px; gap:9px; text-align:left;
+      display:flex; justify-content:center; align-items:center;
+      min-height:78px; padding:6px 10px;
     }
-    body.custom-mode.source-planning .source-set-code{align-self:center; font-size:9px}
-    body.custom-mode.source-planning .source-set canvas{width:190px; max-width:100%; height:72px; aspect-ratio:auto}
-    body.custom-mode.source-planning .source-set-name{font-size:10px; letter-spacing:.09em}
+    body.custom-mode.source-planning .source-set-code{display:none}
+    body.custom-mode.source-planning .source-set canvas{width:220px; max-width:100%; height:auto; aspect-ratio:200/76}
+    body.custom-mode.source-planning .source-set-name{display:none}
   }
 
   /* 試作49：写真を素材として大きく見る。分析の技術情報は画面に出さない。 */
@@ -1906,7 +1905,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile100';
+const BUILD_VERSION = 'mobile101';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -3780,6 +3779,15 @@ function sourceRecipes(mode){
   };
   return recipes[mode]||recipes.MIX;
 }
+function extraSourceRecipes(mode){
+  const recipes={
+    COLOR:['sourceclash','onecolor','sourceclash','chrome','sourceclash'],
+    PATTERN:['sourcemarble','sourceclash','sourceform','sourcefield','sourcemarble'],
+    LIGHT:['sourceburst','flash','sourceburst','mizuhikari','sourceglow'],
+    MIX:['sourceclash','sourcemarble','sourceburst','sourceclash','sourcemarble']
+  };
+  return recipes[mode]||recipes.MIX;
+}
 function makeSourceSets(mode){
   if(!sourceProfile) return [];
   const recipe=sourceRecipes(mode)[0]||['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']];
@@ -3791,12 +3799,12 @@ function makeSourceSets(mode){
     const p=variants[idx%variants.length]||sourceProfile.palette;
     let looks;
     if(isExtra){
-      // 奇抜案：1本のチップの中に反対色・柄が激しく融合するルックを5本すべてに配置！
-      const boldArtLooks=['sourceclash','sourcemarble','sourceburst','sourceclash','sourcemarble'];
-      looks=[0,1,2,3,4].map(i=>boldArtLooks[(i+Math.floor(rnd()*boldArtLooks.length))%boldArtLooks.length]);
-      if(!looks.includes('sourceclash')) looks[0]='sourceclash';
-      if(!looks.includes('sourcemarble')) looks[1]='sourcemarble';
-      if(!looks.includes('sourceburst')) looks[2]='sourceburst';
+      // 奇抜案：mode（COLOR, PATTERN, LIGHT, MIX）に応じて反対色ルックがダイナミックに変化！
+      const baseExtra=extraSourceRecipes(mode);
+      looks=[0,1,2,3,4].map((look,i)=>baseExtra[(i+Math.floor(rnd()*baseExtra.length))%baseExtra.length]);
+      if(mode==='COLOR'&&!looks.includes('sourceclash')) looks[0]='sourceclash';
+      if(mode==='PATTERN'&&!looks.includes('sourcemarble')) looks[0]='sourcemarble';
+      if(mode==='LIGHT'&&!looks.includes('sourceburst')) looks[0]='sourceburst';
     }else{
       looks=baseLooks.map((look,i)=>baseLooks[(i+idx+Math.floor(rnd()*baseLooks.length))%baseLooks.length]);
     }
@@ -3808,7 +3816,7 @@ function makeSourceSets(mode){
       const order=[0,1,2,3,4].map(()=>Math.floor(rnd()*p.length));
       colors=order.map(i=>p[i%p.length]);
     }
-    const name=isExtra?'EXTRA / 03 反対色＆柄':(idx===0?`${baseName} / 01 調和`:`${baseName} / 02 ニュアンス`);
+    const name=isExtra?`EXTRA / 03 ${mode}`:(idx===0?`${baseName} / 01 調和`:`${baseName} / 02 ニュアンス`);
     return {
       name, isExtra, looks, colors, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
       tune:{
@@ -3819,11 +3827,11 @@ function makeSourceSets(mode){
         sculptShape:isExtra?'stiletto':'natural'
       },
       vars:isExtra?{
-        sourceform:.98,
-        sourcefield:.96,
-        sourceglow:.96,
-        stardust:.95,
-        flash:.98
+        sourceform:mode==='PATTERN'?1.0:.95,
+        sourcefield:mode==='PATTERN'?1.0:.92,
+        sourceglow:mode==='LIGHT'?1.0:.95,
+        stardust:mode==='LIGHT'?1.0:.92,
+        flash:mode==='LIGHT'?1.0:(mode==='PATTERN'?.85:.95)
       }:{
         sourceform:Math.min(1,.25+sourceProfile.density*.75),
         sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),
@@ -3888,10 +3896,8 @@ function renderSourceSets(){
       btn.dataset.paletteSaturation=set.paletteTuning.saturation.toFixed(6);
       btn.dataset.palette=set.sourcePalette.join(',');
     }
-    const code=document.createElement('span'); code.className='source-set-code';
-    code.textContent=set.isExtra?'★ EXTRA / 反対色＆柄':(idx===0?'01 HARMONY':'02 NUANCE');
     const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
-    btn.append(code,cv);
+    btn.append(cv);
     btn.onclick=()=>{
       box.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); selectedSourceSet=set; applySet(set);
       openSourceConfirm(set);
