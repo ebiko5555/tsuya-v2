@@ -2043,7 +2043,6 @@ async function startCamera(){
     document.body.classList.remove('source-planning','photo-frozen');
     canvas.width = video.videoWidth||1280; canvas.height = video.videoHeight||720;
     mode = 'live';
-    if(motionLab) motionLab.reset();
     smoothed = [];
     nailState.length = 0;
     trails.length = 0;
@@ -2274,7 +2273,6 @@ $('cmpBtn').onclick = openCompare;
 $('cmpClose').onclick = closeCompare;
 $('retryBtn').onclick = () => {
   mode='live';
-  if(motionLab) motionLab.reset();
   document.body.classList.remove('photo-frozen');
   $('snapBar').style.display='none';
   $('liveBtns').style.display='flex';
@@ -2505,11 +2503,11 @@ function recordTrails(){
   const now = performance.now();
   const cutoff = now - TRAIL_LIFE;
   while(trails.length && trails[0].born < cutoff) trails.shift();
-  if(!trailOn || !renderLandmarks.length){
+  if(!trailOn || !smoothed.length){
     lastTrailPositions.clear();
     return;
   }
-  renderLandmarks.forEach((lm,hi)=>{
+  smoothed.forEach((lm,hi)=>{
     FINGERS.forEach(([tip],fi)=>{
       const [x,y] = lmXY(lm[tip]);
       const key = hi * 5 + fi;
