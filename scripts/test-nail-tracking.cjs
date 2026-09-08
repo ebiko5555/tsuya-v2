@@ -74,13 +74,13 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
-test('artwork pages open an inspectable five-nail set before camera try-on',()=>{
+test('artwork pages open a five-nail set with a reliable return before camera try-on',()=>{
  assert.ok(html.includes('id="nailSetViewer"'));
  assert.ok(html.includes('id="setViewerNails"'));
- assert.ok(html.includes('id="setViewerDetail"'));
  assert.ok(html.includes('このセットを試着する'));
+ assert.ok(html.includes('作品ページへ戻る'));
  assert.ok(html.includes("$('workNails').addEventListener('click',openSetViewer)"));
- assert.ok(html.includes("button.addEventListener('click',()=>selectSetNail(i))"));
+ assert.ok(html.includes("$('nailSetBack').addEventListener('click',closeSetViewer)"));
  assert.ok(html.includes("document.getElementById('setViewerTry').href=tryRoute(current,artworkTryLength)"));
 });
 
