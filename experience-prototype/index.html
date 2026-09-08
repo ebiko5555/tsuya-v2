@@ -1905,7 +1905,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile101';
+const BUILD_VERSION = 'mobile102';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -3770,27 +3770,62 @@ function analyzeSource(source){
     light:Math.max(.04,Math.min(1,bright/used*3.4)), saturation:Math.max(.04,Math.min(1,satSum/used*1.45))
   };
 }
-function sourceRecipes(mode){
+function sourceRecipes(mode, profile){
+  const density = profile ? profile.density : 0.5;
+  const light = profile ? profile.light : 0.5;
+  const contrast = profile ? profile.contrast : 0.5;
+  const pForm = density > 0.42 ? 'sourceform' : 'grad';
+  const pField = contrast > 0.42 ? 'sourcefield' : 'nuance';
+  const pGlow = light > 0.42 ? 'sourceglow' : 'pearl';
   const recipes={
-    COLOR:[['COLOR',['nuance','sheer','grad','pearl','onecolor']]],
-    PATTERN:[['PATTERN',['sourceform','line','sourcefield','pearl','onecolor']]],
-    LIGHT:[['LIGHT',['sourceglow','mizuhikari','stardust','pearl','sheer']]],
-    MIX:[['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']]],
+    COLOR:[['COLOR',['nuance','sheer',pField,'pearl','onecolor']]],
+    PATTERN:[['PATTERN',[pForm,'line',pField,'pearl','onecolor']]],
+    LIGHT:[['LIGHT',[pGlow,'mizuhikari','stardust','pearl','sheer']]],
+    MIX:[['MIX',[pField,pForm,pField,pGlow,'onecolor']]],
   };
   return recipes[mode]||recipes.MIX;
 }
-function extraSourceRecipes(mode){
+function extraSourceRecipes(mode, profile){
+  const density = profile ? profile.density : 0.5;
+  const contrast = profile ? profile.contrast : 0.5;
+  const light = profile ? profile.light : 0.5;
+  let hero = 'sourceclash';
+  if(density > 0.45 && density >= light){
+    hero = 'sourceclash';
+  } else if(density <= 0.40 && contrast <= 0.45){
+    hero = 'sourcemarble';
+  } else if(light > 0.35 || contrast > 0.45){
+    hero = 'sourceburst';
+  }
   const recipes={
-    COLOR:['sourceclash','onecolor','sourceclash','chrome','sourceclash'],
-    PATTERN:['sourcemarble','sourceclash','sourceform','sourcefield','sourcemarble'],
-    LIGHT:['sourceburst','flash','sourceburst','mizuhikari','sourceglow'],
-    MIX:['sourceclash','sourcemarble','sourceburst','sourceclash','sourcemarble']
+    COLOR:[hero,'onecolor','sourceclash','chrome',hero],
+    PATTERN:[
+      density > 0.4 ? 'sourceclash' : 'sourcemarble',
+      'sourceform',
+      density > 0.4 ? 'sourcemarble' : 'sourcefield',
+      hero,
+      'sourcemarble'
+    ],
+    LIGHT:[
+      'sourceburst',
+      light > 0.4 ? 'flash' : 'mizuhikari',
+      hero,
+      'sourceglow',
+      'sourceburst'
+    ],
+    MIX:[
+      hero,
+      density > 0.4 ? 'sourceclash' : 'sourcemarble',
+      light > 0.35 ? 'sourceburst' : 'sourceform',
+      'sourcefield',
+      hero === 'sourcemarble' ? 'sourceclash' : 'sourcemarble'
+    ]
   };
   return recipes[mode]||recipes.MIX;
 }
 function makeSourceSets(mode){
   if(!sourceProfile) return [];
-  const recipe=sourceRecipes(mode)[0]||['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']];
+  const recipe=sourceRecipes(mode, sourceProfile)[0]||['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']];
   const [baseName,baseLooks]=recipe;
   const rnd=seeded((sourceProfile.designSeed||sourceProfile.sourceSeed||1)+701);
   return [0,1,2].map(idx=>{
@@ -3799,8 +3834,7 @@ function makeSourceSets(mode){
     const p=variants[idx%variants.length]||sourceProfile.palette;
     let looks;
     if(isExtra){
-      // 奇抜案：mode（COLOR, PATTERN, LIGHT, MIX）に応じて反対色ルックがダイナミックに変化！
-      const baseExtra=extraSourceRecipes(mode);
+      const baseExtra=extraSourceRecipes(mode, sourceProfile);
       looks=[0,1,2,3,4].map((look,i)=>baseExtra[(i+Math.floor(rnd()*baseExtra.length))%baseExtra.length]);
       if(mode==='COLOR'&&!looks.includes('sourceclash')) looks[0]='sourceclash';
       if(mode==='PATTERN'&&!looks.includes('sourcemarble')) looks[0]='sourcemarble';
