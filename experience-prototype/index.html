@@ -986,6 +986,9 @@
   .source-sets{display:grid; gap:7px; margin-top:10px}
   .source-set{display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; width:100%; min-height:72px; padding:8px 11px; border:1px solid rgba(255,255,255,.14); color:#fff; background:rgba(255,255,255,.025); text-align:left}
   .source-set.active{border-color:rgba(255,255,255,.7); background:rgba(255,255,255,.08)}
+  .source-set.is-extra{border-color:rgba(255,160,80,.38); background:rgba(255,160,80,.04)}
+  .source-set.is-extra.active{border-color:#ffa552; background:rgba(255,165,82,.14); box-shadow:0 0 14px rgba(255,165,82,.28)}
+  .source-set.is-extra .source-set-code{color:#ffa552; font-weight:700}
   .source-set-code{font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; color:rgba(255,255,255,.52)}
   .source-set canvas{width:150px; height:57px}
   .source-set-name{font-size:9px; letter-spacing:.08em; color:rgba(255,255,255,.72); white-space:nowrap}
@@ -1903,7 +1906,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile98';
+const BUILD_VERSION = 'mobile99';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -3516,10 +3519,45 @@ function sourceSeedFromPixels(data){
 function sourcePaletteTunings(seed){
   const rnd=seeded((seed%230000)+137);
   return [
-    {base:.25+rnd()*.06,saturation:2.75+rnd()*.40},
-    {base:.30+rnd()*.06,saturation:2.20+rnd()*.45},
-    {base:.22+rnd()*.06,saturation:3.05+rnd()*.40},
+    {base:.25+rnd()*.06,saturation:2.75+rnd()*.40,isExtra:false},
+    {base:.30+rnd()*.06,saturation:2.20+rnd()*.45,isExtra:false},
+    {base:.02+rnd()*.02,saturation:10.5+rnd()*.80,isExtra:true},
   ];
+}
+function boostVividRgb(r,g,b){
+  let r1=r/255, g1=g/255, b1=b/255;
+  const mx=Math.max(r1,g1,b1), mn=Math.min(r1,g1,b1);
+  let h=0, s=0, l=(mx+mn)/2;
+  if(mx!==mn){
+    const d=mx-mn;
+    s=l>.5?d/(2-mx-mn):d/(mx+mn);
+    switch(mx){
+      case r1: h=(g1-b1)/d+(g1<b1?6:0); break;
+      case g1: h=(b1-r1)/d+2; break;
+      case b1: h=(r1-g1)/d+4; break;
+    }
+    h/=6;
+  }
+  s=Math.min(1, Math.max(.30, s*1.75+.15));
+  if(l<.26) l=l*.3+.20;
+  else if(l>.78) l=.78-(l-.78)*.35;
+  else l=(l-.5)*1.2+.5;
+  l=Math.max(.18,Math.min(.82,l));
+  const hue2rgb=(p,q,t)=>{
+    if(t<0) t+=1;
+    if(t>1) t-=1;
+    if(t<1/6) return p+(q-p)*6*t;
+    if(t<1/2) return q;
+    if(t<2/3) return p+(q-p)*(2/3-t)*6;
+    return p;
+  };
+  const q=l<.5?l*(1+s):l+s-l*s;
+  const p=2*l-q;
+  return {
+    r: Math.round(hue2rgb(p,q,h+1/3)*255),
+    g: Math.round(hue2rgb(p,q,h)*255),
+    b: Math.round(hue2rgb(p,q,h-1/3)*255)
+  };
 }
 function extractSourcePalette(source,n,tuning={base:.28,saturation:2.8}){
   const c=document.createElement('canvas'),s=96;c.width=s;c.height=s;
@@ -3528,14 +3566,19 @@ function extractSourcePalette(source,n,tuning={base:.28,saturation:2.8}){
   for(let i=0;i<d.length;i+=4){
     const alpha=d[i+3]/255; if(alpha<.18) continue;
     const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b),sat=mx?((mx-mn)/mx):0,light=(mx+mn)/510;
-    if((sat<.08&&(light>.84||light<.14))||light>.97) continue;
+    if(tuning.isExtra){
+      if((sat<.10&&(light>.80||light<.16))||light>.96) continue;
+    } else {
+      if((sat<.08&&(light>.84||light<.14))||light>.97) continue;
+    }
     const k=`${r>>4}_${g>>4}_${b>>4}`;
     if(!buckets[k]) buckets[k]={r:0,g:0,b:0,c:0,s:0};
     const x=buckets[k];x.r+=r*alpha;x.g+=g*alpha;x.b+=b*alpha;x.c+=alpha;x.s+=sat*alpha;
   }
   const candidates=Object.values(buckets).map(x=>{
     const r=x.r/x.c,g=x.g/x.c,b=x.b/x.c,sat=x.s/x.c;
-    return {r,g,b,score:x.c*(tuning.base+sat*tuning.saturation)};
+    const satScore=tuning.isExtra?Math.pow(sat,1.45)*tuning.saturation:sat*tuning.saturation;
+    return {r,g,b,score:x.c*(tuning.base+satScore)};
   }).sort((a,b)=>b.score-a.score);
   const chosen=[];
   for(const x of candidates){
@@ -3544,7 +3587,13 @@ function extractSourcePalette(source,n,tuning={base:.28,saturation:2.8}){
     if(chosen.length>=n) break;
   }
   for(const x of candidates){if(chosen.length>=n)break;if(!chosen.includes(x))chosen.push(x);}
-  return chosen.slice(0,n).map(x=>rgb2hex(x.r,x.g,x.b));
+  return chosen.slice(0,n).map(x=>{
+    if(tuning.isExtra){
+      const b=boostVividRgb(x.r,x.g,x.b);
+      return rgb2hex(b.r,b.g,b.b);
+    }
+    return rgb2hex(x.r,x.g,x.b);
+  });
 }
 function analyzeSource(source){
   const c=document.createElement('canvas'), s=96; c.width=s; c.height=s;
@@ -3574,7 +3623,10 @@ function analyzeSource(source){
   const paletteTunings=sourcePaletteTunings(designSeed);
   const paletteVariants=paletteTunings.map(tuning=>{
     const colors=extractSourcePalette(source,8,tuning);
-    fallback.forEach(col=>{ if(colors.length<8&&!colors.includes(col)) colors.push(col); });
+    const fbList=tuning.isExtra
+      ? ['#ff2a6d','#05d9e8','#ffb703','#7928ca','#00f5d4','#111111']
+      : fallback;
+    fbList.forEach(col=>{ if(colors.length<8&&!colors.includes(col)) colors.push(col); });
     return colors.slice(0,8);
   });
   const palette=paletteVariants[0].slice();
@@ -3600,15 +3652,44 @@ function makeSourceSets(mode){
   const [baseName,baseLooks]=recipe;
   const rnd=seeded((sourceProfile.designSeed||sourceProfile.sourceSeed||1)+701);
   return [0,1,2].map(idx=>{
+    const isExtra=(idx===2);
     const variants=sourceProfile.paletteVariants||[sourceProfile.palette];
     const p=variants[idx%variants.length]||sourceProfile.palette;
-    const looks=baseLooks.map((look,i)=>baseLooks[(i+idx+Math.floor(rnd()*baseLooks.length))%baseLooks.length]);
+    let looks;
+    if(isExtra){
+      const extraPool=['sourceform','flash','mizuhikari','line','sourceglow','sourcefield'];
+      looks=[0,1,2,3,4].map(i=>extraPool[(i*2+Math.floor(rnd()*extraPool.length))%extraPool.length]);
+      if(!looks.includes('flash')) looks[1]='flash';
+      if(!looks.includes('sourceform')) looks[0]='sourceform';
+      if(!looks.includes('mizuhikari')) looks[3]='mizuhikari';
+    }else{
+      looks=baseLooks.map((look,i)=>baseLooks[(i+idx+Math.floor(rnd()*baseLooks.length))%baseLooks.length]);
+    }
     const order=[0,1,2,3,4].map(()=>Math.floor(rnd()*p.length));
+    const name=isExtra?'EXTRA / 03 奇抜':(idx===0?`${baseName} / 01 調和`:`${baseName} / 02 ニュアンス`);
     return {
-      name:`${baseName} / ${String(idx+1).padStart(2,'0')}`, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
+      name, isExtra, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
       colors:order.map(i=>p[i%p.length]),
-      tune:{gloss:Math.round((mode==='PATTERN'?72:96)+(rnd()-.5)*18),opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
-      vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.45+rnd()*.4,flash:.45+rnd()*.4}
+      tune:{
+        gloss:isExtra?100:Math.round((mode==='PATTERN'?72:96)+(rnd()-.5)*18),
+        opacity:96,
+        nailSize:95,
+        sculptLen:isExtra?126:118,
+        sculptShape:isExtra?'stiletto':'natural'
+      },
+      vars:isExtra?{
+        sourceform:.98,
+        sourcefield:.96,
+        sourceglow:.96,
+        stardust:.92,
+        flash:.98
+      }:{
+        sourceform:Math.min(1,.25+sourceProfile.density*.75),
+        sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),
+        sourceglow:Math.min(1,.25+sourceProfile.light*.8),
+        stardust:.45+rnd()*.4,
+        flash:.45+rnd()*.4
+      }
     };
   });
 }
@@ -3659,13 +3740,15 @@ function closeSourceConfirm(){
 function renderSourceSets(){
   const box=$('sourceSets'); box.innerHTML=''; sourceSets=makeSourceSets(sourceMode);
   sourceSets.forEach((set,idx)=>{
-    const btn=document.createElement('button'); btn.type='button'; btn.className='source-set'+(idx===0?' active':'');
+    const btn=document.createElement('button'); btn.type='button';
+    btn.className='source-set'+(idx===0?' active':'')+(set.isExtra?' is-extra':'');
     if(set.paletteTuning){
       btn.dataset.paletteBase=set.paletteTuning.base.toFixed(6);
       btn.dataset.paletteSaturation=set.paletteTuning.saturation.toFixed(6);
       btn.dataset.palette=set.sourcePalette.join(',');
     }
-    const code=document.createElement('span'); code.className='source-set-code'; code.textContent='5 NAIL SET';
+    const code=document.createElement('span'); code.className='source-set-code';
+    code.textContent=set.isExtra?'★ EXTRA / 奇抜':(idx===0?'01 HARMONY':'02 NUANCE');
     const cv=document.createElement('canvas'); cv.width=200; cv.height=76; drawSourceSetPreview(cv,set);
     btn.append(code,cv);
     btn.onclick=()=>{
