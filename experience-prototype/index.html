@@ -1455,6 +1455,27 @@
     body.art-page .work-custom::before{width:18px; height:18px; border-color:rgba(23,23,23,.38); color:#171717; background:rgba(255,255,255,.25); text-shadow:none; animation:none}
   }
 
+  /* 作品ページの小さな5本を入口にし、造形を読むための拡大鑑賞画面へつなぐ。 */
+  #workNails{border:0; padding:0; color:inherit; background:transparent; cursor:pointer}
+  #workNails::after{content:"TAP TO VIEW"; position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); white-space:nowrap; color:rgba(255,255,255,.52); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em}
+  .nail-set-viewer{position:fixed; z-index:260; inset:0; display:none; box-sizing:border-box; overflow:auto; padding:calc(22px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); color:#f2f1ed; background:#08090c}
+  .nail-set-viewer.open{display:flex; flex-direction:column; align-items:center}
+  .nail-set-close{position:absolute; left:14px; top:calc(12px + env(safe-area-inset-top)); min-height:42px; padding:0 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; color:#fff; background:rgba(255,255,255,.06); font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em}
+  .nail-set-kicker{margin:48px 0 7px; color:rgba(242,241,237,.5); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
+  .nail-set-title{margin:0; text-align:center; font:300 clamp(32px,10vw,48px)/1.05 "Times New Roman","Yu Mincho",serif; letter-spacing:.04em}
+  .nail-set-note{max-width:290px; margin:12px 0 20px; color:rgba(242,241,237,.64); font-size:11px; line-height:1.7; letter-spacing:.04em; text-align:center}
+  .set-viewer-nails{display:flex; align-items:flex-end; justify-content:center; gap:7px; width:100%; min-height:132px; margin:2px 0 20px}
+  .set-viewer-nails button{display:flex; align-items:flex-end; justify-content:center; width:54px; height:126px; padding:0; border:1px solid transparent; border-radius:8px; background:transparent; cursor:pointer}
+  .set-viewer-nails button.active{border-color:var(--set-accent,#d7b39e); background:rgba(255,255,255,.055); box-shadow:0 8px 24px rgba(0,0,0,.24)}
+  .set-viewer-nails canvas{width:50px; height:104px; filter:drop-shadow(0 10px 13px rgba(0,0,0,.42))}
+  .set-viewer-nails button:nth-child(1) canvas,.set-viewer-nails button:nth-child(5) canvas{height:86px}
+  .set-viewer-nails button:nth-child(2) canvas,.set-viewer-nails button:nth-child(4) canvas{height:96px}
+  .set-viewer-detail{display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; width:min(100%,340px); min-height:238px; border-top:1px solid rgba(255,255,255,.13); border-bottom:1px solid rgba(255,255,255,.13); padding:15px 0 18px}
+  .set-viewer-detail-label{margin-bottom:8px; color:var(--set-accent,#d7b39e); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
+  .set-viewer-detail canvas{width:126px; height:210px; filter:drop-shadow(0 16px 20px rgba(0,0,0,.44))}
+  .set-viewer-try{display:flex; align-items:center; justify-content:center; width:min(100%,340px); min-height:56px; margin-top:20px; border:0; border-radius:999px; color:#171717; background:var(--set-accent,#eadfce); text-decoration:none; font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
+  @media (min-width:820px){.nail-set-viewer{padding-top:9vh}.set-viewer-nails{gap:14px}.set-viewer-nails button{width:74px;height:166px}.set-viewer-nails canvas{width:66px;height:136px}.set-viewer-nails button:nth-child(1) canvas,.set-viewer-nails button:nth-child(5) canvas{height:113px}.set-viewer-nails button:nth-child(2) canvas,.set-viewer-nails button:nth-child(4) canvas{height:125px}}
+
   /* 試作44：写真を大きく見せ、その下の小さな3案から文字なしの拡大確認へ進む。 */
   body.custom-mode.source-planning .sheet-handle,
   body.custom-mode.source-planning .tabs,
@@ -1801,7 +1822,7 @@
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
   <div class="work-copy">
     <p class="work-text" id="workText"></p>
-    <div class="work-nails" id="workNails" aria-label="作品から作った5本のネイル"></div>
+    <button type="button" class="work-nails" id="workNails" aria-label="作品から作った5本のネイルを大きく見る"></button>
     <div class="work-actions">
       <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
         <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
@@ -1809,6 +1830,16 @@
       <a class="source-entry" href="?mode=custom" aria-label="写真からネイルを作る"><span class="source-entry-icon" aria-hidden="true"></span><span><span class="source-entry-title">SOURCE</span><span class="source-entry-sub">写真からつくる</span></span><span class="source-entry-arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
+</section>
+
+<section class="nail-set-viewer" id="nailSetViewer" aria-hidden="true" aria-label="ネイルセットを大きく見る">
+  <button type="button" class="nail-set-close" id="nailSetClose">← BACK</button>
+  <p class="nail-set-kicker" id="nailSetKicker">01 / COLOR — NAIL SET</p>
+  <h2 class="nail-set-title" id="nailSetTitle">色</h2>
+  <p class="nail-set-note">5本のセットを見て、気になるチップを押すとさらに大きく見られます。</p>
+  <div class="set-viewer-nails" id="setViewerNails" aria-label="5本のネイルチップ"></div>
+  <div class="set-viewer-detail" id="setViewerDetail" aria-live="polite"></div>
+  <a class="set-viewer-try" id="setViewerTry" href="?try=COLOR&amp;length=short">このセットを試着する</a>
 </section>
 
 <div id="saveHint" role="dialog" aria-modal="true" aria-label="画像を端末へ保存する">
@@ -4075,6 +4106,7 @@ updateCmpBadge();
   const layer=document.getElementById('workLayer');
   const workFilm=document.getElementById('workFilm');
   const index=document.getElementById('workIndex');
+  const nailSetViewer=document.getElementById('nailSetViewer');
   const params=new URLSearchParams(location.search);
   document.getElementById('siteHome').href='../touch-hands/';
   const route=(name,value)=>{
@@ -4574,6 +4606,38 @@ updateCmpBadge();
       box.appendChild(cv);
     }));
   }
+  let selectedSetNail=2;
+  function selectSetNail(index){
+    const nails=[...document.querySelectorAll('#setViewerNails button')];
+    if(!nails.length)return;
+    selectedSetNail=Math.max(0,Math.min(index,nails.length-1));
+    nails.forEach((button,i)=>button.classList.toggle('active',i===selectedSetNail));
+    const source=nails[selectedSetNail].querySelector('canvas');
+    const detail=document.getElementById('setViewerDetail'); detail.innerHTML='';
+    const label=document.createElement('span'); label.className='set-viewer-detail-label'; label.textContent='NAIL '+String(selectedSetNail+1).padStart(2,'0')+' / DETAIL';
+    const canvas=document.createElement('canvas'); canvas.width=384; canvas.height=640;
+    canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);
+    canvas.setAttribute('aria-label',(selectedSetNail+1)+'本目を拡大表示');
+    detail.append(label,canvas);
+  }
+  function openSetViewer(){
+    const work=works[current];
+    document.getElementById('nailSetKicker').textContent=work.no+' / '+current+' — NAIL SET';
+    document.getElementById('nailSetTitle').textContent=work.title;
+    nailSetViewer.style.setProperty('--set-accent',work.accent);
+    renderNailPreview(current,'setViewerNails',artworkTryLength);
+    const nails=[...document.querySelectorAll('#setViewerNails canvas')];
+    nails.forEach((canvas,i)=>{
+      const button=document.createElement('button'); button.type='button';
+      button.setAttribute('aria-label',(i+1)+'本目を大きく見る');
+      canvas.replaceWith(button); button.appendChild(canvas);
+      button.addEventListener('click',()=>selectSetNail(i));
+    });
+    document.getElementById('setViewerTry').href=tryRoute(current,artworkTryLength);
+    nailSetViewer.classList.add('open'); nailSetViewer.setAttribute('aria-hidden','false');
+    selectSetNail(selectedSetNail);
+  }
+  function closeSetViewer(){nailSetViewer.classList.remove('open'); nailSetViewer.setAttribute('aria-hidden','true');}
   installArtworkLooks();
   buildLooks();
 
@@ -4671,8 +4735,15 @@ updateCmpBadge();
     artworkTryLength=normalizeTryLength(button.dataset.length);
     renderLengthChoice($('workLengthChoice'),artworkTryLength);
     renderNailPreview(current,'workNails',artworkTryLength);
+    if(nailSetViewer.classList.contains('open'))openSetViewer();
   });
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&layer.classList.contains('open'))closeWork();});
+  $('workNails').addEventListener('click',openSetViewer);
+  $('nailSetClose').addEventListener('click',closeSetViewer);
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape')return;
+    if(nailSetViewer.classList.contains('open'))closeSetViewer();
+    else if(layer.classList.contains('open'))closeWork();
+  });
   window.addEventListener('pageshow',playWorkFilmWhenReady);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) playWorkFilmWhenReady();});
   layer.addEventListener('pointerdown',playWorkFilmWhenReady,{passive:true});
