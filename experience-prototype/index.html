@@ -1898,27 +1898,18 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile90"></script>
-<script src="./motion-lab-core.js?v=mobile97"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile97';
+const BUILD_VERSION = 'mobile98';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
 let currentColor = '#b76e79';
 let currentLook = 'onecolor';
 let smoothed = [];
-let renderLandmarks = [];
-const landmarkTracker = TsuyaTracking.createTracker();
-let trackingSession=0, pendingTrackingSession=-1, trackingFrameAt=0, lastVideoTime=-1;
-let motionLab = (typeof TsuyaMotionLabCore !== 'undefined')
-  ? TsuyaMotionLabCore.createSession(()=>document.createElement('canvas'))
-  : null;
-let pendingMotionFrameId=null;
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
 const TRY_LENGTHS={short:102,long:164};
@@ -1978,11 +1969,9 @@ function ensureLive(){
    片手だけにすると29ms・26fpsになる。スマホは片手で持つので2つ探す意味がない。 */
     liveHands = makeHands({maxNumHands:1, modelComplexity:0, minDetectionConfidence:0.5, minTrackingConfidence:0.3});
     liveHands.onResults(res => {
-      if(pendingTrackingSession!==trackingSession||mode!=='live'){liveBusy=false;return;}
       const lms = res.multiHandLandmarks || [];
-      if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms,trackingFrameAt); }
-      else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;lastTrailPositions.clear();}
-      if(motionLab)motionLab.finish(pendingMotionFrameId,lms,smoothed,performance.now());
+      if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms); }
+      else if(performance.now() - lastSeenT > 280){ smoothed.length = 0; nailState.length = 0; lastTrailPositions.clear(); }
       liveBusy = false;
     });
     liveReady = liveHands.initialize();
@@ -1990,8 +1979,34 @@ function ensureLive(){
   return liveReady;
 }
 let lastSeenT = 0;
-function updateLandmarks(lms,frameAt=performance.now()){
-  smoothed=landmarkTracker.update(lms,frameAt,performance.now());
+function updateLandmarks(lms){
+  const now = performance.now();
+  const dt = Math.min(0.1, Math.max(0.001, (now - (updateLandmarks._t||now-16))/1000));
+  updateLandmarks._t = now;
+  lms.forEach((lm,h) => {
+    if(!smoothed[h] || smoothed[h].length !== lm.length){
+      smoothed[h] = lm.map(p=>({x:p.x, y:p.y, vx:0, vy:0}));
+      return;
+    }
+    lm.forEach((p,i)=>{
+      const s = smoothed[h][i];
+      [['x','vx'],['y','vy']].forEach(([ax,v])=>{
+        /* 26fps 出るようになったぶん、平滑を強めても遅れない。
+           実測で静止時の揺れが 72px→18px、角度が 19°→7° に下がった値 */
+        const d = p[ax]-s[ax];
+        if(Math.abs(d) < 0.0030){ s[v]*=0.5; return; }
+        const dv = d/dt;
+        s[v] += alphaFor(1.0, dt)*(dv - s[v]);
+        const cutoff = 0.55 + 32*Math.abs(s[v]);
+        s[ax] += alphaFor(cutoff, dt)*d;
+      });
+    });
+  });
+  smoothed.length = lms.length;
+}
+function alphaFor(cutoff, dt){
+  const r = 2*Math.PI*cutoff*dt;
+  return r/(r+1);
 }
 
 /* ================= カメラ ================= */
@@ -1999,7 +2014,6 @@ let cameraStarting=false;
 async function startCamera(){
   if(cameraStarting) return;
   cameraStarting=true;
-  trackingSession++;lastVideoTime=-1;landmarkTracker.reset();renderLandmarks=[];
   setStatus('準備しています…');
   const sourceCapture=document.body.classList.contains('source-camera-capture');
   if(!sourceCapture){
@@ -2064,12 +2078,9 @@ function startLoops(){
     if(mode === 'live' && video.readyState >= 2){
       const sourceCapture=document.body.classList.contains('source-camera-capture');
       const sp = SKIN_FX_PRESETS[skinFx];
-      const motionFrame=motionLab?motionLab.select(now,video,landmarkTracker.project(now)):null;
-      const cameraImage=motionFrame?motionFrame.image:video;
-      if(motionLab)motionLab.tick(now);
       ctx.save();
       if(mirrored()){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
-      ctx.drawImage(cameraImage,0,0,canvas.width,canvas.height);
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
       if(sp&&!sourceCapture){
         /* 縮めて描き戻すとぼける。色味の処理も縮小側でやれば画素数が 1/25 で済む */
         const sw = Math.max(16, Math.round(canvas.width/sp.div));
@@ -2077,7 +2088,7 @@ function startLoops(){
         if(skinCv.width!==sw || skinCv.height!==sh){ skinCv.width=sw; skinCv.height=sh; }
         skinCtx.globalCompositeOperation='source-over';
         skinCtx.globalAlpha=1;
-        skinCtx.drawImage(cameraImage,0,0,sw,sh);
+        skinCtx.drawImage(video,0,0,sw,sh);
         skinCtx.globalCompositeOperation='soft-light';   /* 中間調を持ち上げて暖かく */
         skinCtx.globalAlpha=sp.lift;
         skinCtx.fillStyle='#ffe9da';
@@ -2097,12 +2108,10 @@ function startLoops(){
         /* 素材撮影時はメッセージを維持し、シャッター時に消去する */
       }
       else{
-        renderLandmarks=motionFrame?motionFrame.landmarks:landmarkTracker.project(now);
-        if(!renderLandmarks.length){nailState.length=0;lastTrailPositions.clear();}
         recordTrails();
         drawTrails(dt);
         drawNails(dt);
-        if(renderLandmarks.length > 0){
+        if(smoothed.length > 0){
           handLostFrames = 0;
           $('guide')?.classList.add('hand-detected');
         }else{
@@ -2116,17 +2125,10 @@ function startLoops(){
     requestAnimationFrame(draw);
   })(lastT);
   (async function detect(){
-    if(mode === 'live' && !cameraStarting && video.readyState >= 2 && !liveBusy && video.currentTime!==lastVideoTime && !document.body.classList.contains('source-camera-capture')){
-      if(motionLab&&lastVideoTime>=0&&video.currentTime<lastVideoTime)motionLab.reset();
+    if(mode === 'live' && !cameraStarting && video.readyState >= 2 && !liveBusy && !document.body.classList.contains('source-camera-capture')){
       liveBusy = true;
-      lastVideoTime=video.currentTime;trackingFrameAt=performance.now();pendingTrackingSession=trackingSession;
-      try{
-        const captured=motionLab?motionLab.begin(video,trackingFrameAt):null;
-        if(motionLab&&!captured)throw new Error('Comparison frame unavailable');
-        pendingMotionFrameId=captured?captured.id:null;
-        await liveHands.send({image: captured?captured.image:video});
-      }
-      catch(e){ if(motionLab)motionLab.cancel(pendingMotionFrameId);liveBusy = false; }
+      try{ await liveHands.send({image: video}); }
+      catch(e){ liveBusy = false; }
     }
     requestAnimationFrame(detect);
   })();
@@ -2343,7 +2345,7 @@ async function loadImage(file){
 }
 
 /* ================= 爪の描画 ================= */
-const FINGERS = [[4,3,2],[8,7,6],[12,11,10],[16,15,14],[20,19,18]];
+const FINGERS = [[4,3],[8,7],[12,11],[16,15],[20,19]];
 /* 手のひらの骨。どれか1本が奥行きでつぶれても、一番長いものは残る */
 const PALM_BONES = [[0,5],[0,17],[5,17],[0,9],[0,13],[9,17]];
 /* 手のひらの大きさに対する、指節の長さの目安（手を平らにした時の実測比の75%）。
@@ -2351,7 +2353,7 @@ const PALM_BONES = [[0,5],[0,17],[5,17],[0,9],[0,13],[9,17]];
    そのままだと爪が消えてしまうため。 */
 const MIN_LEN_RATIO = [0.240, 0.173, 0.188, 0.173, 0.143];   /* 親指は常に角度がつくので下限を高めに */
 const nailState = [];
-function mirrored(){ return typeof motionLab!=='undefined'&&motionLab?.replay?motionLab.replayMirror:facing==='user'; }
+function mirrored(){ return facing==='user'; }
 function lmXY(p){
   let x = p.x*canvas.width, y = p.y*canvas.height;
   if(mirrored()) x = canvas.width - x;
@@ -2362,7 +2364,7 @@ function drawNails(dt=1/60){
   const alpha = tuneVals.opacity/100;
   const gloss = tuneVals.gloss/100;
   const scale = tuneVals.nailSize/100;
-  renderLandmarks.forEach((lm, hi)=>{
+  smoothed.forEach((lm, hi)=>{
     /* この手が画面上でどれくらいの大きさか（指の向きに左右されない基準） */
     let handRef = 0;
     PALM_BONES.forEach(([a,b])=>{
@@ -2370,29 +2372,17 @@ function drawNails(dt=1/60){
       const d = Math.hypot(ax-bx, ay-by);
       if(d > handRef) handRef = d;
     });
-    FINGERS.forEach(([tip,dip,pip], fi)=>{
-      const [rawTx,rawTy]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]), [px,py]=lmXY(lm[pip]);
+    FINGERS.forEach(([tip,dip], fi)=>{
+      const [tx,ty]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]);
       /* 奥行きで指節がつぶれても、爪がここまでしか小さくならないようにする */
-      const dTip = Math.hypot(rawTx-dx, rawTy-dy);
-      const rawLen = Math.max(dTip, handRef*MIN_LEN_RATIO[fi]);
+      const rawLen = Math.max(Math.hypot(tx-dx,ty-dy), handRef*MIN_LEN_RATIO[fi]);
       if(rawLen < 4) return;
-      /* 位置は計測した指先を使う。関節の合成方向で位置を作り直すと、
-         指を曲げたときにチップが指先から離れてしまう。 */
-      const tx = rawTx, ty = rawTy;
-      const previous = nailState[hi*5+fi];
-      const minAxis = Math.max(4, handRef*.04);
-      const midLength = Math.hypot(dx-px,dy-py);
-      /* 指先がカメラを向いたときは短いベクトルのノイズで回転させない。
-         まだ履歴がなければ、中節から向きを取得できるまで描画を待つ。 */
-      let rawAng;
-      if(dTip >= minAxis) rawAng = Math.atan2(rawTy-dy,rawTx-dx);
-      else if(previous) rawAng = previous.ang;
-      else if(midLength >= minAxis) rawAng = Math.atan2(dy-py,dx-px);
-      else return;
-      const st=typeof motionLab!=='undefined'&&motionLab
-        ?motionLab.pose(hi*5+fi,nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt,TsuyaTracking.stabilizeNail)
-        :TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
-      nailState[hi*5+fi]=st;
+      const rawAng = Math.atan2(ty-dy,tx-dx);
+      const st = nailState[hi*5+fi] || (nailState[hi*5+fi] = {len:rawLen, ang:rawAng});
+      const dLen = rawLen - st.len;
+      const dAng0 = ((rawAng - st.ang + Math.PI*3) % (Math.PI*2)) - Math.PI;
+      if(Math.abs(dLen) > st.len*0.035) st.len += dLen*Math.min(1, 0.12 + Math.abs(dLen)/st.len);
+      if(Math.abs(dAng0) > 0.035) st.ang += dAng0*Math.min(1, 0.15 + Math.abs(dAng0)*2);
       const len = st.len, ang = st.ang;
       const lenPct = tuneVals.sculptLen/100;
       const shape = tuneVals.sculptShape;
@@ -2400,7 +2390,7 @@ function drawNails(dt=1/60){
       const h = len*0.94*scale*lenPct;
       const pushOut = len*(0.10 + 0.30*(lenPct-1));
       ctx.save();
-      ctx.translate(st.x+Math.cos(ang)*pushOut, st.y+Math.sin(ang)*pushOut);
+      ctx.translate(tx+Math.cos(ang)*pushOut, ty+Math.sin(ang)*pushOut);
       ctx.rotate(ang+Math.PI/2);
       nailPath(w,h,shape);
       ctx.clip();
@@ -4940,31 +4930,6 @@ updateCmpBadge();
     prepareHub();
   }
 })();
-</script>
-<script src="./motion-lab.js?v=mobile97"></script>
-<script>
-/* The normal try-on path uses matched timing and continuous smoothing as default.
-   Comparison mode mounts the interactive UI panel over the shared session. */
-if(new URLSearchParams(location.search).get('tracking')==='compare'&&document.body.classList.contains('work-tryon')){
-  motionLab=TsuyaMotionLab.mount({
-    session: motionLab,
-    video,canvas,ready:ensureLive,startCamera,mirrored,
-    stream:()=>stream,running:()=>mode==='live',
-    length:applyTryLength,
-    pause(){mode='idle';},
-    clearPoses(){nailState.length=0;trails.length=0;lastTrailPositions.clear();},
-    resetTracking(){
-      trackingSession++;lastVideoTime=-1;lastSeenT=0;
-      landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;
-      trails.length=0;lastTrailPositions.clear();
-    },
-    stopStream(){if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}},
-    runReplay(){
-      canvas.width=video.videoWidth||1280;canvas.height=video.videoHeight||720;
-      mode='live';$('startOverlay').style.display='none';setGuide('枠に手をかざしてください');startLoops();
-    }
-  });
-}
 </script>
 </body>
 </html>
