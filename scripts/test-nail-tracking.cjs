@@ -64,6 +64,13 @@ test('actual draw function uses reduced glow and a short-lived sparkle',()=>{
  assert.equal(calls,1);assert.equal(strokes,1);assert.ok(maxAlpha<.35);
  sandbox.performance.now=()=>570;vm.runInContext('drawTrails();',sandbox);assert.equal(calls,1);
 });
+test('try-on gloss has no fixed diagonal haze and appears only when nail direction meets the light',()=>{
+ const draw=html.slice(html.indexOf('function drawNails('),html.indexOf('function flatLook('));
+ const gel=html.slice(html.indexOf('function paintGelTip('),html.indexOf('function nailShapeSpecimen('));
+ assert.ok(draw.includes('const specStrength = Math.pow'));
+ assert.ok(draw.includes('if(specAlpha>.018)'));
+ assert.ok(!gel.includes('const shine=c.createLinearGradient'));
+});
 test('all ten artwork presets restore a restrained trail and no late override hides it',()=>{
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});

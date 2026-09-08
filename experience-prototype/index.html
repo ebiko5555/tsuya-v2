@@ -2401,8 +2401,12 @@ function drawNails(dt=1/60){
         /* 指の傾き・手の向きに応じて、光のハイライトが爪の表面を滑らかに移動 */
         const hx = locLx * (w * 0.36);
         const hy = -h * 0.18 + locLy * (h * 0.14);
-        const facing = Math.max(0.18, Math.min(1.0, 0.45 - locLy * 0.55));
-        const specAlpha = alpha * gloss * facing;
+        /* 常時の白い筋ではなく、爪の向きが光源へ向いた時だけ反射を立てる。 */
+        const alignment = Math.max(0,Math.min(1,0.5-locLy*0.5));
+        const specStrength = Math.pow(Math.max(0,(alignment-.52)/.48),1.7);
+        const specAlpha = alpha * gloss * specStrength;
+
+        if(specAlpha>.018){
 
         /* 1. メインの鏡面ハイライト（ソフトボックス・ライトの鋭い光沢） */
         ctx.save();
@@ -2426,7 +2430,7 @@ function drawNails(dt=1/60){
         beamGrad.addColorStop(0.6, `rgba(255,255,255,${0.30 * specAlpha * 1.5})`);
         beamGrad.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.fillStyle = beamGrad;
-        ctx.fillRect(-w * 0.05, -h * 0.38, w * 0.10, h * 0.76);
+        ctx.fillRect(-w * 0.035, -h * 0.34, w * 0.07, h * 0.68);
         ctx.restore();
 
         /* 3. 反対側の微細なアンビエント反射光（環境光のキワ） */
@@ -2435,6 +2439,7 @@ function drawNails(dt=1/60){
         ctx.beginPath();
         ctx.ellipse(-hx * 0.75, hy * 0.8, w * 0.08, h * 0.16, 0.2, 0, Math.PI * 2);
         ctx.fill();
+        }
       }
       ctx.restore();
     });
@@ -3008,14 +3013,6 @@ function paintGelTip(c,w,h,seed,gloss=1,lookKey=null){
   const edge=c.createLinearGradient(0,-h*.58,0,-h*.26);
   edge.addColorStop(0,'rgba(255,255,255,.22)'); edge.addColorStop(.55,'rgba(255,239,232,.055)'); edge.addColorStop(1,'rgba(255,255,255,0)');
   c.globalAlpha=keep*.62; c.fillStyle=edge; c.fillRect(-w*.5,-h*.6,w,h*.38);
-  if(gloss>.04 && !isFlat){
-    const shine=c.createLinearGradient(-w*.36,-h*.48,w*.28,h*.30);
-    shine.addColorStop(0,'rgba(255,255,255,0)'); shine.addColorStop(.38,'rgba(255,255,255,.05)');
-    shine.addColorStop(.52,'rgba(255,255,255,.31)'); shine.addColorStop(.64,'rgba(255,255,255,.045)'); shine.addColorStop(1,'rgba(255,255,255,0)');
-    c.globalAlpha=keep*Math.min(.55,.16+gloss*.34); c.fillStyle=shine; c.fillRect(-w*.5,-h*.58,w,h*1.14);
-    c.globalAlpha=keep*(.10+gloss*.16); c.fillStyle='rgba(255,255,255,.9)';
-    for(let i=0;i<2;i++){ const x=(rnd()-.5)*w*.48, y=(-.18+rnd()*.36)*h; c.fillRect(x,y,Math.max(.7,w*.018),Math.max(1.2,h*.035)); }
-  }
   /* デザイン属性に連動した、透明なジェルの下に沈んだ極細線と箔。
      無地・シアー系ではゼロになり、余計なノイズやゴミ感を完全に防ぐ。 */
   if(profile.wire > 0){
