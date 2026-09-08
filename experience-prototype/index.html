@@ -1864,13 +1864,13 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile91"></script>
+<script src="./tracking-core.js?v=mobile90"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile91';
+const BUILD_VERSION = 'mobile90';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -1878,7 +1878,7 @@ let currentColor = '#b76e79';
 let currentLook = 'onecolor';
 let smoothed = [];
 let renderLandmarks = [];
-const landmarkTracker = TsuyaTracking.createHandTracker();
+const landmarkTracker = TsuyaTracking.createTracker();
 let trackingSession=0, pendingTrackingSession=-1, trackingFrameAt=0, lastVideoTime=-1;
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
@@ -1951,7 +1951,7 @@ function ensureLive(){
 }
 let lastSeenT = 0;
 function updateLandmarks(lms,frameAt=performance.now()){
-  smoothed=landmarkTracker.update(lms,frameAt,performance.now(),canvas.width/canvas.height);
+  smoothed=landmarkTracker.update(lms,frameAt,performance.now());
 }
 
 /* ================= カメラ ================= */
@@ -2319,12 +2319,6 @@ function drawNails(dt=1/60){
       const d = Math.hypot(ax-bx, ay-by);
       if(d > handRef) handRef = d;
     });
-    const pf=lm.palmFrame;
-    const handFrame=pf?{
-      x:mirrored()?canvas.width-pf.x*canvas.height:pf.x*canvas.height,
-      y:pf.y*canvas.height,scale:pf.scale*canvas.height,
-      ang:mirrored()?Math.PI-pf.ang:pf.ang,generation:pf.generation
-    }:null;
     FINGERS.forEach(([tip,dip,pip], fi)=>{
       const [rawTx,rawTy]=lmXY(lm[tip]), [dx,dy]=lmXY(lm[dip]), [px,py]=lmXY(lm[pip]);
       /* 奥行きで指節がつぶれても、爪がここまでしか小さくならないようにする */
@@ -2341,10 +2335,10 @@ function drawNails(dt=1/60){
          まだ履歴がなければ、中節から向きを取得できるまで描画を待つ。 */
       let rawAng;
       if(dTip >= minAxis) rawAng = Math.atan2(rawTy-dy,rawTx-dx);
-      else if(previous&&(!handFrame||previous.generation===handFrame.generation)) rawAng = handFrame&&previous.local?previous.local.ang+handFrame.ang:previous.ang;
+      else if(previous) rawAng = previous.ang;
       else if(midLength >= minAxis) rawAng = Math.atan2(dy-py,dx-px);
       else return;
-      const st=TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng,frame:handFrame},dt);
+      const st=TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
       nailState[hi*5+fi]=st;
       const len = st.len, ang = st.ang;
       const lenPct = tuneVals.sculptLen/100;
