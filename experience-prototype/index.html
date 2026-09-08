@@ -1864,13 +1864,13 @@
   </div>
 </section>
 
-<script src="./tracking-core.js?v=mobile92"></script>
+<script src="./tracking-core.js?v=mobile90"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile92';
+const BUILD_VERSION = 'mobile90';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -1879,7 +1879,6 @@ let currentLook = 'onecolor';
 let smoothed = [];
 let renderLandmarks = [];
 const landmarkTracker = TsuyaTracking.createTracker();
-const closeupHold = TsuyaTracking.createCloseupHold();
 let trackingSession=0, pendingTrackingSession=-1, trackingFrameAt=0, lastVideoTime=-1;
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
@@ -1943,7 +1942,7 @@ function ensureLive(){
       if(pendingTrackingSession!==trackingSession||mode!=='live'){liveBusy=false;return;}
       const lms = res.multiHandLandmarks || [];
       if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms,trackingFrameAt); }
-      else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];lastTrailPositions.clear();}
+      else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;lastTrailPositions.clear();}
       liveBusy = false;
     });
     liveReady = liveHands.initialize();
@@ -1960,7 +1959,7 @@ let cameraStarting=false;
 async function startCamera(){
   if(cameraStarting) return;
   cameraStarting=true;
-  trackingSession++;lastVideoTime=-1;landmarkTracker.reset();closeupHold.reset();renderLandmarks=[];
+  trackingSession++;lastVideoTime=-1;landmarkTracker.reset();renderLandmarks=[];
   setStatus('準備しています…');
   const sourceCapture=document.body.classList.contains('source-camera-capture');
   if(!sourceCapture){
@@ -1991,7 +1990,6 @@ async function startCamera(){
     canvas.width = video.videoWidth||1280; canvas.height = video.videoHeight||720;
     mode = 'live';
     smoothed = [];
-    closeupHold.reset();
     nailState.length = 0;
     trails.length = 0;
     lastTrailPositions.clear();
@@ -2055,17 +2053,9 @@ function startLoops(){
         /* 素材撮影時はメッセージを維持し、シャッター時に消去する */
       }
       else{
-        const tracked=landmarkTracker.project(now);
-        if(tracked.length){
-          renderLandmarks=tracked;
-          closeupHold.remember(tracked,canvas.width,canvas.height);
-        }else{
-          renderLandmarks=closeupHold.project(now);
-        }
-        const closeupActive=closeupHold.active();
+        renderLandmarks=landmarkTracker.project(now);
         if(!renderLandmarks.length){nailState.length=0;lastTrailPositions.clear();}
-        if(!closeupActive)recordTrails();
-        else lastTrailPositions.clear();
+        recordTrails();
         drawTrails(dt);
         drawNails(dt);
         if(renderLandmarks.length > 0){

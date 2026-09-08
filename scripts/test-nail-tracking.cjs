@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {createTracker,createCloseupHold,smoothNail,stabilizeNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
+const {createTracker,smoothNail,stabilizeNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
 const frame=x=>[Array.from({length:21},(_,i)=>({x:x+i*.001,y:.5+i*.001,z:0}))];
 
 test('small held movements converge instead of remaining in a dead zone',()=>{
@@ -69,9 +69,8 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});
  assert.ok(!html.includes('drawTrails=function'));
  assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createTracker()'));
- assert.ok(html.includes('tracking-core.js?v=mobile92'));
- assert.ok(html.includes("const BUILD_VERSION = 'mobile92'"));
- assert.ok(html.includes('TsuyaTracking.createCloseupHold()'));
+ assert.ok(html.includes('tracking-core.js?v=mobile90'));
+ assert.ok(html.includes("const BUILD_VERSION = 'mobile90'"));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
@@ -210,24 +209,4 @@ test('foreshortened fingers hold the last direction and degenerate first frames 
  draw.draw(hand);assert.equal(draw.poses()[0].ang,angle);
  const collapsed=[Array.from({length:21},()=>({x:.5,y:.5,z:0}))];
  assert.equal(drawingHarness().draw(collapsed).length,0);
-});
-
-test('close-up hold keeps a near hand and enlarges its five tips after detection ends',()=>{
- const hold=createCloseupHold();
- const hand=frame(.35);
- hand[0][0]={x:.5,y:.75,z:0};hand[0][5]={x:.35,y:.55,z:0};hand[0][9]={x:.5,y:.48,z:0};hand[0][13]={x:.65,y:.55,z:0};hand[0][17]={x:.75,y:.68,z:0};
- hold.remember(hand,1280,720);
- const initial=hold.project(100),expanded=hold.project(700);
- assert.equal(initial.length,1);assert.equal(initial[0].length,21);assert.equal(hold.active(),true);
- const d0=Math.hypot(initial[0][8].x-initial[0][0].x,initial[0][8].y-initial[0][0].y);
- const d1=Math.hypot(expanded[0][8].x-expanded[0][0].x,expanded[0][8].y-expanded[0][0].y);
- assert.ok(d1>d0*1.3);
- assert.equal(hand[0][8].x,.358);
-});
-
-test('close-up hold does not mask an ordinary small or reset hand loss',()=>{
- const hold=createCloseupHold();
- hold.remember(frame(.5),1280,720);
- assert.deepEqual(hold.project(100),[]);
- hold.reset();assert.deepEqual(hold.project(200),[]);assert.equal(hold.active(),false);
 });
