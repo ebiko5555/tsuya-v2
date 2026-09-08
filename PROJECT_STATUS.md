@@ -36,9 +36,9 @@ SPECIAL 01 公開確認: 2026-09-06、`754ce5a` を `origin main` へpush成功�
 出典: 利用者による「試着したネイルチップをちゃんと大きく表示して設置するのはどこにしたらいいだろう」「特に作品ページのチップ」「それ作ってみて」という指示。
 
 - 作品ページの5本の小さな見本を、`TAP TO VIEW` として押せる入口に変更。ライブ試着とは別の全画面「NAIL SET」へ開く。
-- 閲覧画面では5本を幅50px前後・高さ104px前後で並べ、一本を選ぶと幅126px・高さ210pxで拡大する。選択中のチップと番号を明示し、5本を切り替えられる。
-- 閲覧画面の「このセットを試着する」は、作品と選択済みのSHORT/LONGを保った既存のカメラ試着導線へ進む。追跡処理は変更しない。
-- `scripts/test-nail-tracking.cjs` 24件成功、JavaScript構文と`git diff --check`成功。公開版を390×844で確認し、作品ページ→セット閲覧→1本目の拡大→試着URLの生成を確認。実装コミット `9781ad6` を `origin main` へpush、Pages run `34203653301` 成功。確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?work=COLOR&v=9781ad6`。
+- 閲覧画面では5本を幅62px前後・高さ130px前後で一緒に大きく表示する。一本ずつ選ぶ操作は置かない。
+- 閲覧画面の「このセットを試着する」は、作品と選択済みのSHORT/LONGを保った既存のカメラ試着導線へ進む。上部のBACKと下部の「作品ページへ戻る」はどちらも閲覧画面を閉じる。追跡処理は変更しない。
+- `scripts/test-nail-tracking.cjs` 24件成功、JavaScript構文と`git diff --check`成功。初版の実装コミット `9781ad6` に続き、選択操作を除き戻る導線を追加した `ff45236` を `origin main` へpush、Pages run `34207976789` 成功。確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?work=COLOR&v=ff45236`。
 
 ### 試作92の取り消し・試作90へ復帰（2026-09-08）
 
