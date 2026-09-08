@@ -69,7 +69,8 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});
  assert.ok(!html.includes('drawTrails=function'));
  assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createTracker()'));
- assert.ok(!html.includes('tracking-core.js?v='));
+ assert.ok(html.includes('tracking-core.js?v=mobile90'));
+ assert.ok(html.includes("const BUILD_VERSION = 'mobile90'"));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
@@ -134,13 +135,17 @@ test('SOURCE keeps four modes but offers one completed five-nail set for each',(
   assert.ok(!html.includes("['FLASH'"));
 });
 
-test('clipped nail renders add a gel-tip depth and reflection layer',()=>{
-  assert.ok(html.includes('function paintGelTip(c,w,h,seed,gloss=1)'));
-  assert.ok(html.includes('paintGelTip(ctx,w,h,hi*5+fi,gloss)'));
-  assert.ok(html.includes('paintGelTip(c,24,heights[i],i+11,.92)'));
-  assert.ok(html.includes('paintGelTip(c,w,h,index+31,tuneVals.gloss/100)'));
-  assert.ok(html.includes('透明なジェルの下に沈んだ極細線と箔を置く'));
-  assert.ok(html.includes('for(let i=0;i<7;i++)'));
+test('gel rendering retains depth and respects plain versus artwork decoration',()=>{
+  let fills=0,strokes=0;
+  const c={globalAlpha:1,save(){},restore(){},fillRect(){fills++;},translate(){},rotate(){},beginPath(){},moveTo(){},quadraticCurveTo(){},stroke(){strokes++;},createLinearGradient(){return {addColorStop(){}};}};
+  const code=html.slice(html.indexOf('function getFoilWireProfile('),html.indexOf('function nailShapeSpecimen('));
+  const box={c,seeded:()=>()=>.5,flatLook:()=>false};
+  vm.createContext(box);vm.runInContext(code,box);
+  vm.runInContext("paintGelTip(c,30,60,0,1,'onecolor')",box);
+  assert.ok(fills>=3);assert.equal(strokes,0);
+  const plain=fills;
+  vm.runInContext("paintGelTip(c,30,60,0,1,'artSculpt')",box);
+  assert.ok(fills-plain>plain);assert.equal(strokes,3);
 });
 
 test('camera uses the strongest skin correction by default without recoloring nails',()=>{
@@ -148,4 +153,60 @@ test('camera uses the strongest skin correction by default without recoloring na
   assert.ok(html.includes("let skinFx='white'"));
   assert.ok(html.includes("const sp = SKIN_FX_PRESETS[skinFx]"));
   assert.ok(html.includes('drawNails(dt);'));
+});
+
+// Run the actual pose-to-Canvas path; only material painting is stubbed.
+function drawingHarness(){
+ const translations=[];
+ const gradient={addColorStop(){}};
+ const ctx=new Proxy({translate(x,y){translations.push([x,y]);},createRadialGradient(){return gradient;}},{get(o,k){return k in o?o[k]:()=>{};}});
+ const box={TsuyaTracking:{stabilizeNail},ctx,canvas:{width:1280,height:720},facing:'environment',performance:{now:()=>0},tuneVals:{opacity:96,gloss:0,nailSize:100,sculptLen:164,sculptShape:'natural'},renderLandmarks:[],sparkT:0,nailPath(){},paintByKey(){},paintGelTip(){},nailLooks:Array(5).fill('onecolor'),nailColors:Array(5).fill('#ffffff')};
+ vm.createContext(box);
+ vm.runInContext(html.slice(html.indexOf('const FINGERS ='),html.indexOf('function flatLook(')),box);
+ return {box,draw(lm,dt=1/60){box.renderLandmarks=lm;translations.length=0;box.dt=dt;vm.runInContext('drawNails(dt)',box);return translations.map(p=>[...p]);},poses(){return vm.runInContext('nailState',box);}};
+}
+function movingHand(x){
+ const lm=Array.from({length:21},()=>({x,y:.7,z:0}));
+ for(let f=0;f<5;f++)for(let j=1;j<=4;j++)lm[f*4+j]={x:x+f*.03,y:.7-j*.06,z:0};
+ return [lm];
+}
+test('the drawn nails never reverse during constant motion across inference delays',()=>{
+ for(const latency of [30,40,50,80])for(const fps of [30,60,120]){
+  const tracker=createTracker(),draw=drawingHarness();let sample=-1,previous=null,worst=0;
+  for(let i=0;i<fps*2;i++){
+   const now=i*1000/fps,k=Math.floor((now-latency)/(1000/30));
+   if(k>=0&&k!==sample){tracker.update(movingHand(.3+.15*k/30),k*1000/30,now);sample=k;}
+   const positions=draw.draw(tracker.project(now),1/fps);
+   if(now>500&&positions.length){if(previous!==null)worst=Math.min(worst,positions[0][0]-previous);previous=positions[0][0];}
+  }
+  assert.ok(worst>=-.01,`latency=${latency}, fps=${fps}, reversal=${worst}`);
+ }
+});
+test('projection is independent of repeated reads and holds bounded prediction until loss',()=>{
+ const t=createTracker();for(let i=0;i<30;i++)t.update(frame(.3+i*.005),i*1000/30,i*1000/30+40);
+ const first=t.project(1010);assert.deepEqual(t.project(1010),first);
+ const held=t.project(1080);assert.deepEqual(held,first);
+ assert.deepEqual(t.project(1160),[]);
+});
+test('translation does not release stationary angle or size noise',()=>{
+ let pose=stabilizeNail(null,{x:300,y:200,len:40,ang:1},1/60);
+ for(let i=1;i<180;i++){
+  pose=stabilizeNail(pose,{x:300+3*i,y:200,len:40+Math.sin(i*1.7)*.7,ang:1+Math.sin(i*1.3)*.04},1/60);
+  assert.equal(pose.ang,1);assert.equal(pose.len,40);
+ }
+ assert.ok(Math.abs(pose.x-837)<1.5);
+});
+test('a bent finger stays anchored to its measured tip and uses the distal direction',()=>{
+ const draw=drawingHarness(),hand=movingHand(.4);
+ hand[0][2]={x:.4-30/1280,y:.4-15/720,z:0};
+ hand[0][3]={x:.4,y:.4,z:0};hand[0][4]={x:.4+30/1280,y:.4,z:0};
+ draw.draw(hand);const p=draw.poses()[0];
+ assert.equal(p.x,hand[0][4].x*1280);assert.equal(p.y,hand[0][4].y*720);assert.equal(p.ang,0);
+});
+test('foreshortened fingers hold the last direction and degenerate first frames are skipped',()=>{
+ const draw=drawingHarness(),hand=movingHand(.4);draw.draw(hand);const angle=draw.poses()[0].ang;
+ hand[0][4]={...hand[0][3],x:hand[0][3].x+.0001};
+ draw.draw(hand);assert.equal(draw.poses()[0].ang,angle);
+ const collapsed=[Array.from({length:21},()=>({x:.5,y:.5,z:0}))];
+ assert.equal(drawingHarness().draw(collapsed).length,0);
 });

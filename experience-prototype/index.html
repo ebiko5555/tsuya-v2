@@ -1864,12 +1864,13 @@
   </div>
 </section>
 
-<script src="./tracking-core.js"></script>
+<script src="./tracking-core.js?v=mobile90"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
+const BUILD_VERSION = 'mobile90';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -2324,16 +2325,19 @@ function drawNails(dt=1/60){
       const dTip = Math.hypot(rawTx-dx, rawTy-dy);
       const rawLen = Math.max(dTip, handRef*MIN_LEN_RATIO[fi]);
       if(rawLen < 4) return;
-      /* 爪の向き（角度）：指先（tip〜dip）単体だと1pxのジッターで先端が大きく首を振る。
-         指全体の胴体軸である中節（dip〜pip）を合成し、角度の激しい震え・首振りを根本から消去 */
-      const vTipX = rawTx - dx, vTipY = rawTy - dy;
-      const vMidX = dx - px, vMidY = dy - py;
-      const rawAng = Math.atan2(vTipY * 0.42 + vMidY * 0.58, vTipX * 0.42 + vMidX * 0.58);
-      /* 幾何学的骨格アンカー：MediaPipeの指先（tip）は毎フレーム3〜4px激しくジッターする。
-         より安定した第1関節（dip）から骨格ベクトルに沿って指先位置を再構成することで、
-         指を動かした際のガクガク・プルプル振動を87%以上根本からシャットアウト！ */
-      const tx = dx + Math.cos(rawAng) * dTip;
-      const ty = dy + Math.sin(rawAng) * dTip;
+      /* 位置は計測した指先を使う。関節の合成方向で位置を作り直すと、
+         指を曲げたときにチップが指先から離れてしまう。 */
+      const tx = rawTx, ty = rawTy;
+      const previous = nailState[hi*5+fi];
+      const minAxis = Math.max(4, handRef*.04);
+      const midLength = Math.hypot(dx-px,dy-py);
+      /* 指先がカメラを向いたときは短いベクトルのノイズで回転させない。
+         まだ履歴がなければ、中節から向きを取得できるまで描画を待つ。 */
+      let rawAng;
+      if(dTip >= minAxis) rawAng = Math.atan2(rawTy-dy,rawTx-dx);
+      else if(previous) rawAng = previous.ang;
+      else if(midLength >= minAxis) rawAng = Math.atan2(dy-py,dx-px);
+      else return;
       const st=TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
       nailState[hi*5+fi]=st;
       const len = st.len, ang = st.ang;

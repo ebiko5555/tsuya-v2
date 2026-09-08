@@ -35,18 +35,17 @@
     function project(now){
       if(sampleAt===null||now-receivedAt>140)return [];
       const age=Math.max(0,(now-sampleAt)/1000);
-      // Extrapolate only recent, consistent motion; never continue across lost detections.
-      const recent=age<=.065;
+      // Cap prediction, then hold it until a new observation or the loss timeout.
+      // Expiring an offset between observations makes a moving hand jump backward.
       return hands.map(lm=>lm.map(s=>{
         const out={x:s.x,y:s.y,z:s.z};
-        for(const [axis,vKey,rawVKey,cKey,extKey] of [['x','vx','rawVX','cx','extrapX'],['y','vy','rawVY','cy','extrapY']]){
+        for(const [axis,vKey,rawVKey,cKey] of [['x','vx','rawVX','cx'],['y','vy','rawVY','cy']]){
           const conKey=axis==='x'?'consistentX':'consistentY';
-          const active=recent&&s[conKey]>=2&&Math.abs(s[rawVKey])>.012&&s[vKey]*s[rawVKey]>0;
+          const active=s[conKey]>=2&&Math.abs(s[rawVKey])>.012&&s[vKey]*s[rawVKey]>0;
           const horizon=Math.min(.045,age+1/(2*Math.PI*s[cKey]));
           const targetExtrap=active?clamp(s[vKey]*horizon,-.018,.018):0;
-          // Smooth the extrapolation offset transition so it never rolls back or jumps abruptly
-          s[extKey]=(s[extKey]||0)+(targetExtrap-(s[extKey]||0))*0.65;
-          out[axis]+=s[extKey];
+          // Projection is read-only: its result must not depend on display refresh rate.
+          out[axis]+=targetExtrap;
         }
         return out;
       }));
@@ -74,10 +73,13 @@
     const meanMove=Math.hypot(nextMean.x-previous.x,nextMean.y-previous.y);
     const rawLength=Math.abs(target.len-previous.len), meanLength=Math.abs(nextMean.len-previous.len);
     const rawAngle=Math.abs(angleDelta(target.ang,previous.ang)), meanAngle=Math.abs(angleDelta(nextMean.ang,previous.ang));
-    const entering=rawMove>positionNoise*1.4||meanMove>positionNoise*.78||rawLength>lengthNoise*1.4||meanLength>lengthNoise*.78||rawAngle>angleNoise*1.4||meanAngle>angleNoise*.78;
-    const continuing=rawMove>positionNoise*.44||meanMove>positionNoise*.28||rawLength>lengthNoise*.44||meanLength>lengthNoise*.28||rawAngle>angleNoise*.44||meanAngle>angleNoise*.28;
-    const moving=previous.moving?continuing:entering;
-    if(!moving)return {...previous,mean:nextMean,moving:false};
+    // Translation must not unlock unrelated angle or size noise.
+    const isMoving=(wasMoving,raw,mean,noise)=>wasMoving
+      ?raw>noise*.44||mean>noise*.28
+      :raw>noise*1.4||mean>noise*.78;
+    const movingPos=isMoving(previous.movingPos,rawMove,meanMove,positionNoise);
+    const movingAng=isMoving(previous.movingAng,rawAngle,meanAngle,angleNoise);
+    const movingLen=isMoving(previous.movingLen,rawLength,meanLength,lengthNoise);
     // Position tracks quickly for responsive hand motion
     const followPos=alpha(18+rawMove/Math.max(target.len,1)*25,safeDt);
     // Angle uses a refined hydraulic damper to stop high-frequency flutter from whipping the nail tip
@@ -85,12 +87,13 @@
     // Length uses smooth settling to eliminate breathing jitter
     const followLen=alpha(10+rawLength/Math.max(target.len,1)*20,safeDt);
     return {
-      x:previous.x+(target.x-previous.x)*followPos,
-      y:previous.y+(target.y-previous.y)*followPos,
-      len:previous.len+(target.len-previous.len)*followLen,
-      ang:previous.ang+angleDelta(target.ang,previous.ang)*followAng,
+      x:previous.x+(movingPos?(target.x-previous.x)*followPos:0),
+      y:previous.y+(movingPos?(target.y-previous.y)*followPos:0),
+      len:previous.len+(movingLen?(target.len-previous.len)*followLen:0),
+      ang:previous.ang+(movingAng?angleDelta(target.ang,previous.ang)*followAng:0),
       mean:nextMean,
-      moving:true
+      movingPos,movingAng,movingLen,
+      moving:movingPos||movingAng||movingLen
     };
   }
   function createTrailSampler(){
