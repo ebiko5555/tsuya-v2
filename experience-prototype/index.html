@@ -970,6 +970,8 @@
   #sourcePreview{width:70px; height:70px; object-fit:cover; background:#17181b}
   .source-meta{min-width:0; color:rgba(255,255,255,.52); font:500 8px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
   .source-meta strong{display:block; overflow:hidden; margin-bottom:2px; color:#fff; font-size:10px; font-weight:500; text-overflow:ellipsis; white-space:nowrap}
+  .source-motif-pick{display:block; grid-column:1 / -1; width:100%; min-height:38px; margin-top:8px; border:1px solid rgba(255,255,255,.38); color:#fff; background:rgba(255,255,255,.06); font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
+  .source-motif-pick.active{border-color:#fff; background:#fff; color:#08090c}
   .source-modes{display:none; gap:5px; margin-top:12px; overflow-x:auto; scrollbar-width:none}
   .source-modes.ready{display:flex}
   .source-mode{display:flex; flex:1; min-width:64px; min-height:48px; padding:5px 7px 4px; align-items:center; justify-content:center; gap:4px; border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.56); background:none; font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em}
@@ -1717,6 +1719,7 @@
       <img class="source-large-image" id="sourceLargeImage" alt="選択した写真">
       <canvas id="sourcePreview" width="160" height="160"></canvas>
       <div class="source-meta"><strong id="sourceName">SOURCE</strong><span id="sourceReading">色・線・光を読み取ります</span></div>
+      <button type="button" class="source-motif-pick" id="sourceMotifPick">モチーフをタップして指定</button>
     </div>
     <div class="source-modes" id="sourceModes">
       <button type="button" class="source-mode" data-source-mode="COLOR" aria-label="色を使う"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="11" cy="13" r="6" fill="#e96d67" stroke="none"/><circle cx="20" cy="12" r="6" fill="#dfbd4f" stroke="none"/><circle cx="16" cy="20" r="6" fill="#6ca9a6" stroke="none"/></svg><span class="mode-label">COLOR</span></button>
@@ -3418,24 +3421,31 @@ let sourceMode='MIX';
 let sourceSets=[];
 let selectedSourceSet=null;
 let sourceTryLength='short';
+let sourceInputRef=null;
+let sourceInputLabel='FOUND MATERIAL';
+let sourceRandomSalt=0;
+let sourcePickMode=false;
 function renderLengthChoice(box,length){
   if(!box) return;
   const active=normalizeTryLength(length);
   box.querySelectorAll('[data-length]').forEach(button=>button.classList.toggle('active',button.dataset.length===active));
 }
-function sourceCanvasFrom(input){
+function sourceCanvasFrom(input, focus=null){
   const out=document.createElement('canvas'); out.width=160; out.height=160;
   const ow=input.videoWidth||input.naturalWidth||input.width||160;
   const oh=input.videoHeight||input.naturalHeight||input.height||160;
   const sc=Math.max(out.width/ow,out.height/oh), sw=out.width/sc, sh=out.height/sc;
-  const sx=(ow-sw)/2, sy=(oh-sh)/2;
+  const fx=Math.max(0,Math.min(1,focus&&Number.isFinite(focus.x)?focus.x:.5));
+  const fy=Math.max(0,Math.min(1,focus&&Number.isFinite(focus.y)?focus.y:.5));
+  const sx=Math.max(0,Math.min(ow-sw,fx*ow-sw/2));
+  const sy=Math.max(0,Math.min(oh-sh,fy*oh-sh/2));
   out.getContext('2d').drawImage(input,sx,sy,sw,sh,0,0,out.width,out.height);
-  applyAutomaticSubjectMask(out);
+  applyAutomaticSubjectMask(out, {x:(fx*ow-sx)/sw, y:(fy*oh-sy)/sh});
   return out;
 }
 /* 写真の外周に多い色を背景候補とみなし、中央のまとまりを優先する。
    完全な切り抜きではなく、背景をデザイン分析へ混ぜないための重み付きマスク。 */
-function applyAutomaticSubjectMask(canvas){
+function applyAutomaticSubjectMask(canvas, focus={x:.5,y:.5}){
   const cx=canvas.getContext('2d',{willReadFrequently:true});
   const w=canvas.width,h=canvas.height,img=cx.getImageData(0,0,w,h),d=img.data;
   const ring=Math.max(8,Math.round(Math.min(w,h)*.09)), buckets={};
@@ -3455,11 +3465,11 @@ function applyAutomaticSubjectMask(canvas){
       const dr=r-q[0],dg=g-q[1],db=b-q[2];
       colorDistance=Math.min(colorDistance,Math.sqrt(dr*dr*.30+dg*dg*.59+db*db*.11));
     }
-    const nx=(x/(w-1)-.5)/.5,ny=(y/(h-1)-.5)/.5;
+    const nx=(x/(w-1)-focus.x)/.5,ny=(y/(h-1)-focus.y)/.5;
     const center=Math.max(0,1-Math.sqrt(nx*nx*.72+ny*ny));
     const edge=Math.min(x,y,w-1-x,h-1-y)/ring;
     const edgePenalty=Math.max(0,1-edge);
-    raw[p]=Math.max(0,Math.min(1,(colorDistance-16)/58+center*.52-edgePenalty*.58));
+    raw[p]=Math.max(0,Math.min(1,(colorDistance-16)/58+center*.68-edgePenalty*.58));
   }}
   /* 小さな隙間を平均化し、被写体の中を一つのまとまりとして扱う。 */
   const smooth=new Float32Array(w*h);
@@ -3552,7 +3562,9 @@ function analyzeSource(source){
   points.sort((a,b)=>b.m-a.m);
   const used=Math.max(1,totalWeight),avg=sum/used, variance=Math.max(0,sum2/used-avg*avg);
   const fallback=['#d8c4b8','#806c65','#ece7df','#384047','#b9977d','#f7f4ef'];
-  const sourceSeed=sourceSeedFromPixels(data),paletteTunings=sourcePaletteTunings(sourceSeed);
+  const sourceSeed=sourceSeedFromPixels(data);
+  const designSeed=(sourceSeed^sourceRandomSalt)>>>0;
+  const paletteTunings=sourcePaletteTunings(designSeed);
   const paletteVariants=paletteTunings.map(tuning=>{
     const colors=extractSourcePalette(source,8,tuning);
     fallback.forEach(col=>{ if(colors.length<8&&!colors.includes(col)) colors.push(col); });
@@ -3560,7 +3572,7 @@ function analyzeSource(source){
   });
   const palette=paletteVariants[0].slice();
   return {
-    palette:palette.slice(0,8), paletteVariants, paletteTunings, sourceSeed, points:points.slice(0,42),
+    palette:palette.slice(0,8), paletteVariants, paletteTunings, sourceSeed, designSeed, points:points.slice(0,42),
     angle:.5*Math.atan2(ey,ex), density:Math.max(.08,Math.min(1,(edge/Math.max(1,count))/62)),
     contrast:Math.max(.05,Math.min(1,Math.sqrt(variance)/70)),
     light:Math.max(.04,Math.min(1,bright/used*3.4)), saturation:Math.max(.04,Math.min(1,satSum/used*1.45))
@@ -3577,13 +3589,19 @@ function sourceRecipes(mode){
 }
 function makeSourceSets(mode){
   if(!sourceProfile) return [];
-  return sourceRecipes(mode).map(([name,looks],idx)=>{
-    const p=(sourceProfile.paletteVariants&&sourceProfile.paletteVariants[idx])||sourceProfile.palette;
+  const recipe=sourceRecipes(mode)[0]||['MIX',['sourcefield','sourceform','sourcefield','sourceglow','onecolor']];
+  const [baseName,baseLooks]=recipe;
+  const rnd=seeded((sourceProfile.designSeed||sourceProfile.sourceSeed||1)+701);
+  return [0,1,2].map(idx=>{
+    const variants=sourceProfile.paletteVariants||[sourceProfile.palette];
+    const p=variants[idx%variants.length]||sourceProfile.palette;
+    const looks=baseLooks.map((look,i)=>baseLooks[(i+idx+Math.floor(rnd()*baseLooks.length))%baseLooks.length]);
+    const order=[0,1,2,3,4].map(()=>Math.floor(rnd()*p.length));
     return {
-      name, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
-      colors:[p[idx%p.length],p[(idx+3)%p.length],p[(idx+1)%p.length],p[(idx+4)%p.length],p[(idx+2)%p.length]],
-      tune:{gloss:mode==='PATTERN'?72:96,opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
-      vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.55+idx*.15,flash:.55+idx*.12}
+      name:`${baseName} / ${String(idx+1).padStart(2,'0')}`, looks, sourcePalette:p.slice(), paletteTuning:sourceProfile.paletteTunings&&sourceProfile.paletteTunings[idx],
+      colors:order.map(i=>p[i%p.length]),
+      tune:{gloss:Math.round((mode==='PATTERN'?72:96)+(rnd()-.5)*18),opacity:96,nailSize:95,sculptLen:118,sculptShape:'natural'},
+      vars:{sourceform:Math.min(1,.25+sourceProfile.density*.75),sourcefield:Math.min(1,.22+sourceProfile.contrast*.72),sourceglow:Math.min(1,.25+sourceProfile.light*.8),stardust:.45+rnd()*.4,flash:.45+rnd()*.4}
     };
   });
 }
@@ -3651,8 +3669,10 @@ function renderSourceSets(){
   });
   selectedSourceSet=sourceSets[0]||null;
 }
-  function ingestSource(input,label){
-  const sampled=sourceCanvasFrom(input); sourceProfile=analyzeSource(sampled);
+  function ingestSource(input,label,focus=null){
+  sourceInputRef=input; sourceInputLabel=label||'FOUND MATERIAL';
+  sourceRandomSalt=(Math.floor(Math.random()*0xffffffff)>>>0);
+  const sampled=sourceCanvasFrom(input,focus); sourceProfile=analyzeSource(sampled);
   const ow=input.videoWidth||input.naturalWidth||input.width||sampled.width;
   const oh=input.videoHeight||input.naturalHeight||input.height||sampled.height;
   const preview=$('sourcePreview'), pc=preview.getContext('2d');
@@ -3678,6 +3698,7 @@ function renderSourceSets(){
   $('artSignal').setAttribute('aria-label','選択した画像のプレビュー');
   $('sourceName').textContent=label||'FOUND MATERIAL';
   $('sourceFrame').dataset.sourceSeed=String(sourceProfile.sourceSeed);
+  $('sourceFrame').dataset.designSeed=String(sourceProfile.designSeed);
   const deg=Math.round(sourceProfile.angle*180/Math.PI);
   $('sourceReading').textContent=`${sourceProfile.palette.length} COLORS / LINE ${Math.round(sourceProfile.density*100)} / LIGHT ${Math.round(sourceProfile.light*100)} / ${deg}°`;
   $('sourceFrame').classList.add('ready'); $('sourceModes').classList.add('ready'); $('sourceTry').classList.add('ready');
@@ -3694,6 +3715,25 @@ function renderSourceSets(){
   renderChips(sourceProfile.palette); buildLooks(); renderSourceSets();
   document.querySelectorAll('[data-source-mode]').forEach(x=>x.classList.toggle('active',x.dataset.sourceMode===sourceMode));
 }
+function sourcePointFromEvent(event, element){
+  const rect=element.getBoundingClientRect();
+  if(!rect.width||!rect.height) return null;
+  const input=sourceInputRef;
+  const ow=input&&(input.videoWidth||input.naturalWidth||input.width)||rect.width;
+  const oh=input&&(input.videoHeight||input.naturalHeight||input.height)||rect.height;
+  const scale=Math.min(rect.width/ow,rect.height/oh), dw=ow*scale, dh=oh*scale;
+  const x=(event.clientX-rect.left-(rect.width-dw)/2)/dw;
+  const y=(event.clientY-rect.top-(rect.height-dh)/2)/dh;
+  return {x:Math.max(0,Math.min(1,x)),y:Math.max(0,Math.min(1,y))};
+}
+function pickSourceMotif(event, element){
+  if(!sourcePickMode||!sourceInputRef) return;
+  const point=sourcePointFromEvent(event,element); if(!point) return;
+  sourcePickMode=false;
+  $('sourceMotifPick').classList.remove('active');
+  $('sourceMotifPick').textContent='モチーフを指定しました';
+  ingestSource(sourceInputRef,sourceInputLabel,point);
+}
 function activateSourceTab(){
   const tab=document.querySelector('.tab[data-t="source"]'); if(!tab) return;
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -3705,6 +3745,14 @@ $('sourceInput').addEventListener('change',async e=>{
   const file=e.target.files[0]; if(!file) return;
   const img=await loadImage(file); ingestSource(img,file.name.replace(/\.[^.]+$/,'').slice(0,24)); e.target.value='';
 });
+$('sourceMotifPick').onclick=()=>{
+  if(!sourceInputRef) return;
+  sourcePickMode=!sourcePickMode;
+  $('sourceMotifPick').classList.toggle('active',sourcePickMode);
+  $('sourceMotifPick').textContent=sourcePickMode?'画像をタップしてください':'モチーフをタップして指定';
+};
+$('sourceLargeImage').addEventListener('click',e=>pickSourceMotif(e,$('sourceLargeImage')));
+$('sourcePreview').addEventListener('click',e=>pickSourceMotif(e,$('sourcePreview')));
 $('sourceCamera').onclick=()=>{
   if(mode!=='live'||video.readyState<2){ $('sourceReading').textContent='CAMERA IS NOT READY'; return; }
   ingestSource(video,'CAMERA / FOUND MATERIAL');
