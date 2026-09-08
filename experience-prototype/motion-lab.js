@@ -1,7 +1,7 @@
 (function(root){
   'use strict';
   function mount(api){
-    const session=TsuyaMotionLabCore.createSession(()=>document.createElement('canvas'));
+    const session=api?.session||TsuyaMotionLabCore.createSession(()=>document.createElement('canvas'));
     document.body.classList.add('motion-lab');
     const style=document.createElement('style');
     style.textContent=`

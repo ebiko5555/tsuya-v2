@@ -1899,13 +1899,13 @@
 </section>
 
 <script src="./tracking-core.js?v=mobile90"></script>
-<script src="./motion-lab-core.js?v=mobile96"></script>
+<script src="./motion-lab-core.js?v=mobile97"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile96';
+const BUILD_VERSION = 'mobile97';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -1915,7 +1915,10 @@ let smoothed = [];
 let renderLandmarks = [];
 const landmarkTracker = TsuyaTracking.createTracker();
 let trackingSession=0, pendingTrackingSession=-1, trackingFrameAt=0, lastVideoTime=-1;
-let motionLab=null, pendingMotionFrameId=null;
+let motionLab = (typeof TsuyaMotionLabCore !== 'undefined')
+  ? TsuyaMotionLabCore.createSession(()=>document.createElement('canvas'))
+  : null;
+let pendingMotionFrameId=null;
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
 const TRY_LENGTHS={short:102,long:164};
@@ -2026,6 +2029,7 @@ async function startCamera(){
     document.body.classList.remove('source-planning','photo-frozen');
     canvas.width = video.videoWidth||1280; canvas.height = video.videoHeight||720;
     mode = 'live';
+    if(motionLab) motionLab.reset();
     smoothed = [];
     nailState.length = 0;
     trails.length = 0;
@@ -2268,6 +2272,7 @@ $('cmpBtn').onclick = openCompare;
 $('cmpClose').onclick = closeCompare;
 $('retryBtn').onclick = () => {
   mode='live';
+  if(motionLab) motionLab.reset();
   document.body.classList.remove('photo-frozen');
   $('snapBar').style.display='none';
   $('liveBtns').style.display='flex';
@@ -4936,11 +4941,13 @@ updateCmpBadge();
   }
 })();
 </script>
-<script src="./motion-lab.js?v=mobile96"></script>
+<script src="./motion-lab.js?v=mobile97"></script>
 <script>
-/* The normal try-on path is unchanged; comparison is explicitly opt-in. */
+/* The normal try-on path uses matched timing and continuous smoothing as default.
+   Comparison mode mounts the interactive UI panel over the shared session. */
 if(new URLSearchParams(location.search).get('tracking')==='compare'&&document.body.classList.contains('work-tryon')){
   motionLab=TsuyaMotionLab.mount({
+    session: motionLab,
     video,canvas,ready:ensureLive,startCamera,mirrored,
     stream:()=>stream,running:()=>mode==='live',
     length:applyTryLength,
