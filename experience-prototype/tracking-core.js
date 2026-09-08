@@ -52,6 +52,83 @@
     }
     return {update,project,reset};
   }
+  // Fit the shared palm motion separately from articulation of individual fingers.
+  // Coordinates are isotropic (x is multiplied by the camera aspect ratio).
+  function createHandTracker(){
+    const palmIndices=[0,5,9,13,17],motion=createTracker();
+    let states=[],sampleAt=null,aspect=1,generation=0;
+    function reset(){motion.reset();states=[];sampleAt=null;generation++;}
+    function fit(points,reference){
+      const x=points.reduce((n,p)=>n+p.x,0)/points.length;
+      const y=points.reduce((n,p)=>n+p.y,0)/points.length;
+      let a=0,b=0,d=0;
+      reference.forEach((r,i)=>{
+        a+=r.x*(points[i].x-x)+r.y*(points[i].y-y);
+        b+=r.x*(points[i].y-y)-r.y*(points[i].x-x);
+        d+=r.x*r.x+r.y*r.y;
+      });
+      return {x,y,scale:Math.hypot(a,b)/Math.max(d,1e-9),ang:Math.atan2(b,a),generation};
+    }
+    function referenceFor(points){
+      const x=points.reduce((n,p)=>n+p.x,0)/points.length;
+      const y=points.reduce((n,p)=>n+p.y,0)/points.length;
+      const scale=Math.sqrt(points.reduce((n,p)=>n+(p.x-x)**2+(p.y-y)**2,0)/points.length);
+      if(scale<.005)return null;
+      return points.map(p=>({x:(p.x-x)/scale,y:(p.y-y)/scale}));
+    }
+    function update(input,at,received=at,cameraAspect=1){
+      if(sampleAt!==null&&at<=sampleAt)return project(received);
+      if(!input.length||input.some(lm=>lm.length!==21||lm.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))){
+        reset();return [];
+      }
+      const nextAspect=Number.isFinite(cameraAspect)&&cameraAspect>0?cameraAspect:1;
+      const gap=sampleAt===null?Infinity:at-sampleAt;
+      if(gap>180||states.length!==input.length||aspect!==nextAspect||input.some((lm,i)=>
+        !states[i]||Math.hypot(lm[0].x-states[i].wrist.x,lm[0].y-states[i].wrist.y)>.22))reset();
+      aspect=nextAspect;
+      const dt=clamp(gap/1000,1/120,.1),next=[];
+      for(let h=0;h<input.length;h++){
+        const lm=input[h],palm=palmIndices.map(i=>({x:lm[i].x*aspect,y:lm[i].y}));
+        const previous=states[h],reference=previous?.reference||referenceFor(palm);
+        if(!reference){reset();return [];}
+        const frame=fit(palm,reference);
+        if(frame.scale<.005){reset();return [];}
+        const co=Math.cos(frame.ang),si=Math.sin(frame.ang);
+        const points=lm.map((p,i)=>{
+          const dx=p.x*aspect-frame.x,dy=p.y-frame.y;
+          const x=(co*dx+si*dy)/frame.scale,y=(-si*dx+co*dy)/frame.scale;
+          const old=previous?.points[i];
+          if(!old)return {x,y,z:p.z||0,history:[{x,y}]};
+          const history=[...old.history,{x,y}].slice(-3);
+          // A single bad inference must not detach a chip from the hand.
+          const median=axis=>[...history].sort((a,b)=>a[axis]-b[axis])[Math.floor(history.length/2)][axis];
+          const mx=history.length===3?median('x'):x,my=history.length===3?median('y'):y;
+          const error=Math.hypot(mx-old.x,my-old.y);
+          const follow=alpha(1.25+clamp((error-.025)*35,0,10),dt);
+          return {x:old.x+(mx-old.x)*follow,y:old.y+(my-old.y)*follow,z:p.z||0,history};
+        });
+        next.push({reference,points,wrist:{x:lm[0].x,y:lm[0].y}});
+      }
+      states=next;sampleAt=at;
+      motion.update(input.map(lm=>palmIndices.map(i=>lm[i])),at,received);
+      return project(received);
+    }
+    function project(now){
+      const palms=motion.project(now);
+      if(palms.length!==states.length)return [];
+      return palms.map((palm,h)=>{
+        const frame=fit(palm.map(p=>({x:p.x*aspect,y:p.y})),states[h].reference);
+        const co=Math.cos(frame.ang),si=Math.sin(frame.ang);
+        const lm=states[h].points.map(p=>({
+          x:(frame.x+frame.scale*(co*p.x-si*p.y))/aspect,
+          y:frame.y+frame.scale*(si*p.x+co*p.y),z:p.z
+        }));
+        lm.palmFrame=frame;
+        return lm;
+      });
+    }
+    return {update,project,reset};
+  }
   function smoothNail(previous,length,angle,dt){
     if(!previous)return {len:length,ang:angle};
     const dAng=Math.atan2(Math.sin(angle-previous.ang),Math.cos(angle-previous.ang));
@@ -61,6 +138,20 @@
   // Stabilize the complete nail pose, so position, angle and length settle together.
   // Independent damping for angle and length prevents lever-arm vibration from fluttering the tip.
   function stabilizeNail(previous,target,dt){
+    // Lock in hand coordinates, then carry the chip with the shared palm transform.
+    // Freezing screen coordinates would leave a chip behind when the hand moves.
+    if(target.frame){
+      const f=target.frame,co=Math.cos(f.ang),si=Math.sin(f.ang),unit=100/f.scale;
+      const dx=target.x-f.x,dy=target.y-f.y;
+      const localTarget={x:(co*dx+si*dy)*unit,y:(-si*dx+co*dy)*unit,len:target.len*unit,ang:target.ang-f.ang};
+      const local=stabilizeNail(previous?.generation===f.generation?previous.local:null,localTarget,dt);
+      return {
+        x:f.x+(co*local.x-si*local.y)/unit,
+        y:f.y+(si*local.x+co*local.y)/unit,
+        len:local.len/unit,ang:local.ang+f.ang,
+        local,generation:f.generation,moving:local.moving
+      };
+    }
     const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
     if(!previous||!Number.isFinite(previous.x))return {...target,mean:{...target}};
     const safeDt=clamp(dt,1/120,.1);
@@ -112,7 +203,7 @@
       }
     };
   }
-  const api={createTracker,smoothNail,stabilizeNail,createTrailSampler};
+  const api={createTracker,createHandTracker,smoothNail,stabilizeNail,createTrailSampler};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.TsuyaTracking=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {createTracker,smoothNail,stabilizeNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
+const {createTracker,createHandTracker,smoothNail,stabilizeNail,createTrailSampler}=require('../experience-prototype/tracking-core.js');
 const frame=x=>[Array.from({length:21},(_,i)=>({x:x+i*.001,y:.5+i*.001,z:0}))];
 
 test('small held movements converge instead of remaining in a dead zone',()=>{
@@ -68,9 +68,9 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  const presets=[...html.matchAll(/trail:\{on:(true|false),intensity:(\d+),hue:/g)];
  assert.equal(presets.length,10);presets.forEach(p=>{assert.equal(p[1],'true');assert.ok(+p[2]>=40&&+p[2]<=60);});
  assert.ok(!html.includes('drawTrails=function'));
- assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createTracker()'));
- assert.ok(html.includes('tracking-core.js?v=mobile90'));
- assert.ok(html.includes("const BUILD_VERSION = 'mobile90'"));
+ assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createHandTracker()'));
+ assert.ok(html.includes('tracking-core.js?v=mobile91'));
+ assert.ok(html.includes("const BUILD_VERSION = 'mobile91'"));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
@@ -103,7 +103,7 @@ test('nail stabilizer releases promptly for movement, slow drift and finger rota
 });
 
 test('the rendered nail uses stabilized translation as well as angle and length',()=>{
-  assert.ok(html.includes('TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt)'));
+  assert.ok(html.includes('TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng,frame:handFrame},dt)'));
   assert.ok(html.includes('ctx.translate(st.x+Math.cos(ang)*pushOut, st.y+Math.sin(ang)*pushOut)'));
 });
 
@@ -171,11 +171,11 @@ function movingHand(x){
  return [lm];
 }
 test('the drawn nails never reverse during constant motion across inference delays',()=>{
- for(const latency of [30,40,50,80])for(const fps of [30,60,120]){
-  const tracker=createTracker(),draw=drawingHarness();let sample=-1,previous=null,worst=0;
+ for(const make of [createTracker,createHandTracker])for(const latency of [30,40,50,80])for(const fps of [30,60,120]){
+  const tracker=make(),draw=drawingHarness();let sample=-1,previous=null,worst=0;
   for(let i=0;i<fps*2;i++){
    const now=i*1000/fps,k=Math.floor((now-latency)/(1000/30));
-   if(k>=0&&k!==sample){tracker.update(movingHand(.3+.15*k/30),k*1000/30,now);sample=k;}
+   if(k>=0&&k!==sample){tracker.update(movingHand(.3+.15*k/30),k*1000/30,now,1280/720);sample=k;}
    const positions=draw.draw(tracker.project(now),1/fps);
    if(now>500&&positions.length){if(previous!==null)worst=Math.min(worst,positions[0][0]-previous);previous=positions[0][0];}
   }
@@ -209,4 +209,108 @@ test('foreshortened fingers hold the last direction and degenerate first frames 
  draw.draw(hand);assert.equal(draw.poses()[0].ang,angle);
  const collapsed=[Array.from({length:21},()=>({x:.5,y:.5,z:0}))];
  assert.equal(drawingHarness().draw(collapsed).length,0);
+});
+
+function jitterRun(makeTracker){
+ const tracker=makeTracker(),draw=drawingHarness(),errors=[],tipErrors=[];
+ for(let i=0;i<360;i++){
+  const now=i*1000/60;
+  // 30 Hz inference, delivered 40 ms after exposure; 60 Hz drawing.
+  if(i%2===0){
+   const at=now-40,hand=movingHand(.25+.12*at/1000);
+   hand[0].forEach((p,j)=>{
+    const amplitude=[0,5,9,13,17].includes(j)?1:6;
+    p.x+=Math.sin(i*.71+j*2.3)*amplitude/1280;
+    p.y+=Math.cos(i*.93+j*1.7)*amplitude/720;
+   });
+   tracker.update(hand,at,now,1280/720);
+  }
+  draw.draw(tracker.project(now));
+  if(i>60){const p=draw.poses()[1];const expectedX=(.25+.03+.12*now/1000)*1280;
+   errors.push(p.x-expectedX);
+   const extension=p.len*(.10+.30*.64)+p.len*.94*1.64*.50;
+   tipErrors.push(p.x+Math.cos(p.ang)*extension-expectedX);}
+ }
+ const mean=errors.reduce((a,b)=>a+b,0)/errors.length;
+ const rms=Math.sqrt(errors.reduce((a,b)=>a+(b-mean)**2,0)/errors.length);
+ const tipMean=tipErrors.reduce((a,b)=>a+b,0)/tipErrors.length;
+ const tipRms=Math.sqrt(tipErrors.reduce((a,b)=>a+(b-tipMean)**2,0)/tipErrors.length);
+ return {rms,tipRms,lag:Math.abs(mean)};
+}
+test('hand-relative stabilization reduces moving fingertip jitter without excessive lag',()=>{
+ const before=jitterRun(createTracker),after=jitterRun(createHandTracker);
+ console.log('Moving fingertip jitter (px):',JSON.stringify({before,after}));
+ assert.ok(after.rms<before.rms*.6,JSON.stringify({before,after}));
+ assert.ok(after.tipRms<before.tipRms*.6,JSON.stringify({before,after}));
+ assert.ok(after.lag<10,`lag ${after.lag}px at 154px/s`);
+});
+test('an isolated bad fingertip observation does not detach its chip',()=>{
+ const tracker=createHandTracker(),draw=drawingHarness();let baseline;
+ for(let i=0;i<15;i++){tracker.update(movingHand(.4),i*33,i*33,1280/720);draw.draw(tracker.project(i*33));baseline=draw.poses()[1].x;}
+ const bad=movingHand(.4);bad[0][8].x+=.08;
+ tracker.update(bad,495,495,1280/720);draw.draw(tracker.project(495));
+ assert.ok(Math.abs(draw.poses()[1].x-baseline)<1);
+});
+test('hand-relative tracking still follows deliberate finger articulation',()=>{
+ const tracker=createHandTracker(),draw=drawingHarness();let original;
+ for(let i=0;i<15;i++){tracker.update(movingHand(.4),i*33,i*33,1280/720);draw.draw(tracker.project(i*33));original=draw.poses()[1].x;}
+ for(let i=15;i<25;i++){
+  const hand=movingHand(.4);hand[0][7].x+=.04;hand[0][8].x+=.04;
+  tracker.update(hand,i*33,i*33,1280/720);draw.draw(tracker.project(i*33));
+ }
+ assert.ok(Math.abs(draw.poses()[1].x-original-.04*1280)<5);
+});
+test('palm-relative lock carries rotation and scale without releasing local noise',()=>{
+ let pose=null;
+ for(let i=0;i<120;i++){
+  const ang=i*.005,scale=80+i*.1,x=300+i,y=200+i*.2;
+  const frame={x,y,ang,scale,generation:1};
+  const target={x:x+Math.cos(ang)*scale,y:y+Math.sin(ang)*scale,len:scale*.4,ang:ang-1,frame};
+  pose=stabilizeNail(pose,target,1/60);
+  assert.ok(Math.abs(pose.x-target.x)<1e-8);assert.ok(Math.abs(pose.ang-target.ang)<1e-8);assert.ok(Math.abs(pose.len-target.len)<1e-8);
+ }
+});
+test('hand-relative state clears on lost detections, camera aspect changes and resets',()=>{
+ const tracker=createHandTracker();tracker.update(movingHand(.4),0,40,1280/720);
+ const first=tracker.project(40)[0].palmFrame.generation;
+ assert.deepEqual(tracker.project(181),[]);
+ tracker.update(movingHand(.6),200,240,1280/720);
+ assert.ok(tracker.project(240)[0].palmFrame.generation>first);
+ tracker.reset();assert.deepEqual(tracker.project(250),[]);
+ tracker.update(movingHand(.4),300,340,720/1280);
+ const lm=tracker.project(340)[0];assert.ok(Math.abs(lm[8].x-.43)<1e-8);
+});
+
+test('hand-relative reconstruction handles rotation, zoom and both camera orientations',()=>{
+ for(const facing of ['environment','user']){
+  const tracker=createHandTracker(),draw=drawingHarness();draw.box.facing=facing;
+  for(let i=0;i<120;i++){
+   const angle=i*.006,scale=1+i*.002,hand=movingHand(.4);
+   hand[0]=hand[0].map(p=>{const x=(p.x-.46)*1280/720,y=p.y-.55;return {x:.46+scale*(Math.cos(angle)*x-Math.sin(angle)*y)*720/1280,y:.55+scale*(Math.sin(angle)*x+Math.cos(angle)*y),z:0};});
+   tracker.update(hand,i*33,i*33+40,1280/720);
+   const projected=tracker.project(i*33+40);draw.draw(projected);
+   const nail=draw.poses()[1],tip=projected[0][8];
+   assert.ok(Math.abs(nail.x-(facing==='user'?1280-tip.x*1280:tip.x*1280))<.01);
+   assert.ok(Math.abs(nail.y-tip.y*720)<.01);
+   assert.ok(Number.isFinite(nail.ang)&&nail.len>0);
+  }
+ }
+});
+test('invalid hand samples and degenerate palms never produce nonfinite chips',()=>{
+ const tracker=createHandTracker();tracker.update(movingHand(.4),0,40,1280/720);
+ const bad=movingHand(.4);bad[0][8].x=NaN;
+ assert.deepEqual(tracker.update(bad,33,73,1280/720),[]);
+ assert.deepEqual(tracker.project(73),[]);
+ const flat=[Array.from({length:21},()=>({x:.5,y:.5,z:0}))];
+ assert.deepEqual(tracker.update(flat,66,106,1280/720),[]);
+});
+
+test('shared palm motion settles after stopping and follows a real reversal',()=>{
+ const tracker=createHandTracker(),draw=drawingHarness();
+ for(let i=0;i<30;i++){tracker.update(movingHand(.3+i*.003),i*33,i*33+40,1280/720);draw.draw(tracker.project(i*33+40));}
+ for(let i=30;i<40;i++){tracker.update(movingHand(.387),i*33,i*33+40,1280/720);draw.draw(tracker.project(i*33+40));}
+ assert.ok(Math.abs(draw.poses()[1].x-(.387+.03)*1280)<1);
+ const before=draw.poses()[1].x;
+ for(let i=40;i<50;i++){tracker.update(movingHand(.387-(i-39)*.003),i*33,i*33+40,1280/720);draw.draw(tracker.project(i*33+40));}
+ assert.ok(draw.poses()[1].x<before-30);
 });
