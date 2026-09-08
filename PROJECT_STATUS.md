@@ -38,6 +38,7 @@ SPECIAL 01 公開確認: 2026-09-06、`754ce5a` を `origin main` へpush成功�
 - チップ共通のジェル描画に入っていた固定の斜めぼかし光を取り除いた。標本・作品ページ・通常のチップは、この斜め光を持たない。
 - カメラ試着の描画だけで、指の画面上の向きと固定光源の角度が合った時に限って鏡面反射を描く。合わない時は反射をほぼ出さず、反射の細い筋も従来より細くした。
 - `scripts/test-nail-tracking.cjs` 25件成功、JavaScript構文と`git diff --check`成功。実装コミット `15f100d` を `origin main` へpush、Pages run `34211977065` 成功。iPhone実機で手をゆっくり回した時の艶の強さ・出る角度は要確認。確認URL: `https://ebiko5555.github.io/tsuya-v2/experience-prototype/?try=COLOR&v=15f100d`。
+- 続けて、チップ見本用のスタジオ照明の斜め白光も削除した。試着時の向き連動艶は維持。コミット `e14341e` を `origin main` へpush、Pages run `34212437342` 成功。
 
 ### 試作93（2026-09-08）— 作品ネイルを大きく見る
 
