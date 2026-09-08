@@ -52,6 +52,38 @@
     }
     return {update,project,reset};
   }
+  // MediaPipe stops returning a hand when it fills the camera frame. Keep a
+  // near-frame hand briefly as a macro view, without changing normal tracking.
+  function createCloseupHold(){
+    let saved=null, startedAt=null;
+    function reset(){saved=null;startedAt=null;}
+    function remember(input,width,height){
+      if(!input.length||!input[0]?.length)return;
+      const landmarks=input.map(lm=>lm.map(p=>({x:p.x,y:p.y,z:p.z||0})));
+      const palm=[0,5,9,13,17].map(i=>landmarks[0][i]);
+      const cx=palm.reduce((n,p)=>n+p.x,0)/palm.length;
+      const cy=palm.reduce((n,p)=>n+p.y,0)/palm.length;
+      let span=0;
+      for(let i=0;i<palm.length;i++)for(let j=i+1;j<palm.length;j++){
+        span=Math.max(span,Math.hypot((palm[i].x-palm[j].x)*width,(palm[i].y-palm[j].y)*height));
+      }
+      saved={landmarks,cx,cy,near:span/Math.min(width,height)>=.24};
+      startedAt=null;
+    }
+    function project(now){
+      if(!saved?.near)return [];
+      if(startedAt===null)startedAt=now;
+      // The physical video has already enlarged. Add only a small, capped
+      // continuation so the painted chip does not vanish at the detection edge.
+      const zoom=1+Math.min(.34,(now-startedAt)/520*.34);
+      return saved.landmarks.map(lm=>lm.map(p=>({
+        x:saved.cx+(p.x-saved.cx)*zoom,
+        y:saved.cy+(p.y-saved.cy)*zoom,z:p.z
+      })));
+    }
+    function active(){return startedAt!==null;}
+    return {remember,project,active,reset};
+  }
   function smoothNail(previous,length,angle,dt){
     if(!previous)return {len:length,ang:angle};
     const dAng=Math.atan2(Math.sin(angle-previous.ang),Math.cos(angle-previous.ang));
@@ -112,7 +144,7 @@
       }
     };
   }
-  const api={createTracker,smoothNail,stabilizeNail,createTrailSampler};
+  const api={createTracker,createCloseupHold,smoothNail,stabilizeNail,createTrailSampler};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.TsuyaTracking=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
