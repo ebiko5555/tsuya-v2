@@ -1899,12 +1899,13 @@
 </section>
 
 <script src="./tracking-core.js?v=mobile90"></script>
+<script src="./motion-lab-core.js?v=mobile96"></script>
 <script>
 /* ================= 状態 ================= */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile90';
+const BUILD_VERSION = 'mobile96';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -1914,6 +1915,7 @@ let smoothed = [];
 let renderLandmarks = [];
 const landmarkTracker = TsuyaTracking.createTracker();
 let trackingSession=0, pendingTrackingSession=-1, trackingFrameAt=0, lastVideoTime=-1;
+let motionLab=null, pendingMotionFrameId=null;
 let rafOn = false;
 const tuneVals = { gloss:65, opacity:96, nailSize:100, sculptLen:140, sculptShape:'natural' };
 const TRY_LENGTHS={short:102,long:164};
@@ -1977,6 +1979,7 @@ function ensureLive(){
       const lms = res.multiHandLandmarks || [];
       if(lms.length){ lastSeenT = performance.now(); updateLandmarks(lms,trackingFrameAt); }
       else if(performance.now()-lastSeenT>140){landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;lastTrailPositions.clear();}
+      if(motionLab)motionLab.finish(pendingMotionFrameId,lms,smoothed,performance.now());
       liveBusy = false;
     });
     liveReady = liveHands.initialize();
@@ -2057,9 +2060,12 @@ function startLoops(){
     if(mode === 'live' && video.readyState >= 2){
       const sourceCapture=document.body.classList.contains('source-camera-capture');
       const sp = SKIN_FX_PRESETS[skinFx];
+      const motionFrame=motionLab?motionLab.select(now,video,landmarkTracker.project(now)):null;
+      const cameraImage=motionFrame?motionFrame.image:video;
+      if(motionLab)motionLab.tick(now);
       ctx.save();
       if(mirrored()){ ctx.translate(canvas.width,0); ctx.scale(-1,1); }
-      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      ctx.drawImage(cameraImage,0,0,canvas.width,canvas.height);
       if(sp&&!sourceCapture){
         /* 縮めて描き戻すとぼける。色味の処理も縮小側でやれば画素数が 1/25 で済む */
         const sw = Math.max(16, Math.round(canvas.width/sp.div));
@@ -2067,7 +2073,7 @@ function startLoops(){
         if(skinCv.width!==sw || skinCv.height!==sh){ skinCv.width=sw; skinCv.height=sh; }
         skinCtx.globalCompositeOperation='source-over';
         skinCtx.globalAlpha=1;
-        skinCtx.drawImage(video,0,0,sw,sh);
+        skinCtx.drawImage(cameraImage,0,0,sw,sh);
         skinCtx.globalCompositeOperation='soft-light';   /* 中間調を持ち上げて暖かく */
         skinCtx.globalAlpha=sp.lift;
         skinCtx.fillStyle='#ffe9da';
@@ -2087,7 +2093,7 @@ function startLoops(){
         /* 素材撮影時はメッセージを維持し、シャッター時に消去する */
       }
       else{
-        renderLandmarks=landmarkTracker.project(now);
+        renderLandmarks=motionFrame?motionFrame.landmarks:landmarkTracker.project(now);
         if(!renderLandmarks.length){nailState.length=0;lastTrailPositions.clear();}
         recordTrails();
         drawTrails(dt);
@@ -2107,10 +2113,16 @@ function startLoops(){
   })(lastT);
   (async function detect(){
     if(mode === 'live' && !cameraStarting && video.readyState >= 2 && !liveBusy && video.currentTime!==lastVideoTime && !document.body.classList.contains('source-camera-capture')){
+      if(motionLab&&lastVideoTime>=0&&video.currentTime<lastVideoTime)motionLab.reset();
       liveBusy = true;
       lastVideoTime=video.currentTime;trackingFrameAt=performance.now();pendingTrackingSession=trackingSession;
-      try{ await liveHands.send({image: video}); }
-      catch(e){ liveBusy = false; }
+      try{
+        const captured=motionLab?motionLab.begin(video,trackingFrameAt):null;
+        if(motionLab&&!captured)throw new Error('Comparison frame unavailable');
+        pendingMotionFrameId=captured?captured.id:null;
+        await liveHands.send({image: captured?captured.image:video});
+      }
+      catch(e){ if(motionLab)motionLab.cancel(pendingMotionFrameId);liveBusy = false; }
     }
     requestAnimationFrame(detect);
   })();
@@ -2334,7 +2346,7 @@ const PALM_BONES = [[0,5],[0,17],[5,17],[0,9],[0,13],[9,17]];
    そのままだと爪が消えてしまうため。 */
 const MIN_LEN_RATIO = [0.240, 0.173, 0.188, 0.173, 0.143];   /* 親指は常に角度がつくので下限を高めに */
 const nailState = [];
-function mirrored(){ return facing==='user'; }
+function mirrored(){ return typeof motionLab!=='undefined'&&motionLab?.replay?motionLab.replayMirror:facing==='user'; }
 function lmXY(p){
   let x = p.x*canvas.width, y = p.y*canvas.height;
   if(mirrored()) x = canvas.width - x;
@@ -2372,7 +2384,9 @@ function drawNails(dt=1/60){
       else if(previous) rawAng = previous.ang;
       else if(midLength >= minAxis) rawAng = Math.atan2(dy-py,dx-px);
       else return;
-      const st=TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
+      const st=typeof motionLab!=='undefined'&&motionLab
+        ?motionLab.pose(hi*5+fi,nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt,TsuyaTracking.stabilizeNail)
+        :TsuyaTracking.stabilizeNail(nailState[hi*5+fi],{x:tx,y:ty,len:rawLen,ang:rawAng},dt);
       nailState[hi*5+fi]=st;
       const len = st.len, ang = st.ang;
       const lenPct = tuneVals.sculptLen/100;
@@ -4921,6 +4935,29 @@ updateCmpBadge();
     prepareHub();
   }
 })();
+</script>
+<script src="./motion-lab.js?v=mobile96"></script>
+<script>
+/* The normal try-on path is unchanged; comparison is explicitly opt-in. */
+if(new URLSearchParams(location.search).get('tracking')==='compare'&&document.body.classList.contains('work-tryon')){
+  motionLab=TsuyaMotionLab.mount({
+    video,canvas,ready:ensureLive,startCamera,mirrored,
+    stream:()=>stream,running:()=>mode==='live',
+    length:applyTryLength,
+    pause(){mode='idle';},
+    clearPoses(){nailState.length=0;trails.length=0;lastTrailPositions.clear();},
+    resetTracking(){
+      trackingSession++;lastVideoTime=-1;lastSeenT=0;
+      landmarkTracker.reset();smoothed=[];renderLandmarks=[];nailState.length=0;
+      trails.length=0;lastTrailPositions.clear();
+    },
+    stopStream(){if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}},
+    runReplay(){
+      canvas.width=video.videoWidth||1280;canvas.height=video.videoHeight||720;
+      mode='live';$('startOverlay').style.display='none';setGuide('枠に手をかざしてください');startLoops();
+    }
+  });
+}
 </script>
 </body>
 </html>

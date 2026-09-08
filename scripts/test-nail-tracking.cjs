@@ -78,7 +78,7 @@ test('all ten artwork presets restore a restrained trail and no late override hi
  assert.ok(!html.includes('drawTrails=function'));
  assert.ok(html.indexOf('tracking-core.js')>=0&&html.indexOf('tracking-core.js')<html.indexOf('TsuyaTracking.createTracker()'));
  assert.ok(html.includes('tracking-core.js?v=mobile90'));
- assert.ok(html.includes("const BUILD_VERSION = 'mobile90'"));
+ assert.ok(html.includes("const BUILD_VERSION = 'mobile96'"));
  assert.ok(html.includes('pendingTrackingSession!==trackingSession'));
 });
 
