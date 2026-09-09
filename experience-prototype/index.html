@@ -1739,7 +1739,6 @@
     <p class="source-intro">身のまわりの色・線・光を採集して、5本のネイルへ組み替える。</p>
     <div class="source-actions">
       <button type="button" class="source-action" id="sourcePhoto">写真を選ぶ</button>
-      <button type="button" class="source-action" id="sourceCamera">いま映っているもの</button>
     </div>
     <div class="source-frame" id="sourceFrame">
       <img class="source-large-image" id="sourceLargeImage" alt="選択した写真">
@@ -1929,7 +1928,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'mobile105';
+const BUILD_VERSION = 'mobile106';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -2160,7 +2159,8 @@ function startLoops(){
 }
 $('startBtn').onclick = ()=>{
   if(document.body.classList.contains('custom-mode')&&!document.body.classList.contains('source-selected')){
-    document.body.classList.add('source-camera-capture');
+    $('sourceInput').click();
+    return;
   }
   startCamera();
 };
@@ -4059,10 +4059,6 @@ $('sourceMotifPick').onclick=()=>{
 };
 $('sourceLargeImage').addEventListener('click',e=>pickSourceMotif(e,$('sourceLargeImage')));
 $('sourcePreview').addEventListener('click',e=>pickSourceMotif(e,$('sourcePreview')));
-$('sourceCamera').onclick=()=>{
-  if(mode!=='live'||video.readyState<2){ $('sourceReading').textContent='CAMERA IS NOT READY'; return; }
-  ingestSource(video,'CAMERA / FOUND MATERIAL');
-};
 $('sourceTry').onclick=()=>openSourceConfirm(selectedSourceSet||sourceSets[0]);
 $('sourceConfirmBack').onclick=closeSourceConfirm;
 $('sourceLengthChoice').addEventListener('click',event=>{
@@ -5153,7 +5149,7 @@ updateCmpBadge();
     }
     document.querySelector('#startOverlay .invite').innerHTML='COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
     document.getElementById('openingGuide').textContent=origin?(origin.title+' / 身のまわりから採集する'):'身のまわりから採集する';
-    document.getElementById('startBtn').textContent='カメラから作る';
+    document.getElementById('startBtn').textContent='写真を選ぶ';
     document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';
     const backHref=origin?route('work',fromKey):homeRoute();
     const workBack=document.getElementById('tryWorkBack'); workBack.textContent='BACK'; workBack.href=backHref;

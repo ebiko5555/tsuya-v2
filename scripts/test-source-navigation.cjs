@@ -57,3 +57,10 @@ test('SOURCE shutter controls are anchored below the existing return pill',()=>{
  assert.ok(html.includes('body.custom-mode.source-tryon #liveBtns{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom))}'));
  assert.ok(html.includes('bottom:calc(92px + env(safe-area-inset-bottom));'));
 });
+test('SOURCE only offers a device photo picker, never an in-app material camera',()=>{
+ assert.ok(html.includes('id="sourcePhoto"'));
+ assert.ok(!html.includes('id="sourceCamera"'));
+ assert.ok(!html.includes("$('sourceCamera')"));
+ assert.ok(html.includes("document.getElementById('startBtn').textContent='写真を選ぶ'"));
+ assert.match(html,/\$\('startBtn'\)\.onclick = \(\)=>\{[\s\S]*?\$\('sourceInput'\)\.click\(\);[\s\S]*?return;/);
+});
