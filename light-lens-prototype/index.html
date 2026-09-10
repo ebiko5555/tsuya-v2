@@ -1483,10 +1483,11 @@
   #workNails::after{content:"TAP TO VIEW"; position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); white-space:nowrap; color:rgba(255,255,255,.52); font:500 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.15em}
   .nail-set-viewer{position:fixed; z-index:260; inset:0; display:none; box-sizing:border-box; overflow:auto; padding:calc(22px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); color:#f2f1ed; background:#08090c}
   .nail-set-viewer.open{display:flex; flex-direction:column; align-items:center}
-  .nail-set-close{position:absolute; left:14px; top:calc(12px + env(safe-area-inset-top)); min-height:42px; padding:0 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; color:#fff; background:rgba(255,255,255,.06); font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em}
+  .nail-set-close{position:absolute;z-index:3; left:14px; top:calc(12px + env(safe-area-inset-top)); min-height:42px; padding:0 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; color:#fff; background:rgba(8,9,12,.72); font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.12em}
   .nail-set-kicker{margin:48px 0 7px; color:rgba(242,241,237,.5); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
   .nail-set-title{margin:0; text-align:center; font:300 clamp(32px,10vw,48px)/1.05 "Times New Roman","Yu Mincho",serif; letter-spacing:.04em}
   .nail-set-note{max-width:290px; margin:12px 0 14px; color:rgba(242,241,237,.64); font-size:11px; line-height:1.7; letter-spacing:.04em; text-align:center}
+  .nail-set-concept{max-width:330px;margin:0;color:rgba(242,241,237,.82);font-size:13px;line-height:1.75;letter-spacing:.035em;text-align:center}
   .set-viewer-nails{display:flex; flex:1; align-items:center; justify-content:center; gap:5px; width:100%; min-height:260px; margin:0}
   .set-viewer-nails canvas{width:62px; height:130px; filter:drop-shadow(0 13px 17px rgba(0,0,0,.46))}
   .set-viewer-nails canvas:nth-child(1),.set-viewer-nails canvas:nth-child(5){height:108px}
@@ -1495,6 +1496,22 @@
   .set-viewer-try,.set-viewer-back{display:flex; align-items:center; justify-content:center; width:100%; min-height:56px; border-radius:999px; text-decoration:none; font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .set-viewer-try{border:0; color:#171717; background:var(--set-accent,#eadfce)}
   .set-viewer-back{border:1px solid rgba(255,255,255,.35); color:rgba(255,255,255,.9); background:rgba(255,255,255,.05)}
+  .set-viewer-photo{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border:1px solid rgba(255,255,255,.42);border-radius:999px;color:#f2f1ed;background:rgba(255,255,255,.04);text-decoration:none;font-size:13px;letter-spacing:.08em}
+  @media (max-width:819px){
+    .nail-set-viewer{padding-left:14px;padding-right:14px}
+    .nail-set-kicker{margin-top:45px}
+    .nail-set-note{margin-bottom:8px}
+    .set-viewer-nails{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,142px);align-content:center;gap:4px 8px;flex:0 0 292px;min-height:292px;width:min(100%,330px)}
+    .set-viewer-nails canvas{width:76px;height:142px;justify-self:center}
+    .set-viewer-nails canvas:nth-child(1){grid-column:1/3;height:132px}
+    .set-viewer-nails canvas:nth-child(2){grid-column:3/5;height:142px}
+    .set-viewer-nails canvas:nth-child(3){grid-column:5/7;height:150px}
+    .set-viewer-nails canvas:nth-child(4){grid-column:2/4;height:142px}
+    .set-viewer-nails canvas:nth-child(5){grid-column:4/6;height:132px}
+    .set-viewer-actions{gap:8px;margin-top:8px}
+    .set-viewer-try{min-height:54px}
+    .set-viewer-photo,.set-viewer-back{min-height:48px}
+  }
   @media (min-width:820px){.nail-set-viewer{padding-top:9vh}.set-viewer-nails{gap:12px;min-height:330px}.set-viewer-nails canvas{width:82px;height:170px}.set-viewer-nails canvas:nth-child(1),.set-viewer-nails canvas:nth-child(5){height:141px}.set-viewer-nails canvas:nth-child(2),.set-viewer-nails canvas:nth-child(4){height:157px}}
 
   /* 試作44：写真を大きく見せ、その下の小さな3案から文字なしの拡大確認へ進む。 */
@@ -1928,10 +1945,12 @@
   <button type="button" class="nail-set-close" id="nailSetClose">← BACK</button>
   <p class="nail-set-kicker" id="nailSetKicker">01 / COLOR — NAIL SET</p>
   <h2 class="nail-set-title" id="nailSetTitle">色</h2>
-  <p class="nail-set-note">この作品の5本セットです。試着する前に、形と柄をゆっくり見られます。</p>
+  <p class="nail-set-note">作品から固定設計した5本です。表示するたびに変わる生成ではありません。</p>
+  <p class="nail-set-concept" id="nailSetConcept"></p>
   <div class="set-viewer-nails" id="setViewerNails" aria-label="5本のネイルチップ"></div>
   <div class="set-viewer-actions">
-    <a class="set-viewer-try" id="setViewerTry" href="?mode=custom&amp;from=COLOR">この作品からつくる</a>
+    <a class="set-viewer-try" id="setViewerTry" href="?try=COLOR">この5本を手に重ねる</a>
+    <a class="set-viewer-photo" id="setViewerPhoto" href="?mode=custom&amp;from=COLOR">写真の色を重ねる</a>
     <button type="button" class="set-viewer-back" id="nailSetBack">作品ページへ戻る</button>
   </div>
 </section>
@@ -1994,7 +2013,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'lightlens02-engine106';
+const BUILD_VERSION = 'lightlens03-engine106';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -4530,6 +4549,18 @@ updateCmpBadge();
       preset:{looks:['artFrame','sheer','frenchmirror','artFrame','aurora'],colors:['#e2b9b2','#ead8cf','#caa75d','#f0cbc6','#d7cabd'],tune:{gloss:82,opacity:90,nailSize:100,sculptLen:148,sculptShape:'coffin'},vars:{sheer:.3,frenchmirror:.16,aurora:.38},trail:{on:true,intensity:50,hue:'#f0d4c8'}}
     }
   };
+  const artworkNailConcepts={
+    COLOR:'増殖する色面、交差する筆跡、顔料の粒子を、密度の異なる5本へ展開しています。',
+    SURFACE:'液体の膜、鉱物の奥行き、金色の亀裂と反射を、表面の厚みとして5本に刻んでいます。',
+    SCULPT:'手を形づくるワイヤーの交差、結節、空洞を、5本の小さな立体構造へ置き換えています。',
+    LIGHT:'同心円、放射線、光子の集積と暗部を、明滅の異なる5本の光として構成しています。',
+    HAND:'掌の輪郭、関節、皮膚の線と記憶の重なりを、素描の密度が異なる5本に分けています。',
+    TRACE:'動いたあとに残る粒子、消えかけた線、時間の濃淡を、痕跡の5段階として定着させています。',
+    SPACE:'手と球体の距離、軌道、星雲、触れる直前の光を、奥行きの異なる5本へ配しています。',
+    THINKING:'回転する手の輪郭と考える時間の層を、線の方向と余白が異なる5本に刻んでいます。',
+    ORB:'白い球体と赤い爪のスケール関係を、球・環・赤い面の比率が異なる5本に展開しています。',
+    FRAME:'二つの手、淡い膜、金色の線が交差する240フレームを、時間差のある5本へ凝縮しています。'
+  };
   const order=Object.keys(works);
   const tabMap={looks:'COLOR',colors:'COLOR',tune:'SURFACE',sculpt:'SCULPT',hikari:'LIGHT'};
   const overlay=document.getElementById('startOverlay');
@@ -5018,6 +5049,57 @@ updateCmpBadge();
       }
       c.globalAlpha=keep;
     }};
+
+    /* 作品専用5本組。各数値は作品ごと・指ごとに固定した設計値で、表示時に抽選しない。 */
+    const blueprints={
+      COLOR:[[-.28,9,.72,.10],[-.12,15,.9,.32],[.08,22,1.08,.54],[.24,13,.84,.76],[.34,7,.64,.92]],
+      SURFACE:[[-.3,5,.7,.08],[-.16,8,.9,.27],[.02,12,1.12,.48],[.2,9,.88,.7],[.34,6,.66,.9]],
+      SCULPT:[[-.32,9,.72,.06],[-.18,14,.86,.26],[0,21,1.08,.48],[.18,16,.9,.7],[.32,11,.7,.91]],
+      LIGHT:[[-.3,7,.66,.05],[-.15,11,.86,.24],[0,18,1.12,.5],[.16,13,.9,.72],[.31,8,.7,.94]],
+      HAND:[[-.28,12,.72,.04],[-.14,20,.88,.25],[0,29,1.05,.5],[.15,22,.9,.74],[.3,15,.7,.95]],
+      TRACE:[[-.32,18,.68,.08],[-.18,31,.85,.29],[0,52,1.08,.51],[.17,36,.9,.73],[.31,23,.7,.92]],
+      SPACE:[[-.3,16,.68,.06],[-.15,27,.86,.28],[0,44,1.12,.5],[.16,31,.9,.72],[.31,20,.7,.94]],
+      THINKING:[[-.3,14,.7,.05],[-.16,22,.88,.27],[0,34,1.08,.5],[.16,25,.9,.73],[.3,17,.72,.95]],
+      ORB:[[-.3,1,.62,.08],[-.15,2,.8,.29],[0,3,1.06,.5],[.16,2,.84,.71],[.31,1,.66,.92]],
+      FRAME:[[-.3,4,.7,.06],[-.16,6,.86,.27],[0,9,1.08,.49],[.16,7,.9,.72],[.31,5,.72,.94]]
+    };
+    const baseLooks={COLOR:'artColor',SURFACE:'artSurface',SCULPT:'artSculpt',LIGHT:'artLight',HAND:'artHand',TRACE:'artTrace',SPACE:'artSpace',THINKING:'artThinking',ORB:'artOrb',FRAME:'artFrame'};
+
+    function paintArtworkBlueprint(c,w,h,workKey,b,index,col){
+      const [axis,density,scale,phase]=b, x=axis*w, y=(phase-.5)*h*.5;
+      c.save();
+      c.globalCompositeOperation='color';c.globalAlpha=(workKey==='TRACE'||workKey==='THINKING') ? 0.16 : 0.28;c.fillStyle=col;c.fillRect(-w*.55,-h*.6,w*1.1,h*1.2);
+      c.globalCompositeOperation='source-over';c.globalAlpha=1;c.lineCap='round';c.lineJoin='round';
+      if(workKey==='COLOR'){
+        for(let i=0;i<density;i++){const yy=-h*.46+i*h/(density-1||1);c.strokeStyle=hexA(i%3?col:shade(col,-34),.34+(i%4)*.11);c.lineWidth=Math.max(.35,w*(.006+(i%5)*.004));c.beginPath();c.moveTo(-w*.56,yy);c.bezierCurveTo(x-w*.18,yy+h*.18*scale,x+w*.2,yy-h*.16*scale,w*.56,yy+h*.05);c.stroke();}
+      }else if(workKey==='SURFACE'){
+        for(let i=0;i<density;i++){const px=-w*.42+(i%3)*w*.34+(index%2)*w*.05,py=-h*.45+Math.floor(i/3)*h*.23;c.fillStyle=i%2?'rgba(244,211,133,.42)':hexA(col,.36);c.beginPath();c.moveTo(px,py-w*.09);c.lineTo(px+w*.12,py-w*.02);c.lineTo(px+w*.05,py+w*.13);c.lineTo(px-w*.1,py+w*.08);c.closePath();c.fill();}c.strokeStyle='rgba(255,229,157,.9)';c.lineWidth=Math.max(.5,w*.012);c.beginPath();c.moveTo(x-w*.24,-h*.55);c.lineTo(x+w*.08,-h*.18);c.lineTo(x-w*.1,h*.08);c.lineTo(x+w*.25,h*.55);c.stroke();
+      }else if(workKey==='SCULPT'){
+        for(let i=0;i<density;i++){const xx=-w*.5+i*w/(density-1||1);c.strokeStyle=i%3?'rgba(226,246,240,.68)':'rgba(214,174,92,.88)';c.lineWidth=Math.max(.35,w*(.005+(i%4)*.003));c.beginPath();c.moveTo(xx,-h*.58);c.bezierCurveTo(x+w*.35*Math.sin(i*.8),-h*.18,x-w*.32*Math.cos(i*.7),h*.2,-xx,h*.58);c.stroke();}for(let i=0;i<6;i++){c.fillStyle=i%2?'#e9c875':'#f4fffb';c.beginPath();c.arc(x+Math.sin(i*1.7)*w*.25,-h*.32+i*h*.13,Math.max(.45,w*.009),0,Math.PI*2);c.fill();}
+      }else if(workKey==='LIGHT'){
+        for(let i=1;i<=Math.min(8,density);i++){c.strokeStyle=i%2?'rgba(188,248,237,.5)':'rgba(239,210,142,.46)';c.lineWidth=Math.max(.35,w*.006);c.beginPath();c.arc(x,y,w*.055*i*scale,0,Math.PI*2);c.stroke();}for(let i=0;i<density*2;i++){const a=i*2.399+phase*6.28,r=w*.05+(i/density)*w*.32;c.fillStyle=i%4?'rgba(160,239,225,.68)':'rgba(255,246,205,.95)';c.beginPath();c.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,Math.max(.35,w*(.004+(i%3)*.003)),0,Math.PI*2);c.fill();}
+      }else if(workKey==='HAND'||workKey==='THINKING'){
+        for(let i=0;i<density;i++){const yy=-h*.5+i*h/(density-1||1);c.strokeStyle=i%5?'rgba(74,52,58,.38)':hexA(col,.7);c.lineWidth=Math.max(.32,w*(.004+(i%4)*.002));c.beginPath();c.moveTo(-w*.55,yy);c.bezierCurveTo(x-w*.18,yy-h*.05*scale,x+w*.22,yy+h*.07*scale,w*.55,yy-h*.02);c.stroke();}c.strokeStyle=workKey==='HAND'?'rgba(177,103,116,.72)':'rgba(83,61,68,.65)';c.lineWidth=Math.max(.5,w*.012);for(let i=0;i<3;i++){c.beginPath();c.ellipse(x,y,w*(.16+i*.07)*scale,h*(.11+i*.04),phase+i*.32,0,Math.PI*2);c.stroke();}
+      }else if(workKey==='TRACE'){
+        for(let i=0;i<density;i++){const px=((i*37+index*19)%101)/100*w-w*.5,py=((i*61+index*13)%103)/102*h-h*.5,r=w*(.003+(i%7)*.002);c.fillStyle=i%6?'rgba(235,232,224,.35)':'rgba(255,255,255,.78)';c.beginPath();c.arc(px,py,r,0,Math.PI*2);c.fill();}c.strokeStyle='rgba(220,217,209,.34)';c.setLineDash([w*.025,w*.04]);c.beginPath();c.moveTo(-w*.52,y);c.bezierCurveTo(x-w*.2,-h*.3,x+w*.18,h*.28,w*.52,-y);c.stroke();c.setLineDash([]);
+      }else if(workKey==='SPACE'){
+        for(let i=0;i<density;i++){const a=i*2.17+phase*6.28,r=w*(.04+(i%density)/density*.48);c.fillStyle=i%7?'rgba(232,241,255,.65)':'rgba(255,220,135,.96)';c.beginPath();c.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,Math.max(.34,w*(.003+(i%4)*.002)),0,Math.PI*2);c.fill();}c.strokeStyle='rgba(225,196,116,.55)';c.lineWidth=Math.max(.35,w*.006);for(let i=1;i<4;i++){c.beginPath();c.ellipse(x,y,w*.12*i*scale,h*.06*i,phase,0,Math.PI*2);c.stroke();}
+      }else if(workKey==='ORB'){
+        for(let i=0;i<density;i++){const ox=x+(i-(density-1)/2)*w*.17,oy=y+(i%2?h*.09:-h*.08),r=w*(.11+(i===Math.floor(density/2)?.05:0));const g=c.createRadialGradient(ox-r*.3,oy-r*.3,0,ox,oy,r);g.addColorStop(0,'#fff');g.addColorStop(.65,'#eee9df');g.addColorStop(1,'#9d978d');c.fillStyle=g;c.beginPath();c.arc(ox,oy,r,0,Math.PI*2);c.fill();c.strokeStyle='rgba(229,194,111,.72)';c.lineWidth=Math.max(.5,w*.01);c.beginPath();c.arc(ox,oy,r*1.25,0,Math.PI*2);c.stroke();}
+      }else if(workKey==='FRAME'){
+        for(let i=0;i<density;i++){c.save();c.translate(x+(i%3-1)*w*.16,-h*.42+Math.floor(i/3)*h*.27);c.rotate(phase+i*.28);c.fillStyle=i%2?hexA(col,.28):'rgba(244,215,207,.28)';c.fillRect(-w*.22,-h*.055,w*.44,h*.11);c.restore();}c.strokeStyle='rgba(213,174,91,.9)';c.lineWidth=Math.max(.6,w*.014);for(let i=0;i<2;i++){c.beginPath();c.moveTo(-w*.55,(i?-.25:.28)*h);c.bezierCurveTo(x-w*.1,(i?.36:-.4)*h,x+w*.16,(i?-.38:.42)*h,w*.55,(i?.24:-.27)*h);c.stroke();}
+      }
+      c.restore();
+    }
+
+    Object.entries(baseLooks).forEach(([workKey,baseKey])=>{
+      const source=LOOKS[baseKey];
+      works[workKey].preset.looks=blueprints[workKey].map((blueprint,index)=>{
+        const key=baseKey+'Detail'+(index+1);
+        LOOKS[key]={name:source.name+'・'+(index+1),flat:source.flat,paint(c,w,h,col,seed){source.paint(c,w,h,col,index);paintArtworkBlueprint(c,w,h,workKey,blueprint,index,col);}};
+        return key;
+      });
+    });
   }
 
   function renderNailPreview(key,targetId,length){
@@ -5026,13 +5108,13 @@ updateCmpBadge();
     const lengthScale=normalizeTryLength(length,inferTryLength(p.tune))==='long'?1.16:.68;
     withVars(p.vars,()=>p.looks.forEach((look,i)=>{
       const cv=document.createElement('canvas');
-      /* 写真のような10倍の緻密さ：Retina対応の倍密度（192×320） */
-      cv.width=192; cv.height=320;
+      /* 作品専用線を拡大しても保つ3倍密度（288×480）。 */
+      cv.width=288; cv.height=480;
       cv.dataset.look=look; cv.title=LOOKS[look]?.name||look;
       cv.setAttribute('aria-label',(i+1)+'本目 '+(LOOKS[look]?.name||look));
       const h=122*lengthScale, w=62;
       const c=cv.getContext('2d');
-      c.scale(2, 2);
+      c.scale(3, 3);
       c.translate(48, 80);
       paintPhotographicSpecimen(c, w, h, look, p.colors[i], i, 0.94);
       box.appendChild(cv);
@@ -5043,8 +5125,10 @@ updateCmpBadge();
     document.getElementById('nailSetKicker').textContent=work.no+' / '+current+' — NAIL SET';
     document.getElementById('nailSetTitle').textContent=work.title;
     nailSetViewer.style.setProperty('--set-accent',work.accent);
+    document.getElementById('nailSetConcept').textContent=artworkNailConcepts[current];
     renderNailPreview(current,'setViewerNails',artworkTryLength);
-    document.getElementById('setViewerTry').href=customRoute(current);
+    document.getElementById('setViewerTry').href=tryRoute(current,artworkTryLength);
+    document.getElementById('setViewerPhoto').href=customRoute(current);
     nailSetViewer.classList.add('open'); nailSetViewer.setAttribute('aria-hidden','false');
   }
   function closeSetViewer(){nailSetViewer.classList.remove('open'); nailSetViewer.setAttribute('aria-hidden','true');}
@@ -5094,31 +5178,10 @@ updateCmpBadge();
     renderNailPreview(key,'workNails',artworkTryLength);
     renderLengthChoice($('workLengthChoice'),artworkTryLength);
     const customLink=document.querySelector('.source-entry');
-    const customHref=customRoute(key); customLink.href=customHref;
+    customLink.href='#nail-set-viewer';
     customLink.onclick=event=>{
       event.preventDefault();
-      if(document.body.classList.contains('create-entering')||document.body.classList.contains('route-leaving')) return;
-      document.body.classList.add('create-entering');
-      const rect=customLink.getBoundingClientRect();
-      if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-        const centerX=rect.left+rect.width/2, centerY=rect.top+18;
-        for(let i=0;i<16;i++){
-          const angle=-2.65+(1.7*i/15)+((i%3)-1)*.025;
-          const distance=60+(i%5)*12;
-          const particle=document.createElement('span');
-          particle.className='create-particle';
-          particle.style.setProperty('--particle-x',centerX+'px');
-          particle.style.setProperty('--particle-y',centerY+'px');
-          particle.style.setProperty('--particle-dx',Math.cos(angle)*distance+'px');
-          particle.style.setProperty('--particle-dy',Math.sin(angle)*distance+'px');
-          particle.style.setProperty('--particle-size',(6+(i%4)*2)+'px');
-          particle.style.setProperty('--particle-delay',((i%5)*12)+'ms');
-          document.body.appendChild(particle);
-          setTimeout(()=>particle.remove(),900);
-        }
-      }
-      setTimeout(()=>document.body.classList.add('route-leaving'),720);
-      setTimeout(()=>{location.href=customHref;},1060);
+      openSetViewer();
     };
     index.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.workKey===key));
     const activeButton=index.querySelector('button.active');

@@ -11,6 +11,17 @@ test('artwork stays primary before photo and hand',()=>{
   assert.doesNotMatch(lens,/const startArtworkTryOn=/);
   assert.match(lens,/lensFilm\.src=origin\.film/);
 });
+test('artwork CTA opens a fixed five-nail work before photo selection',()=>{
+  assert.match(lens,/customLink\.href='#nail-set-viewer'/);
+  assert.match(lens,/customLink\.onclick=event=>\{[\s\S]*?openSetViewer\(\)/);
+  assert.match(lens,/id="setViewerTry"[^>]+>この5本を手に重ねる/);
+  assert.match(lens,/id="setViewerPhoto"[^>]+>写真の色を重ねる/);
+});
+test('all five nails use fixed artwork-specific detail blueprints',()=>{
+  assert.match(lens,/作品ごと・指ごとに固定した設計値/);
+  assert.match(lens,/works\[workKey\]\.preset\.looks=blueprints\[workKey\]\.map/);
+  assert.match(lens,/paintArtworkBlueprint\(c,w,h,workKey,blueprint,index,col\)/);
+});
 test('generated nails combine artwork looks with photo palette',()=>{
   assert.match(lens,/const lens=window\.__TSUYA_LENS_ORIGIN\|\|null/);
   assert.match(lens,/const originLooks=lens\.preset\.looks\.slice\(\)/);
