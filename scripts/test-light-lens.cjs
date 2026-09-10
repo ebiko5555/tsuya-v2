@@ -3,12 +3,13 @@ const lens=fs.readFileSync(require.resolve('../light-lens-prototype/index.html')
 const base=fs.readFileSync(require.resolve('../experience-prototype/index.html'),'utf8');
 function section(html,a,b){const i=html.indexOf(a),j=html.indexOf(b,i);assert.ok(i>=0&&j>i,`${a} section missing`);return html.slice(i,j);}
 test('every inline script parses',()=>{for(const m of lens.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc=|importmap/.test(m[1]))new vm.Script(m[2]);});
-test('journey is one path from artwork to everyday photo to hand',()=>{
-  assert.match(lens,/光を受け取りにいく/);
-  assert.match(lens,/この光を連れていく/);
-  assert.match(lens,/日常の写真をひらく/);
-  assert.match(lens,/この光を手へ戻す/);
-  assert.match(lens,/const startArtworkTryOn=\(\)=>\{ location\.href=customRoute\(current\); \};/);
+test('artwork stays primary before photo and hand',()=>{
+  assert.match(lens,/body\.art-page \.work-film\{left:0;top:0;width:100%;height:100svh/);
+  assert.match(lens,/この作品からつくる/);
+  assert.match(lens,/作品の性質 × 写真の色/);
+  assert.match(lens,/手に重ねる/);
+  assert.doesNotMatch(lens,/const startArtworkTryOn=/);
+  assert.match(lens,/lensFilm\.src=origin\.film/);
 });
 test('generated nails combine artwork looks with photo palette',()=>{
   assert.match(lens,/const lens=window\.__TSUYA_LENS_ORIGIN\|\|null/);

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-<title>TSUYA — 光を連れていく</title>
+<title>TSUYA — 作品と日常のあいだ</title>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
         onerror="window.__mpFailed=true"></script>
 <style>
@@ -1600,7 +1600,7 @@
     body.custom-mode.source-planning #sourcePreview,
     body.custom-mode.source-planning .source-meta{display:none}
   }
-  /* 光を連れていく試作：作品→日常→手を一つの流れにする */
+  /* 特別試作02：作品を主画面に置き、写真と試着を作品の後段にする。 */
   .journey-intro{
     position:fixed; z-index:200; inset:0; display:flex; flex-direction:column;
     justify-content:flex-end; padding:calc(28px + env(safe-area-inset-top)) 24px calc(34px + env(safe-area-inset-bottom));
@@ -1611,6 +1611,7 @@
       #08090c;
     transition:opacity .8s ease,visibility .8s ease,transform .8s ease;
   }
+  .journey-intro{display:none!important}
   .journey-intro.dismissed{opacity:0;visibility:hidden;transform:scale(1.025);pointer-events:none}
   body.art-page .journey-intro,body.custom-mode .journey-intro,body.work-tryon .journey-intro{display:none}
   .journey-kicker{font:600 11px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;color:#d7b39e}
@@ -1618,24 +1619,37 @@
   .journey-intro p{max-width:29em;font-size:14px;line-height:1.85;color:rgba(255,255,255,.76)}
   .journey-start{min-height:58px;margin-top:25px;border:1px solid rgba(255,255,255,.5);color:#fff;background:rgba(8,9,12,.38);font-size:15px;letter-spacing:.08em}
   .journey-note{display:block;margin-top:11px;font-size:11px;line-height:1.55;color:rgba(255,255,255,.5);text-align:center}
-  .journey-stage-label{
-    position:fixed;z-index:94;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
-    color:rgba(255,255,255,.72);font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;
-    pointer-events:none;white-space:nowrap;
-  }
-  body.art-page .journey-stage-label::after{content:'01  光を受け取る'}
-  body.custom-mode .journey-stage-label::after{content:'02  日常へ移す'}
-  body.custom-mode.source-tryon .journey-stage-label::after,body.work-tryon .journey-stage-label::after{content:'03  手へ戻す'}
+  .journey-stage-label{display:none}
   body.lens-from-work .source-origin span{font-size:0}
-  body.lens-from-work .source-origin span::after{content:'連れてきた光';font-size:11px}
+  body.lens-from-work .source-origin span::after{content:'選んだ作品';font-size:11px}
   body.lens-from-work .source-origin button{display:none}
   body.lens-from-work .opening-actions .make-link{display:none!important}
   body.lens-from-work .source-modes{display:none!important}
   body.lens-from-work .source-intro{font-size:14px;line-height:1.75;text-align:center;color:rgba(255,255,255,.78)}
-  body.lens-from-work .source-frame::before{
-    content:'作品の光が、写真の中を通っています。';display:block;margin:0 0 10px;
-    color:#d7b39e;font-size:13px;line-height:1.6;text-align:center;
-  }
+  body.lens-from-work .source-frame::before{content:'作品の性質 × 写真の色';display:block;margin:0 0 10px;color:#d7b39e;font-size:13px;line-height:1.6;text-align:center}
+  .lens-origin-film{display:none}
+  body.lens-from-work.source-planning .lens-origin-film{position:absolute;z-index:2;left:0;top:33px;width:100%;height:30svh;display:block;object-fit:contain;mix-blend-mode:screen;opacity:.24;pointer-events:none}
+  body.hub-mode .opening-films::after{background:linear-gradient(180deg,rgba(4,5,7,.03) 0%,rgba(4,5,7,.1) 52%,rgba(4,5,7,.74) 100%)}
+  body.hub-mode .opening-film.is-hub-active{opacity:1;filter:none}
+  body.hub-mode .opening-work-meta{left:20px;right:20px;bottom:calc(24px + env(safe-area-inset-bottom));padding:0}
+  body.hub-mode .opening-work-title{font-size:clamp(34px,11vw,52px)}
+  body.hub-mode .opening-work-cue span{font-size:13px;letter-spacing:.08em}
+  body.art-page .work-film{left:0;top:0;width:100%;height:100svh;opacity:1;filter:none!important;object-fit:cover}
+  body.art-page .work-layer::after{inset:0;width:100%;height:100svh;background:linear-gradient(180deg,rgba(4,5,7,.08),transparent 44%,rgba(4,5,7,.88) 100%);pointer-events:none}
+  body.art-page .work-film-mark{top:calc(70px + env(safe-area-inset-top));right:20px;bottom:auto;left:20px;text-align:left}
+  body.art-page .work-index{z-index:5;top:auto!important;left:16px;right:16px;bottom:calc(112px + env(safe-area-inset-bottom));height:50px;padding:0;overflow-x:auto;background:transparent}
+  body.art-page .work-index::before{display:none}
+  body.art-page .work-index button{flex:0 0 42px!important;width:42px!important;height:42px!important;padding:0!important;border:1px solid rgba(255,255,255,.35)!important;border-radius:50%;background:rgba(4,5,7,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  body.art-page .work-index .work-nav-title{display:none}
+  body.art-page .work-index button.active{color:#101012!important;background:var(--work-accent)!important;border-color:var(--work-accent)!important}
+  body.art-page .work-copy{z-index:5;left:16px;right:16px;top:auto!important;bottom:calc(20px + env(safe-area-inset-bottom));padding:0!important;overflow:visible;background:transparent}
+  body.art-page .work-text,body.art-page #workNails,body.art-page .work-length-choice{display:none!important}
+  body.art-page .work-actions{position:static;width:100%;max-width:none;margin:0;padding:0;background:transparent;transform:none;display:block}
+  body.art-page .source-entry{min-height:62px;grid-template-columns:1fr!important;justify-content:center;gap:0;padding:0 24px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(5,6,8,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center}
+  body.art-page .source-entry>span:nth-child(2){display:block;width:100%}
+  body.art-page .source-entry-icon,body.art-page .source-entry-arrow,body.art-page .source-entry-sub{display:none}
+  body.art-page .source-entry-title{font-size:14px;letter-spacing:.08em}
+  @media (min-width:820px){body.art-page .work-film{width:100%}body.art-page .work-copy{left:50%;right:auto;width:360px;transform:translateX(-50%)}body.art-page .work-index{left:50%;right:auto;width:min(560px,90vw);transform:translateX(-50%)}}
   body.lens-from-work .source-try,body.lens-from-work .source-confirm-try{font-size:15px;letter-spacing:.08em}
   .lens-contact-note{display:none;margin:12px 0 2px;text-align:center;color:rgba(255,255,255,.58);font-size:12px;line-height:1.65}
   body.lens-from-work.source-selected .lens-contact-note{display:block}
@@ -1647,9 +1661,9 @@
 <body>
 <section class="journey-intro" id="journeyIntro" aria-labelledby="journeyTitle">
   <div class="journey-kicker">TSUYA / 見ることから、纏うことへ</div>
-  <h1 id="journeyTitle">見た光を、<br>日常へ連れていく。</h1>
-  <p>作品に残る光を受け取り、あなたの日常の色と重ね、手の上へ戻す体験です。</p>
-  <button type="button" class="journey-start" id="journeyStart">光を受け取りにいく</button>
+  <h1 id="journeyTitle">作品と日常の、<br>あいだに触れる。</h1>
+  <p>10点の作品を見たあと、日常の写真に残る色を重ねます。</p>
+  <button type="button" class="journey-start" id="journeyStart">作品を見る</button>
   <small class="journey-note">写真は端末の中だけで読み取られます</small>
 </section>
 <div class="journey-stage-label" aria-hidden="true"></div>
@@ -1701,7 +1715,7 @@
     <div class="opening-work-meta" aria-live="polite">
       <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
       <div class="opening-work-title" id="openingWorkTitle">色</div>
-      <div class="opening-work-cue"><span>気になった光に触れる</span></div>
+      <div class="opening-work-cue"><span>作品を見る</span></div>
       <div class="opening-progress" id="openingProgress"></div>
     </div>
     <nav class="opening-index" id="openingIndex" aria-label="作品を選ぶ">
@@ -1764,7 +1778,7 @@
     <div class="length-choice" id="sourceLengthChoice" aria-label="ネイルの長さを選ぶ">
       <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
     </div>
-    <button type="button" class="source-confirm-try" id="sourceConfirmTry">この光を手へ戻す</button>
+    <button type="button" class="source-confirm-try" id="sourceConfirmTry">手に重ねる</button>
   </div>
 </section>
 
@@ -1786,12 +1800,13 @@
       <div><span>FROM ARTWORK</span><strong id="sourceOriginTitle">01 / COLOR / 色</strong></div>
       <button type="button" id="sourceOriginReset">作品ネイル</button>
     </div>
-    <p class="source-intro">連れてきた作品の光を、あなたの日常の色に触れさせる。</p>
-    <p class="lens-contact-note">二つの像が触れ、別の色として現れました。</p>
+    <p class="source-intro">作品の線や光に、日常の写真から見つけた色を重ねます。</p>
+    <p class="lens-contact-note">作品の性質と写真の色から、5本の像が生まれました。</p>
     <div class="source-actions">
       <button type="button" class="source-action" id="sourcePhoto">写真を選ぶ</button>
     </div>
     <div class="source-frame" id="sourceFrame">
+      <video class="lens-origin-film" id="lensOriginFilm" muted loop autoplay playsinline webkit-playsinline preload="metadata" aria-hidden="true"></video>
       <img class="source-large-image" id="sourceLargeImage" alt="選択した写真">
       <canvas id="sourcePreview" width="160" height="160"></canvas>
       <div class="source-meta"><strong id="sourceName">SOURCE</strong><span id="sourceReading">色・線・光を読み取ります</span></div>
@@ -1805,7 +1820,7 @@
     </div>
     <div class="source-sets" id="sourceSets"></div>
     <button type="button" class="exhibit-open source-exhibit">作品として見る</button>
-    <button type="button" class="source-try" id="sourceTry">手へ戻す</button>
+    <button type="button" class="source-try" id="sourceTry">手に重ねる</button>
   </div>
 
   <div class="tray active" id="tray-looks">
@@ -1893,7 +1908,7 @@
 </div>
 
 <section class="work-layer" id="workLayer" aria-hidden="true" aria-label="試着からひらく作品">
-  <video class="work-film" id="workFilm" src="../experience-prototype/art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="0" role="button" aria-label="この作品の光を日常へ連れていく"></video>
+  <video class="work-film" id="workFilm" src="../experience-prototype/art-assets/color-pattern.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-label="作品映像"></video>
   <div class="work-film-mark" aria-live="polite"><div class="work-film-code" id="workFilmCode">01 / COLOR</div><div class="work-film-title" id="workFilmTitle">色</div></div>
   <button type="button" class="work-close" id="workClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span>BACK</span></button>
   <nav class="work-index" id="workIndex" aria-label="作品を選ぶ"></nav>
@@ -1904,7 +1919,7 @@
       <div class="length-choice work-length-choice" id="workLengthChoice" aria-label="ネイルの長さを選ぶ">
         <button type="button" data-length="short">SHORT</button><button type="button" data-length="long">LONG</button>
       </div>
-      <a class="source-entry" href="?mode=custom" aria-label="この作品の光を日常へ連れていく"><span class="source-entry-icon" aria-hidden="true"></span><span><span class="source-entry-title">この光を連れていく</span><span class="source-entry-sub">日常の写真へ</span></span><span class="source-entry-arrow" aria-hidden="true">→</span></a>
+      <a class="source-entry" href="?mode=custom" aria-label="この作品からつくる"><span class="source-entry-icon" aria-hidden="true"></span><span><span class="source-entry-title">この作品からつくる</span><span class="source-entry-sub">写真の色と重ねる</span></span><span class="source-entry-arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -1916,7 +1931,7 @@
   <p class="nail-set-note">この作品の5本セットです。試着する前に、形と柄をゆっくり見られます。</p>
   <div class="set-viewer-nails" id="setViewerNails" aria-label="5本のネイルチップ"></div>
   <div class="set-viewer-actions">
-    <a class="set-viewer-try" id="setViewerTry" href="?mode=custom&amp;from=COLOR">この光を連れていく</a>
+    <a class="set-viewer-try" id="setViewerTry" href="?mode=custom&amp;from=COLOR">この作品からつくる</a>
     <button type="button" class="set-viewer-back" id="nailSetBack">作品ページへ戻る</button>
   </div>
 </section>
@@ -1979,7 +1994,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'lightlens01-engine106';
+const BUILD_VERSION = 'lightlens02-engine106';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -5213,19 +5228,21 @@ updateCmpBadge();
         applyArtworkPreset(fromKey);
         document.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active'));
       };
-      document.querySelector('.opening-mark').innerHTML='光を連れていく<br>'+origin.no+' / '+fromKey+' → 日常 → 手';
+      document.querySelector('.opening-mark').innerHTML='TSUYA / '+origin.no+' / '+fromKey+'<br>作品の性質 × 写真の色';
+      const lensFilm=document.getElementById('lensOriginFilm');
+      if(lensFilm){lensFilm.src=origin.film;lensFilm.load();playSilently(lensFilm);}
     }else{
       window.__TSUYA_LENS_ORIGIN=null;
       document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
     }
-    document.querySelector('#startOverlay .invite').innerHTML=origin?'日常の像を、<br>ひらく。':'COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
-    document.getElementById('openingGuide').textContent=origin?'特別な写真でなくてかまいません。いま連れてきた光で、もう一度見るための写真です。':'身のまわりから採集する';
-    document.getElementById('startBtn').textContent=origin?'写真をひらく':'写真を選ぶ';
+    document.querySelector('#startOverlay .invite').innerHTML=origin?'写真の色を、<br>作品に重ねる。':'COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
+    document.getElementById('openingGuide').textContent=origin?'猫、服、食卓、風景。どの写真でもかまいません。作品の線や光は残したまま、その写真の色を重ねます。':'身のまわりから採集する';
+    document.getElementById('startBtn').textContent='写真を選ぶ';
     document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';
     const backHref=origin?route('work',fromKey):homeRoute();
     const workBack=document.getElementById('tryWorkBack'); workBack.textContent='BACK'; workBack.href=backHref;
     const link=document.querySelector('.make-link');
-    link.textContent=origin?'日常の写真をひらく':'写真から作る'; link.href='#';
+    link.textContent=origin?'写真を選ぶ':'写真から作る'; link.href='#';
     link.onclick=ev=>{ev.preventDefault(); document.getElementById('sourceInput').click();};
     document.getElementById('globalBack').href=backHref;
     document.getElementById('globalBackText').textContent='BACK';
@@ -5282,11 +5299,7 @@ updateCmpBadge();
   document.querySelectorAll('[data-opening-work]').forEach(button=>{
     button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
   });
-  const startArtworkTryOn=()=>{ location.href=customRoute(current); };
-  workFilm.addEventListener('click',startArtworkTryOn);
-  workFilm.addEventListener('keydown',event=>{
-    if(event.key==='Enter'||event.key===' '){ event.preventDefault(); startArtworkTryOn(); }
-  });
+  workFilm.addEventListener('click',()=>playSilently(workFilm));
 
   const globalBack=document.getElementById('globalBack');
   globalBack.addEventListener('click',event=>{
@@ -5345,24 +5358,24 @@ updateCmpBadge();
     if(film) film.play().catch(()=>{});
   });
   if(document.body.classList.contains('lens-from-work')){
-    document.title='TSUYA — 日常へ移す';
+    document.title='TSUYA — 作品と写真を重ねる';
     const origin=window.__TSUYA_LENS_ORIGIN;
     const photo=document.getElementById('sourcePhoto');
-    if(photo) photo.textContent='日常の写真をひらく';
+    if(photo) photo.textContent='写真を選ぶ';
     const originTitle=document.getElementById('sourceOriginTitle');
-    if(originTitle&&origin) originTitle.textContent=origin.key+' / '+origin.title+' の光';
+    if(originTitle&&origin) originTitle.textContent=origin.key+' / '+origin.title;
     const back=document.getElementById('sourceConfirmBack');
-    if(back) back.textContent='← 生まれた光へ戻る';
+    if(back) back.textContent='← 5本の選択へ戻る';
     const sourceTry=document.getElementById('sourceTry');
-    if(sourceTry) sourceTry.textContent='手へ戻す';
+    if(sourceTry) sourceTry.textContent='手に重ねる';
     const confirmTry=document.getElementById('sourceConfirmTry');
-    if(confirmTry) confirmTry.textContent='この光を手へ戻す';
+    if(confirmTry) confirmTry.textContent='手に重ねる';
     const identity=document.getElementById('tryIdentityText');
-    if(identity&&origin) identity.textContent=origin.key+' × 日常 / 手の上でひとつになる';
+    if(identity&&origin) identity.textContent=origin.key+' × PHOTO';
     new MutationObserver(()=>{
       if(document.body.classList.contains('source-tryon')){
         const guide=document.querySelector('.guide-text');
-        if(guide) guide.textContent='手を、光の中に置いてください';
+        if(guide) guide.textContent='手を画面に映してください';
       }
     }).observe(document.body,{attributes:true,attributeFilter:['class']});
   }
