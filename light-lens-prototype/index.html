@@ -1965,7 +1965,7 @@
   <button type="button" class="nail-set-close" id="nailSetClose">← BACK</button>
   <p class="nail-set-kicker" id="nailSetKicker">01 / COLOR — NAIL SET</p>
   <h2 class="nail-set-title" id="nailSetTitle">色</h2>
-  <p class="nail-set-note">作品の構図から設計した、固定の5本です。</p>
+  <p class="nail-set-note">この作品のために組んだ、5本です。</p>
   <p class="nail-set-concept" id="nailSetConcept"></p>
   <div class="set-viewer-nails" id="setViewerNails" aria-label="5本のネイルチップ"></div>
   <div class="set-viewer-actions">
@@ -2033,7 +2033,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'lightlens04-engine106';
+const BUILD_VERSION = 'lightlens05-engine106';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -5112,14 +5112,7 @@ updateCmpBadge();
       c.restore();
     }
 
-    Object.entries(baseLooks).forEach(([workKey,baseKey])=>{
-      const source=LOOKS[baseKey];
-      works[workKey].preset.looks=blueprints[workKey].map((blueprint,index)=>{
-        const key=baseKey+'Detail'+(index+1);
-        LOOKS[key]={name:source.name+'・'+(index+1),flat:source.flat,paint(c,w,h,col,seed){source.paint(c,w,h,col,index);paintArtworkBlueprint(c,w,h,workKey,blueprint,index,col);}};
-        return key;
-      });
-    });
+    /* 作品ごとの5本は、worksで定義した既存の組み合わせをそのまま使う。 */
   }
 
   function renderNailPreview(key,targetId,length){

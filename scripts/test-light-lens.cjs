@@ -17,10 +17,10 @@ test('artwork CTA opens a fixed five-nail work before photo selection',()=>{
   assert.match(lens,/id="setViewerTry"[^>]+>この5本を手に重ねる/);
   assert.match(lens,/id="setViewerPhoto"[^>]+><strong>写真を選んで、別の5本をつくる/);
 });
-test('all five nails use fixed artwork-specific detail blueprints',()=>{
-  assert.match(lens,/作品ごと・指ごとに固定した設計値/);
-  assert.match(lens,/works\[workKey\]\.preset\.looks=blueprints\[workKey\]\.map/);
-  assert.match(lens,/paintArtworkBlueprint\(c,w,h,workKey,blueprint,index,col\)/);
+test('artwork nail sets retain the established work presets',()=>{
+  assert.match(lens,/COLOR:\{[\s\S]*?looks:\['artColor','sheer','nuance','artColor','flash'\]/);
+  assert.match(lens,/HAND:\{[\s\S]*?looks:\['artHand','sheer','line','artHand','french'\]/);
+  assert.doesNotMatch(lens,/works\[workKey\]\.preset\.looks=blueprints\[workKey\]\.map/);
 });
 test('top gallery is manual, immediate, and keeps whole artwork visible',()=>{
   assert.match(lens,/body\.hub-mode \.opening-film\.a,body\.hub-mode \.opening-film\.b\{[\s\S]*?object-fit:contain/);
