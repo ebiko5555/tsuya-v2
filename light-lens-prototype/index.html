@@ -1189,18 +1189,18 @@
       radial-gradient(circle at 50% 42%,transparent 20%,rgba(8,9,12,.24) 92%);
   }
   body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{
-    inset:0; width:100%; height:100%; border-radius:0; clip-path:none; object-fit:cover;
+    inset:0; width:100%; height:100%; border-radius:0; clip-path:none; object-fit:contain;
     opacity:0; filter:saturate(.72) contrast(1.08); transition:opacity 1.8s cubic-bezier(.4,0,.2,1);
   }
   body.hub-mode .opening-film.is-hub-active{opacity:.82}
   body.hub-mode .opening-film.c{display:none}
   body.hub-mode .opening-mark,body.hub-mode #startOverlay .invite,
   body.hub-mode .opening-guide,body.hub-mode .opening-actions,
-  body.hub-mode .opening-steps,body.hub-mode .opening-index{display:none}
-  body.hub-mode .opening-enter{position:absolute; z-index:3; display:block; inset:0}
+  body.hub-mode .opening-steps{display:none}
+  body.hub-mode .opening-enter{position:static;z-index:5;display:flex;align-items:center;justify-content:center;min-height:54px;border:1px solid rgba(255,255,255,.55);border-radius:999px;color:#fff;background:rgba(5,6,8,.66);text-decoration:none;font-size:14px;letter-spacing:.08em;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   body.hub-mode .opening-work-meta{
     position:absolute; z-index:4; display:block; left:22px; right:22px;
-    bottom:calc(38px + env(safe-area-inset-bottom)); pointer-events:none;
+    bottom:calc(190px + env(safe-area-inset-bottom)); pointer-events:none;
   }
   .opening-work-code{color:rgba(255,255,255,.58); font:500 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.18em}
   .opening-work-cue{
@@ -1216,13 +1216,25 @@
     50%{opacity:1; transform:translateX(3px)}
   }
   .opening-progress{height:1px; margin-top:13px; overflow:hidden; background:rgba(255,255,255,.18)}
-  .opening-progress::after{content:""; display:block; width:100%; height:100%; background:#d7b39e; transform-origin:left; animation:hubProgress 5.2s linear both}
+  .opening-progress::after{content:""; display:block; width:100%; height:100%; background:#d7b39e; transform-origin:left;transform:scaleX(var(--hub-progress,.1))}
   .opening-progress.restart::after{animation:none}
   @keyframes hubProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
   @media (prefers-reduced-motion:reduce){
     body.hub-mode .opening-film.a,body.hub-mode .opening-film.b{transition-duration:.2s}
     .opening-progress::after{animation:none; transform:scaleX(1)}
   }
+  .hub-brand{display:none}
+  body.hub-mode header{display:none}
+  body.hub-mode .hub-brand{position:absolute;z-index:5;top:calc(22px + env(safe-area-inset-top));left:20px;right:20px;display:block;pointer-events:none}
+  .hub-brand strong{display:block;color:#fff;font:300 31px/1 "Times New Roman","Yu Mincho",serif;letter-spacing:.18em}
+  .hub-brand span{display:block;margin-top:7px;color:rgba(255,255,255,.6);font:500 10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em}
+  body.hub-mode .opening-index{position:absolute;z-index:6;left:14px;right:14px;bottom:calc(112px + env(safe-area-inset-bottom));display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:7px;width:auto;height:46px;padding:3px;overflow-x:auto;scrollbar-width:none}
+  body.hub-mode .opening-index::-webkit-scrollbar{display:none}
+  body.hub-mode .opening-index button{flex:0 0 40px;width:40px;height:40px;border:1px solid rgba(255,255,255,.38);border-radius:50%;color:#fff;background:rgba(5,6,8,.5);font-size:12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  body.hub-mode .opening-index button.active{color:#101012;border-color:#e4c16d;background:#e4c16d}
+  .hub-actions{display:none}
+  body.hub-mode .hub-actions{position:absolute;z-index:6;left:14px;right:14px;bottom:calc(22px + env(safe-area-inset-bottom));display:grid;grid-template-columns:48px 1fr 48px;gap:8px}
+  .hub-step{min-height:54px;border:1px solid rgba(255,255,255,.42);border-radius:50%;color:#fff;background:rgba(5,6,8,.66);font-size:20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 
   /* 試作23：作品ページだけをスマホの展示アプリとして再構成する。 */
   @media (max-width:819px){
@@ -1496,7 +1508,9 @@
   .set-viewer-try,.set-viewer-back{display:flex; align-items:center; justify-content:center; width:100%; min-height:56px; border-radius:999px; text-decoration:none; font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em}
   .set-viewer-try{border:0; color:#171717; background:var(--set-accent,#eadfce)}
   .set-viewer-back{border:1px solid rgba(255,255,255,.35); color:rgba(255,255,255,.9); background:rgba(255,255,255,.05)}
-  .set-viewer-photo{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border:1px solid rgba(255,255,255,.42);border-radius:999px;color:#f2f1ed;background:rgba(255,255,255,.04);text-decoration:none;font-size:13px;letter-spacing:.08em}
+  .set-viewer-photo{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:66px;padding:8px 16px;border:1px solid rgba(255,255,255,.42);border-radius:999px;color:#f2f1ed;background:rgba(255,255,255,.04);text-decoration:none;text-align:center}
+  .set-viewer-photo strong{font-size:13px;line-height:1.3;letter-spacing:.06em}
+  .set-viewer-photo span{display:block;margin-top:4px;color:rgba(255,255,255,.58);font-size:11px;line-height:1.35;letter-spacing:.02em}
   @media (max-width:819px){
     .nail-set-viewer{padding-left:14px;padding-right:14px}
     .nail-set-kicker{margin-top:45px}
@@ -1510,7 +1524,7 @@
     .set-viewer-nails canvas:nth-child(5){grid-column:4/6;height:132px}
     .set-viewer-actions{gap:8px;margin-top:8px}
     .set-viewer-try{min-height:54px}
-    .set-viewer-photo,.set-viewer-back{min-height:48px}
+    .set-viewer-back{min-height:48px}
   }
   @media (min-width:820px){.nail-set-viewer{padding-top:9vh}.set-viewer-nails{gap:12px;min-height:330px}.set-viewer-nails canvas{width:82px;height:170px}.set-viewer-nails canvas:nth-child(1),.set-viewer-nails canvas:nth-child(5){height:141px}.set-viewer-nails canvas:nth-child(2),.set-viewer-nails canvas:nth-child(4){height:157px}}
 
@@ -1643,15 +1657,16 @@
   body.lens-from-work .opening-actions .make-link{display:none!important}
   body.lens-from-work .source-modes{display:none!important}
   body.lens-from-work .source-intro{font-size:14px;line-height:1.75;text-align:center;color:rgba(255,255,255,.78)}
-  body.lens-from-work .source-frame::before{content:'作品の性質 × 写真の色';display:block;margin:0 0 10px;color:#d7b39e;font-size:13px;line-height:1.6;text-align:center}
+  body.lens-from-work .source-frame::before{content:'作品の線・形 ＋ 写真から選んだ色';display:block;margin:0 0 10px;color:#d7b39e;font-size:13px;line-height:1.6;text-align:center}
   .lens-origin-film{display:none}
   body.lens-from-work.source-planning .lens-origin-film{position:absolute;z-index:2;left:0;top:33px;width:100%;height:30svh;display:block;object-fit:contain;mix-blend-mode:screen;opacity:.24;pointer-events:none}
   body.hub-mode .opening-films::after{background:linear-gradient(180deg,rgba(4,5,7,.03) 0%,rgba(4,5,7,.1) 52%,rgba(4,5,7,.74) 100%)}
   body.hub-mode .opening-film.is-hub-active{opacity:1;filter:none}
-  body.hub-mode .opening-work-meta{left:20px;right:20px;bottom:calc(24px + env(safe-area-inset-bottom));padding:0}
+  body.hub-mode .site-home{display:none}
+  body.hub-mode .opening-work-meta{left:20px;right:20px;bottom:calc(174px + env(safe-area-inset-bottom));padding:0}
   body.hub-mode .opening-work-title{font-size:clamp(34px,11vw,52px)}
-  body.hub-mode .opening-work-cue span{font-size:13px;letter-spacing:.08em}
-  body.art-page .work-film{left:0;top:0;width:100%;height:100svh;opacity:1;filter:none!important;object-fit:cover}
+  body.hub-mode .opening-work-cue,body.hub-mode .opening-progress{display:none}
+  body.art-page .work-film{left:0;top:0;width:100%;height:100svh;opacity:1;filter:none!important;object-fit:contain;background:#050608}
   body.art-page .work-layer::after{inset:0;width:100%;height:100svh;background:linear-gradient(180deg,rgba(4,5,7,.08),transparent 44%,rgba(4,5,7,.88) 100%);pointer-events:none}
   body.art-page .work-film-mark{top:calc(70px + env(safe-area-inset-top));right:20px;bottom:auto;left:20px;text-align:left}
   body.art-page .work-index{z-index:5;top:auto!important;left:16px;right:16px;bottom:calc(112px + env(safe-area-inset-bottom));height:50px;padding:0;overflow-x:auto;background:transparent}
@@ -1718,6 +1733,7 @@
       <video class="opening-film b" src="../experience-prototype/art-assets/surface-gold.mp4" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
       <video class="opening-film c" muted loop autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
     </div>
+    <div class="hub-brand"><strong>TSUYA</strong><span>10 WORKS / HAND &amp; LIGHT</span></div>
     <div class="opening-mark">TRY ON / ART WORK<br>TRACE / SKIN — 2026</div>
     <p class="invite"></p>
     <p class="opening-guide" id="openingGuide"></p>
@@ -1728,7 +1744,6 @@
     <div class="opening-steps" aria-label="試着までの流れ">
       <span><b>01</b>作品を選ぶ</span><span><b>02</b>ネイルを見る</span><span><b>03</b>カメラで試着</span>
     </div>
-    <a class="opening-enter" id="openingEnter" href="?work=COLOR" aria-label="現在表示中の作品へ入る"></a>
     <div class="opening-work-meta" aria-live="polite">
       <div class="opening-work-code" id="openingWorkCode">01 / COLOR</div>
       <div class="opening-work-title" id="openingWorkTitle">色</div>
@@ -1747,6 +1762,11 @@
       <button type="button" data-opening-work="ORB" aria-label="White Orb">09</button>
       <button type="button" data-opening-work="FRAME" aria-label="二つの手の輪舞曲">10</button>
     </nav>
+    <div class="hub-actions">
+      <button type="button" class="hub-step" id="hubPrev" aria-label="前の作品">←</button>
+      <a class="opening-enter" id="openingEnter" href="?work=COLOR" aria-label="現在表示中の作品をひらく">この作品をひらく</a>
+      <button type="button" class="hub-step" id="hubNext" aria-label="次の作品">→</button>
+    </div>
     <div id="status"></div>
   </div>
 
@@ -1817,8 +1837,8 @@
       <div><span>FROM ARTWORK</span><strong id="sourceOriginTitle">01 / COLOR / 色</strong></div>
       <button type="button" id="sourceOriginReset">作品ネイル</button>
     </div>
-    <p class="source-intro">作品の線や光に、日常の写真から見つけた色を重ねます。</p>
-    <p class="lens-contact-note">作品の性質と写真の色から、5本の像が生まれました。</p>
+    <p class="source-intro">作品の線や形は残したまま、写真から取り出した色で別の5本をつくります。</p>
+    <p class="lens-contact-note">作品の構図と、写真から選んだ色で、別の5本ができました。</p>
     <div class="source-actions">
       <button type="button" class="source-action" id="sourcePhoto">写真を選ぶ</button>
     </div>
@@ -1945,12 +1965,12 @@
   <button type="button" class="nail-set-close" id="nailSetClose">← BACK</button>
   <p class="nail-set-kicker" id="nailSetKicker">01 / COLOR — NAIL SET</p>
   <h2 class="nail-set-title" id="nailSetTitle">色</h2>
-  <p class="nail-set-note">作品から固定設計した5本です。表示するたびに変わる生成ではありません。</p>
+  <p class="nail-set-note">作品の構図から設計した、固定の5本です。</p>
   <p class="nail-set-concept" id="nailSetConcept"></p>
   <div class="set-viewer-nails" id="setViewerNails" aria-label="5本のネイルチップ"></div>
   <div class="set-viewer-actions">
     <a class="set-viewer-try" id="setViewerTry" href="?try=COLOR">この5本を手に重ねる</a>
-    <a class="set-viewer-photo" id="setViewerPhoto" href="?mode=custom&amp;from=COLOR">写真の色を重ねる</a>
+    <a class="set-viewer-photo" id="setViewerPhoto" href="?mode=custom&amp;from=COLOR"><strong>写真を選んで、別の5本をつくる</strong><span>作品の線や形は残し、写真から色だけを取り出します</span></a>
     <button type="button" class="set-viewer-back" id="nailSetBack">作品ページへ戻る</button>
   </div>
 </section>
@@ -2013,7 +2033,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const video = document.getElementById('video');
-const BUILD_VERSION = 'lightlens03-engine106';
+const BUILD_VERSION = 'lightlens04-engine106';
 let mode = 'idle';            // idle | live | frozen
 let facing = 'environment';
 let stream = null;
@@ -3953,7 +3973,7 @@ function makeSourceSets(mode){
       const shift=idx===0?0:(idx===1?2:4);
       const colors=[0,1,2,3,4].map((_,i)=>p[(i+shift)%p.length]);
       return {
-        name:`${String(idx+1).padStart(2,'0')} / ${lens.key} × 日常`,
+        name:`${String(idx+1).padStart(2,'0')} / ${lens.key} × 写真の色`,
         isExtra:false,
         looks:originLooks,
         colors,
@@ -4104,7 +4124,7 @@ function renderSourceSets({regenerate=true,resetSelection=false}={}){
   $('signalNo').textContent='SOURCE'; $('signalName').textContent='SELECTED';
   $('artSignal').setAttribute('aria-label','選択した画像のプレビュー');
   const lensOrigin=window.__TSUYA_LENS_ORIGIN||null;
-  $('sourceName').textContent=lensOrigin?(lensOrigin.title+' × 日常'):(label||'FOUND MATERIAL');
+  $('sourceName').textContent=lensOrigin?(lensOrigin.title+' × 写真の色'):(label||'FOUND MATERIAL');
   $('sourceFrame').dataset.sourceSeed=String(sourceProfile.sourceSeed);
   $('sourceFrame').dataset.designSeed=String(sourceProfile.designSeed);
   const deg=Math.round(sourceProfile.angle*180/Math.PI);
@@ -5291,15 +5311,15 @@ updateCmpBadge();
         applyArtworkPreset(fromKey);
         document.querySelectorAll('.source-set').forEach(x=>x.classList.remove('active'));
       };
-      document.querySelector('.opening-mark').innerHTML='TSUYA / '+origin.no+' / '+fromKey+'<br>作品の性質 × 写真の色';
+      document.querySelector('.opening-mark').innerHTML='TSUYA / '+origin.no+' / '+fromKey+'<br>作品の線・形 ＋ 写真から選んだ色';
       const lensFilm=document.getElementById('lensOriginFilm');
       if(lensFilm){lensFilm.src=origin.film;lensFilm.load();playSilently(lensFilm);}
     }else{
       window.__TSUYA_LENS_ORIGIN=null;
       document.querySelector('.opening-mark').innerHTML='WORKS → SOURCE → HAND<br>COLOR / SURFACE / FORM / LIGHT';
     }
-    document.querySelector('#startOverlay .invite').innerHTML=origin?'写真の色を、<br>作品に重ねる。':'COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
-    document.getElementById('openingGuide').textContent=origin?'猫、服、食卓、風景。どの写真でもかまいません。作品の線や光は残したまま、その写真の色を重ねます。':'身のまわりから採集する';
+    document.querySelector('#startOverlay .invite').innerHTML=origin?'写真から、<br>色を選ぶ。':'COLOUR ATELIER<span class="invite-sub">CREATE YOUR OWN NAIL</span>';
+    document.getElementById('openingGuide').textContent=origin?'この作品の線や形はそのまま使います。写真から色だけを取り出して、別の5本をつくります。どの写真でもかまいません。':'身のまわりから採集する';
     document.getElementById('startBtn').textContent='写真を選ぶ';
     document.getElementById('tryIdentityText').textContent=origin?('SOURCE / '+fromKey):'SOURCE';
     const backHref=origin?route('work',fromKey):homeRoute();
@@ -5318,13 +5338,8 @@ updateCmpBadge();
     const code=document.getElementById('openingWorkCode');
     const title=document.getElementById('openingWorkTitle');
     const progress=document.getElementById('openingProgress');
-    let hubIndex=0, activeFilm=0, timer=null;
-
-    function restartProgress(){
-      progress.classList.add('restart');
-      void progress.offsetWidth;
-      progress.classList.remove('restart');
-    }
+    const openingIndex=document.getElementById('openingIndex');
+    let hubIndex=0, activeFilm=0, swipeStartX=null;
     function showHubWork(index,first=false){
       hubIndex=(index+order.length)%order.length;
       const key=order[hubIndex], work=works[key];
@@ -5346,22 +5361,27 @@ updateCmpBadge();
       code.textContent=work.no+' / '+key;
       title.textContent=work.title;
       enter.href=route('work',key);
-      enter.setAttribute('aria-label',work.title+'の作品ページへ入る');
-      restartProgress();
-    }
-    showHubWork(0,true);
-    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-      timer=setInterval(()=>showHubWork(hubIndex+1),5200);
-      document.addEventListener('visibilitychange',()=>{
-        if(document.hidden){clearInterval(timer);timer=null;}
-        else if(!timer){timer=setInterval(()=>showHubWork(hubIndex+1),5200);}
+      enter.setAttribute('aria-label',work.title+'をひらく');
+      progress.style.setProperty('--hub-progress',(hubIndex+1)/order.length);
+      openingIndex.querySelectorAll('button').forEach(button=>{
+        const active=button.dataset.openingWork===key;
+        button.classList.toggle('active',active);
+        if(active)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');
       });
+      const activeButton=openingIndex.querySelector('button.active');
+      if(activeButton)requestAnimationFrame(()=>openingIndex.scrollTo({left:Math.max(0,activeButton.offsetLeft-(openingIndex.clientWidth-activeButton.offsetWidth)/2),behavior:first?'auto':'smooth'}));
     }
+    openingIndex.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>showHubWork(order.indexOf(button.dataset.openingWork))));
+    document.getElementById('hubPrev').addEventListener('click',()=>showHubWork(hubIndex-1));
+    document.getElementById('hubNext').addEventListener('click',()=>showHubWork(hubIndex+1));
+    overlay.addEventListener('pointerdown',event=>{if(!event.target.closest('a,button'))swipeStartX=event.clientX;});
+    overlay.addEventListener('pointerup',event=>{
+      if(swipeStartX===null)return;
+      const distance=event.clientX-swipeStartX;swipeStartX=null;
+      if(Math.abs(distance)>54)showHubWork(hubIndex+(distance<0?1:-1));
+    });
+    showHubWork(0,true);
   }
-
-  document.querySelectorAll('[data-opening-work]').forEach(button=>{
-    button.addEventListener('click',()=>{ location.href=route('work',button.dataset.openingWork); });
-  });
   workFilm.addEventListener('click',()=>playSilently(workFilm));
 
   const globalBack=document.getElementById('globalBack');
