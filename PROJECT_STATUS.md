@@ -2,6 +2,11 @@
 
 最終調査日: 2026-09-11
 
+### 公開入口の整理（2026-09-12）
+
+- 公開中の入口を `light-lens-prototype/` と `touch-hands/` の2つに限定する。旧 `experience-prototype/`、`male-prototype/`、`special-prototype/`、`trial30/`、`top.html` は、開かれても `light-lens-prototype/` へ移動する。旧試作のファイルとGit履歴は残す。
+- `touch-hands/` の各3D作品と「TOUCH TO ENTER」は、旧作品ページではなく `light-lens-prototype/` へつなぐ。
+
 ### 特別試作「作品と日常のあいだ」/ lightlens05-engine106（2026-09-11）
 
 - 「この作品からつくる」のネイルデザインを、lightlens03で追加した細密ブループリント描画から、以前の作品別プリセットへ戻した。トップの手動鑑賞、作品全体表示、写真の説明、カメラ追跡・写真解析はそのまま維持している。

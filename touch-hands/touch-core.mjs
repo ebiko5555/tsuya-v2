@@ -99,7 +99,7 @@ export function advanceRotation(rotation, velocity, dt) {
   const decay=Math.exp(-1.5*dt), travel=(1-decay)/1.5;
   return {rotation:rotation+velocity*travel, velocity:velocity*decay};
 }
-export const workURL = id => `../experience-prototype/?work=${encodeURIComponent(id)}`;
+export const workURL = id => `../light-lens-prototype/?work=${encodeURIComponent(id)}`;
 
 export function floatingPose(config,time,reduced=false,width=390,height=744,body=null){
   const i=MODEL_CONFIG.findIndex(item=>item.id===config.id);
